@@ -96,7 +96,7 @@ def run_exp(Saving_path,
             # note, dict, this have space
             data_local['prompt_list_dir'][f'Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]'] = []
             data_local['response_list_dir'][f'Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]'] = []
-            print(data_local)
+            # print(data_local)
             
             state_update_prompt_local_agent, state_update_prompt_other_agent =  state_update_func_local_agent(pg_row_num,
                                                                                                               pg_column_num,
@@ -135,6 +135,7 @@ def run_exp(Saving_path,
                       '''
             
             # This message should be constructed for teh judge, include both central and local response, agree on global plan
+            print(f'-------###-------###-------###-------JUDGE_ON_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------')
             local_response = data_local['local_agent_response_list_dir']['feedback1']
             cen_response = data_dict['user_prompt_list'][-1]
             judge_prompt = judge_propmt_func(local_response, cen_response, data_dict['pg_dict'])
@@ -166,9 +167,9 @@ def run_exp(Saving_path,
 
             # print(messages[2])
             # print(messages[3])
-            print(f'MODIFIED:\n {response}')
+            print(f'JUDGE MODIFIED:\n {response}')
           else:
-            print(f'PLAN:\n {response}')
+            print(f'ORIGINAL PLAN:\n {response}')
             pass
           data_dict['dialogue_history_list'].append(dialogue_history)
         
