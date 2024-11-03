@@ -16,6 +16,7 @@ def run_exp(Saving_path,
             ):
   
   '''This is information constant'''
+  #TODO: Put this in a data tree
   data_dict = {
         'user_prompt_list': [],
         'response_total_list': [],
@@ -80,7 +81,8 @@ def run_exp(Saving_path,
         'prompt_list_dir': {},
         'response_list_dir': {},
         'local_agent_response_list_dir': {},
-        'agent_dict': {}
+        'agent_dict': {},
+        'judge_resonse': {}
       }
 
       data_local['local_agent_response_list_dir']['feedback1'] = ''
@@ -131,13 +133,21 @@ def run_exp(Saving_path,
                       Do not explain, just directly output json directory.
                       Your response:
                       '''
-            messages = message_construct_func([data_dict['user_prompt_list'][-1], data_local['local_agent_response_list_dir']['feedback1']],
-                                              [response],
-                                              '_w_all_dialogue_history')
-
-            # messages = ... # This message should be constructed for teh judge, include both central and local response, agree on global plan
             
+            # This message should be constructed for teh judge, include both central and local response, agree on global plan
+            local_response = data_local['local_agent_response_list_dir']['feedback1']
+            cen_response = data_dict['user_prompt_list'][-1]
+            judge_prompt = judge_propmt_func(local_response, cen_response, data_dict['pg_dict'])
+            messages = message_construct_func([cen_response, local_response, judge_prompt],
+                                              [response],
+                                              dialogue_history_method)
             response_central_again, token_num_count = LLaMA_response(messages, model_name)
+
+            # messages = message_construct_func([cen_response, local_response],
+            #                                   [response],
+            #                                   '_w_all_dialogue_history')
+            
+            # response_central_again, token_num_count = LLaMA_response(messages, model_name)
             
             #-----------------------------------------SYNTACTIC CHECK AGAIN-----------------------------------------#
             data_dict['token_num_count_list'].append(token_num_count)
