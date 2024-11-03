@@ -9,7 +9,6 @@ Developing frameworks for multi-agent collaborations using Role Playing Leader H
 <div align=center>
 <img src="img/iter.png" width = "80%" alt="struct" align=center />
 </div>
-<<<<<<< HEAD
 
 ## Setting Up
 Install the dependencies by:
