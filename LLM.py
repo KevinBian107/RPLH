@@ -2,8 +2,6 @@ import requests
 import tiktoken
 import time
 
-# ollama run qwen2.5:14b-instruct-q3_K_L
-
 enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"
 
