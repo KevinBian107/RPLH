@@ -28,5 +28,4 @@ Then running main inference by:
 
 ```
 python run_rplh.py
-
 ```
