@@ -10,6 +10,8 @@ input_prompt_token_limit = 3000
 
 def judge_propmt_func(local_response, cen_response, prev_states):
     '''function for the judge to use'''
+
+    #TODO: figure out can't have more explanations?
     judge_prompt = f'''
     You a a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
     You personally do not need to make any moves.
@@ -26,7 +28,7 @@ def judge_propmt_func(local_response, cen_response, prev_states):
     '''
     return judge_prompt
 
-def LLM_summarize_func(state_action_prompt_next_initial, model_name):
+def LLM_summarize_func(state_action_prompt_next_initial, model_name="qwen2.5:14b-instruct-q3_K_L"):
     '''Shorten the prompt given'''
 
     prompt1 = f"Please summarize the following content as concise as possible: \n{state_action_prompt_next_initial}"
