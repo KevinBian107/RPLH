@@ -3,7 +3,7 @@ We are developing frameworks for multi-agent collaborations using **R**ole-**P**
 
 ## Simplified Schematic
 <div align=center>
-<img src="img/rplh.png" width = "100%" alt="struct" align=center />
+<img src="img/rplh_clean.png" width = "100%" alt="struct" align=center />
 </div>
 
 We hope to build agent that is caplable of ***Social-reasoning and expecting what the other agent should be doing***. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to ***Level-one agent***.
