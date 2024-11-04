@@ -159,7 +159,9 @@ def rplh_prompt_func(state_update_prompt, data, dialogue_history_method):
         Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}
         Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
         Remanber to assign action to your self as well.
-        Include an agent only if it has a task next. Now, plan the next step:
+        Include an agent only if it has a task next.
+        You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+        Now, plan the next step:
         """
     return user_prompt_1
 

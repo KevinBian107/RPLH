@@ -18,7 +18,7 @@ We hope to build agent that is caplable of ***Social-reasoning and expecting wha
 <img src="img/iter.png" width = "100%" alt="struct" align=center />
 </div>
 
-# Communication Example
+## Communication Example
 
 Example demonstrating the communication
 
@@ -61,6 +61,43 @@ JUDGE_0_ROW_1_COL_0:
  
 JUDGE_0_ROW_1_COL_1: 
  {"Agent[0.5, 0.5]":"move(box_blue, square[1.5, 1.5])", "Agent[1.5, 0.5]":"move(box_purple, square[0.5, 1.5])"} 
+```
+
+## Local Agent "Complainining" Example
+This is an example of lcoal agent complaining of the action given by others
+
+```
+------###------###------HCA_0------###------###------: 
+...
+Considering these points:
+{
+    "Agent[0.5, 0.5]" : "",
+    "Agent[0.5, 1.5]" : "move(box_blue, square[0.5, 0.5])",
+    "Agent[1.5, 0.5]" : "move(box_red, target_red)",
+    "Agent[1.5, 1.5]" : ""
+}
+
+------###------###------LOCAL_0_ROW_0_COL_0------###------###------: 
+My objections are:
+- The given action plan misses out on actions for Agent[0.5, 0.5], which includes myself.
+- It's unclear how moving box_blue from square [0.5, 1.5] aligns with the observable list provided for that square in the context of coordinating all agents towards their respective targets.
+...
+{"Agent[0.5, 0.5]" : "move(box_orange, target_orange)"}
+
+------###------###------JUDGE_0_ROW_0_COL_0------###------###------: 
+ {"Agent[0.5, 0.5]":"move(box_orange, target_orange)"} 
+ 
+------###------###------LOCAL_0_ROW_0_COL_1------###------###------: 
+ I Agree
+
+ ------###------###------JUDGE_0_ROW_0_COL_1------###------###------: 
+ {"Agent[0.5, 0.5]":"move(box_orange, target_orange)"} 
+ 
+------###------###------LOCAL_0_ROW_1_COL_0------###------###------: 
+Not agreed. The current action plan only includes Agent[0.5, 0.5] moving the box_orange to its target, which was already executed in the previous step.
+...
+Proposed updated action plan:
+{"Agent[1.5, 0.5]":"move(box_red, square[0.5, 0.5])"} 
 ```
 
 ## Setting Up
