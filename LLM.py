@@ -47,10 +47,6 @@ def LLaMA_response(messages, model_name, url="http://localhost:11434/api/generat
 #     {"role": "system", "content": "You are a helpful assistant."},
 #     {"role": "user", "content": "Hello, how are you? What is your parameter size"}
 # ]
-
-# url = "http://localhost:11434/api/generate"
-# model_name = "llama3.2"
-
 # response, token_count = LLaMA_response(messages, model_name, url)
 # print("Response:", response)
 # print("Token count:", token_count)

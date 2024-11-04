@@ -76,8 +76,8 @@ def run_exp(Saving_path,
 
       # write after syntactic check
       with open('conversation.txt', 'a') as f:
-        message = f'HCA_{a}: \n {raw_response} \n \n'
-        sep = f'\n -------###-------###-------###--------------###-------###-------###------- \n'
+        message = f'------###------###------HCA_{a}------###------###------: \n {raw_response} \n \n'
+        sep = f'\n-------###-------###-------###--------------###-------###-------###-------\n'
         f.write(sep)
         length = str(len(data_dict['pg_state_list']))
         f.write(f'ALL STATE STORAGE LENGTH: {length} \n')
@@ -126,11 +126,13 @@ def run_exp(Saving_path,
             messages = message_construct_func(message_raw,
                                               response_raw,
                                               '_w_all_dialogue_history')
+            
+            # given to other LLM, no synthetic check needed
             response_local_agent, token_num_count = LLaMA_response(messages, model_name)
             data_dict['token_num_count_list'].append(token_num_count)
 
             with open('conversation.txt', 'a') as f:
-              message = f'LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}: \n {response_local_agent} \n \n'
+              message = f'------###------###------LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n'
               f.write(message)
             
             if response_local_agent != 'I Agree':
@@ -158,24 +160,19 @@ def run_exp(Saving_path,
                                               dialogue_history_method)
             response_central_again, token_num_count = LLaMA_response(messages, model_name)
 
-            with open('conversation.txt', 'a') as f:
-              message = f'JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}: \n {response_central_again} \n \n'
-              f.write(message)
-
             # messages = message_construct_func([cen_response, local_response],
             #                                   [response],
-            #                                   '_w_all_dialogue_history')
-            
+            #                                   '_w_all_dialogue_history')  
             # response_central_again, token_num_count = LLaMA_response(messages, model_name)
             
-            #-----------------------------------------SYNTACTIC CHECK AGAIN-----------------------------------------#
+            #-----------------------------------------SYNTACTIC CHECK FOR JUDGE-----------------------------------------#
             data_dict['token_num_count_list'].append(token_num_count)
             match = re.search(r'{.*}', response_central_again, re.DOTALL)
             if match:
               response = match.group()
               response, token_num_count_list_add = with_action_syntactic_check_func(data_dict['pg_dict'],
                                                                                     response_central_again, 
-                                                                                    [data_dict['user_prompt_list'][-1], data_local['local_agent_response_list_dir']['feedback1']], 
+                                                                                    [cen_response, local_response, judge_prompt], 
                                                                                     [response],
                                                                                     model_name,
                                                                                     '_w_all_dialogue_history'
@@ -190,6 +187,11 @@ def run_exp(Saving_path,
             print(f'ORIGINAL PLAN:\n {response}')
             pass
           data_dict['dialogue_history_list'].append(dialogue_history)
+
+          # after syntactic checks
+          with open('conversation.txt', 'a') as f:
+              message = f'------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_central_again} \n \n'
+              f.write(message)
         
          #-----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
         # print(agent_response_list)
@@ -236,6 +238,7 @@ query_time_limit = 10
 model_name = "qwen2.5:14b-instruct-q3_K_L"
 print(f'-------------------Model name: {model_name}-------------------')
 
+#'_w_all_dialogue_history', '_w_compressed_dialogue_history', '_w_only_state_action_history'
 run_exp(saving_path, pg_row_num, pg_column_num, iteration_num, 
         query_time_limit, dialogue_history_method='_w_only_state_action_history'
         )
