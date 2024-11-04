@@ -36,7 +36,7 @@ def run_exp(Saving_path,
   data_dict['pg_state_list'].append(data_dict['pg_dict'])
 
   print(f'query_time_limit: {query_time_limit}')
-  for index_query_times in range(2):
+  for index_query_times in range(query_time_limit):
     #-----------------------------------------ONE AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
     for a in range(num_agent):
       print(f'-------###-------###-------###-------HCA_AGENT_{a}-------###-------###-------###-------')
@@ -191,7 +191,27 @@ def run_exp(Saving_path,
             pass
           data_dict['dialogue_history_list'].append(dialogue_history)
         
+         #-----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
         # print(agent_response_list)
+        data_dict['response_total_list'].append(response)
+        original_response_dict = json.loads(data_dict['response_total_list'][index_query_times])
+        try:
+          system_error_feedback, pg_dict_returned = action_from_response(data_dict['pg_dict'], original_response_dict)
+          if system_error_feedback != '':
+            print(system_error_feedback)
+          pg_dict = pg_dict_returned
+
+        except:
+          success_failure = 'Hallucination of wrong plan'
+          pass
+
+        # need to append new states to state list
+        data_dict['pg_state_list'].append(data_dict['pg_dict'])
+        count = 0
+        for ky, value in data_dict['pg_dict'].items():
+          count += len(value)
+        if count == 0:
+          break
         
   #-----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
   if index_query_times < query_time_limit - 1:
@@ -208,6 +228,7 @@ Code_dir_path = os.path.join(os.getcwd())
 os.makedirs(Code_dir_path, exist_ok=True)
 saving_path = Code_dir_path + '/multi-agent-env'
 
+# 4 agent in total
 pg_row_num = 2
 pg_column_num = 2
 iteration_num = 2
