@@ -252,13 +252,18 @@ def dialogue_func(
         Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
         The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
         The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
-        The previous state and action pairs at each step are:
-        {state_action_prompt}
+        The previous state and action pairs at each step are: {state_action_prompt}
         Please learn from previous steps.
         Not purely repeat the actions but learn why the state changes or remains in a dead loop.
         Avoid being stuck in action loops.
+        You can imagine first about how you would plan these actions and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+        Remanber to assign action to your self as well.
+
         The other central planner's current action plan is giving as: {{{central_response}}}.
-        Please evaluate the given plan. If you agree with it, respond 'I Agree', without any extra words.
+        Please be very critical in thinking about this plan.
+
+        Please evaluate the given plan.
+        If you agree with it, respond 'I Agree', without any extra words.
         If not, briefly explain your objections to this other central planner and an judger agent will get involved.
         Your response:
         """

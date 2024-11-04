@@ -37,22 +37,23 @@ def run_exp(Saving_path,
 
   print(f'query_time_limit: {query_time_limit}')
   for index_query_times in range(2):
-    state_update_prompt = state_update_func(pg_row_num, pg_column_num,  data_dict['pg_dict'])
-
     #-----------------------------------------ONE AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
     for a in range(num_agent):
       print(f'-------###-------###-------###-------HCA_AGENT_{a}-------###-------###-------###-------')
 
       '''FOR NUM_AGENT, ITERATIVELY DO'''
+
+      # at second iter, should hav more info
+      state_update_prompt = state_update_func(pg_row_num, pg_column_num,  data_dict['pg_dict'])
       user_prompt_1 = rplh_prompt_func(state_update_prompt, data_dict, dialogue_history_method)
       data_dict['user_prompt_list'].append(user_prompt_1)
       messages = message_construct_func([user_prompt_1], [], dialogue_history_method)
-      response, token_num_count = LLaMA_response(messages, model_name)
-      print(response)
+      raw_response, token_num_count = LLaMA_response(messages, model_name)
+      # print(response)
               
       #-----------------------------------------SYNTACTIC CHECK-----------------------------------------#
       data_dict['token_num_count_list'].append(token_num_count)
-      match = re.search(r'{.*}', response, re.DOTALL)
+      match = re.search(r'{.*}', raw_response, re.DOTALL)
       if match:
         response = match.group()
       if response[0] == '{' and response[-1] == '}':
@@ -72,6 +73,15 @@ def run_exp(Saving_path,
       elif response == 'Syntactic Error':
         pass
       data_dict['hca_agent_response_list'].append(response)
+
+      # write after syntactic check
+      with open('conversation.txt', 'a') as f:
+        message = f'HCA_{a}: \n {raw_response} \n \n'
+        sep = f'\n -------###-------###-------###--------------###-------###-------###------- \n'
+        f.write(sep)
+        length = str(len(data_dict['pg_state_list']))
+        f.write(f'ALL STATE STORAGE LENGTH: {length} \n')
+        f.write(message)
       '''This for loop ends here for all agents doing centralized planning by themselves'''
 
       #-----------------------------------------FOR EACH AGENT RECIEVES COMMAND FROM THE CURRENT HELLUCINATING MAIN AGENT-----------------------------------------#
@@ -118,6 +128,10 @@ def run_exp(Saving_path,
                                               '_w_all_dialogue_history')
             response_local_agent, token_num_count = LLaMA_response(messages, model_name)
             data_dict['token_num_count_list'].append(token_num_count)
+
+            with open('conversation.txt', 'a') as f:
+              message = f'LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}: \n {response_local_agent} \n \n'
+              f.write(message)
             
             if response_local_agent != 'I Agree':
               data_local['local_agent_response_list_dir']['feedback1'] += f'Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n'
@@ -143,6 +157,10 @@ def run_exp(Saving_path,
                                               [response],
                                               dialogue_history_method)
             response_central_again, token_num_count = LLaMA_response(messages, model_name)
+
+            with open('conversation.txt', 'a') as f:
+              message = f'JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}: \n {response_central_again} \n \n'
+              f.write(message)
 
             # messages = message_construct_func([cen_response, local_response],
             #                                   [response],
