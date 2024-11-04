@@ -270,6 +270,7 @@ def dialogue_func(
         Please evaluate the given plan.
         If you agree with it, respond 'I Agree', without any extra words.
         If not, briefly explain your objections to this other central planner and an judger agent will get involved.
+        Ensure that you still include the actions that you agree with. This is crucial, include all actions.
         Your response:
         """
     return user_prompt_1
