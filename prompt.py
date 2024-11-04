@@ -12,6 +12,7 @@ def judge_propmt_func(local_response, cen_response, prev_states):
     '''function for the judge to use'''
     judge_prompt = f'''
     You a a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
+    You personally do not need to make any moves.
 
     The first agent is giving command of {cen_response}, but the second agent is sayin {local_response}.
     Here is all the previous actions of all the agents have taken : {prev_states}.

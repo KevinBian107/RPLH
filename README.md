@@ -1,12 +1,19 @@
 # Role-playing Leader-hellucination Agent
-We are developing frameworks for multi-agent collaborations using Role-Playing Leader-Hellucinating LLM, or in short, RPLH-LLM. We are currently developing on minimal example and we are planning to adapt to MCTS fine-tuned LLM with VirtualHome later.
+We are developing frameworks for multi-agent collaborations using **R**ole-**P**laying **L**eader-**H**ellucinating LLM, or in short, **RPLH-LLM**. We are currently developing on minimal example and we are planning to adapt to MCTS fine-tuned LLM with VirtualHome later.
 
+## Simplified Schematic
+<div align=center>
+<img src="img/rplh_clean.png" width = "100%" alt="struct" align=center />
+</div>
+
+We hope to build agent that is caplable of ***Social-reasoning and expecting what the other agent should be doing***. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to ***Level-one agent***.
+
+## Full Schematic
 <div align=center>
 <img src="img/rplh.png" width = "100%" alt="struct" align=center />
 </div>
 
-# Main Loop
-
+## Main Loops
 <div align=center>
 <img src="img/iter.png" width = "100%" alt="struct" align=center />
 </div>
