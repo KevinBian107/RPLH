@@ -8,14 +8,22 @@ input_prompt_token_limit = 3000
 
 #TODO: Added Common Sense + Sensory Information
 
-def judge_propmt_func(state_update_prompt,
-                              response_total_list,
-                              pg_state_list,
-                              dialogue_history_list,
-                              dialogue_history_method,
-                              ):
+def judge_propmt_func(local_response, cen_response, prev_states):
     '''function for the judge to use'''
-    return ...
+    judge_prompt = f'''
+    You a a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
+
+    The first agent is giving command of {cen_response}, but the second agent is sayin {local_response}.
+    Here is all the previous actions of all the agents have taken : {prev_states}.
+    Please judge which of the action from the first agent or the second agent is better.
+    Do not come-up with something new, only choose one of them:
+
+    Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+    Remanber to assign action to your self as well.
+    Include an agent only if it has a task next.
+    Now, plan the next step:
+    '''
+    return judge_prompt
 
 def LLM_summarize_func(state_action_prompt_next_initial, model_name):
     '''Shorten the prompt given'''
@@ -244,13 +252,18 @@ def dialogue_func(
         Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
         The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
         The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
-        The previous state and action pairs at each step are:
-        {state_action_prompt}
+        The previous state and action pairs at each step are: {state_action_prompt}
         Please learn from previous steps.
         Not purely repeat the actions but learn why the state changes or remains in a dead loop.
         Avoid being stuck in action loops.
+        You can imagine first about how you would plan these actions and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+        Remanber to assign action to your self as well.
+
         The other central planner's current action plan is giving as: {{{central_response}}}.
-        Please evaluate the given plan. If you agree with it, respond 'I Agree', without any extra words.
+        Please be very critical in thinking about this plan.
+
+        Please evaluate the given plan.
+        If you agree with it, respond 'I Agree', without any extra words.
         If not, briefly explain your objections to this other central planner and an judger agent will get involved.
         Your response:
         """
