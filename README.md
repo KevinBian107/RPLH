@@ -11,7 +11,7 @@ We are developing frameworks for multi-agent collaborations using Role-Playing L
 <img src="img/iter.png" width = "100%" alt="struct" align=center />
 </div>
 
-# Example
+# Communication Example
 
 Example demonstrating the communication
 
@@ -30,12 +30,10 @@ Given these observations:
 
 Thus, the next action plan will include moves for both blue boxes:
 
-```json
 {
   "Agent[0.5, 0.5]": "move(box_blue, square[0.5, 1.5])",
   "Agent[1.5, 0.5]": "move(box_blue, square[1.5, 1.5])"
 }
-```
 
 This plan ensures that two blue boxes are moved closer to their targets, with one moving horizontally and the other vertically, making efficient use of available moves while avoiding any immediate conflicts or loop conditions. 
  
