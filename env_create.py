@@ -33,6 +33,8 @@ def surround_index_func(row_num, coloum_num, row_index, coloum_index):
 
 
 def state_update_func(pg_row_num, pg_column_num, pg_dict):
+    '''describes the environment and possible actions for the central HCA agent'''
+
     pg_dict_copy = copy.deepcopy(pg_dict)
     state_update_prompt = ""
     for i in range(pg_row_num):
@@ -56,6 +58,8 @@ def state_update_func(pg_row_num, pg_column_num, pg_dict):
 def state_update_func_local_agent(
     pg_row_num, pg_column_num, pg_row_i, pg_column_j, pg_dict
 ):
+    '''describes the environment and possible actions for each local HCA agents'''
+
     pg_dict_copy = copy.deepcopy(pg_dict)
     state_update_prompt_local_agent = ""
     state_update_prompt_other_agent = ""
@@ -112,24 +116,30 @@ def with_action_syntactic_check_func(
     model_name,
     dialogue_history_method,
 ):
-    '''This only checks if the actions are valid, doesn't care about if it's json,
-    if not json, directly fails it.'''
+    """This only checks if the actions are valid, doesn't care about if it's json,
+    if not json, directly fails it."""
     user_prompt_list = copy.deepcopy(user_prompt_list_input)
     response_total_list = copy.deepcopy(response_total_list_input)
     iteration_num = 0
     token_num_count_list_add = []
     while iteration_num < 6:
         valid = is_valid_json(response)
-        count=0
+        count = 0
         # print("RESPONSE", response)
-        #TODO: need to check this
+        # TODO: need to check this
         while not valid:
-            count+=1
-            print(f'----------JSON Syntactic Check {count} TIME----------')
+            count += 1
+            print(f"----------JSON Syntactic Check {count} TIME----------")
             messages = [
-                        {"role": "system", "content": "You are a helpful assistant specialized for fixing Json format."},
-                        {"role": "user", "content": f"Please fix the Json message in here {response} and give only this JSON as output"},
-                        ]
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant specialized for fixing Json format.",
+                },
+                {
+                    "role": "user",
+                    "content": f"Please fix the Json message in here {response} and give only this JSON as output",
+                },
+            ]
             response, token_num_count = LLaMA_response(messages, model_name)
             token_num_count_list_add.append(token_num_count)
             valid = is_valid_json(response)
@@ -194,9 +204,7 @@ def with_action_syntactic_check_func(
             feedback = "Your assigned plan is not in the correct json format as before. If your answer is empty dict, please check whether you miss to move box into the same colored target like move(box_blue, target_blue)"
 
         if feedback != "":
-            feedback += (
-                "Please replan for all the agents again with the same ouput format. The output should have the same json format {Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}. Do not explain, just directly output json directory. Your response:"
-            )
+            feedback += "Please replan for all the agents again with the same ouput format. The output should have the same json format {Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}. Do not explain, just directly output json directory. Your response:"
             print("----------Syntactic Check----------")
             print(f"Response original: {response}")
             print(f"Feedback: {feedback}")
@@ -217,6 +225,8 @@ def with_action_syntactic_check_func(
 
 
 def action_from_response(pg_dict_input, original_response_dict):
+    '''Processes the actions specified in original_response_dict and updates the environment's state (pg_dict_input)'''
+    
     system_error_feedback = ""
     pg_dict_original = copy.deepcopy(pg_dict_input)
     transformed_dict = {}
@@ -337,6 +347,6 @@ def create_env1(Saving_path, repeat_num=10):
                 json.dump(pg_dict, f)
 
 
-Code_dir_path = "multi-agent-env/"  # Put the current code directory path here
+Code_dir_path = "multi-agent-env/"
 # The first time to create the environment, after that you can comment it
 create_env1(Code_dir_path, repeat_num=10)
