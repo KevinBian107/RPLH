@@ -21,6 +21,7 @@ Here is a demo of our RPLH performing multi-agent resasoning
 4. Modularize code with RPLH class and good documentation baked into the strcuture and organization of the code.
 5. Evaluation metrics and run numbers of experiment runs.
   - Run scalable experiments with 2x2, 2x4, 4x4, 4x8 just as in env create.
+6. Add different color for different agent visualized.
 
 ## Simplified Schematic
 <div align=center>
