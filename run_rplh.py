@@ -26,6 +26,7 @@ def run_exp(
     os.makedirs(Saving_path_result + f"/response", exist_ok=True)
     os.makedirs(Saving_path_result + f"/pg_state", exist_ok=True)
     os.makedirs(Saving_path_result + f"/dialogue_history", exist_ok=True)
+    os.makedirs(Saving_path_result + f"/hca_agent_response", exist_ok=True)
 
     """This is information constant"""
     # TODO: Put this in a data tree
@@ -64,7 +65,7 @@ def run_exp(
 
     print(f"query_time_limit: {query_time_limit}")
     for index_query_times in range(query_time_limit):
-        # -----------------------------------------ONE AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
+        # -----------------------------------------ONE HCA AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
         for a in range(num_agent):
             print(
                 f"-------###-------###-------###-------HCA_AGENT_{a}-------###-------###-------###-------"
@@ -126,7 +127,19 @@ def run_exp(
                 pass
             elif response == "Syntactic Error":
                 pass
-            data_dict["hca_agent_response_list"].append(response)
+            
+            data_dict["hca_agent_response_list"].append(raw_response)
+
+            with open(
+                Saving_path_result
+                + "/hca_agent_response"
+                + "/hca_agent_response"
+                + str(index_query_times + 2)
+                + ".txt",
+                "w",
+            ) as f:
+                print("\n SAVE HCA RESPONSE \n")
+                json.dump(data_dict["hca_agent_response_list"], f)
 
             # write after syntactic check
             with open("conversation.txt", "a") as f:
@@ -250,7 +263,7 @@ def run_exp(
                         messages = message_construct_func(
                             [cen_response, local_response, judge_prompt],
                             [response],
-                            dialogue_history_method,
+                            "_w_only_state_action_history",
                         )
                         response_central_again, token_num_count = LLaMA_response(
                             messages, model_name
@@ -276,6 +289,7 @@ def run_exp(
                                     [response],
                                     model_name,
                                     "_w_all_dialogue_history",
+                                    is_judge=True,
                                 )
                             )
                             data_dict["token_num_count_list"] = (
@@ -335,7 +349,7 @@ def run_exp(
                 + "/dialogue_history"
                 + "/dialogue_history"
                 + str(index_query_times + 2)
-                + ".json",
+                + ".txt",
                 "w",
             ) as f:
                 print("\n SAVE DIALOGUE \n")

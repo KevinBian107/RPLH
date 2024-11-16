@@ -5,7 +5,6 @@ enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"
 enc = tiktoken.encoding_for_model("gpt-4")
 input_prompt_token_limit = 3000
-
 N = 10
 
 
@@ -23,6 +22,7 @@ def judge_propmt_func(local_response, cen_response, prev_states):
         Do not come-up with something new, only choose one of them, but do give explanations of your choice after saying EXPLAINATION:
 
         Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+        Notice that you do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
         Include an agent only if it has a task next.
         Now, plan the next step:
         """
