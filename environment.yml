@@ -30,4 +30,5 @@ dependencies:
       - stable_baselines3==2.0.0
       - openai
       - tiktoken
+      - black
 

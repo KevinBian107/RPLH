@@ -6,13 +6,14 @@ assert enc.decode(enc.encode("hello world")) == "hello world"
 enc = tiktoken.encoding_for_model("gpt-4")
 input_prompt_token_limit = 3000
 
-N=10
+N = 10
+
 
 def judge_propmt_func(local_response, cen_response, prev_states):
-    '''function for the judge to use'''
+    """function for the judge to use"""
 
-    #TODO: figure out can't have more explanations?
-    judge_prompt = f'''
+    # TODO: figure out can't have more explanations?
+    judge_prompt = f"""
         You a a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
         You personally do not need to make any moves but only serve as the decision maker to judge others' moves.
 
@@ -24,11 +25,14 @@ def judge_propmt_func(local_response, cen_response, prev_states):
         Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
         Include an agent only if it has a task next.
         Now, plan the next step:
-        '''
+        """
     return judge_prompt
 
-def LLM_summarize_func(state_action_prompt_next_initial, model_name="qwen2.5:14b-instruct-q3_K_L"):
-    '''Shorten the prompt given'''
+
+def LLM_summarize_func(
+    state_action_prompt_next_initial, model_name="qwen2.5:14b-instruct-q3_K_L"
+):
+    """Shorten the prompt given"""
 
     prompt1 = f"Please summarize the following content as concise as possible: \n{state_action_prompt_next_initial}"
     messages = [
@@ -38,8 +42,9 @@ def LLM_summarize_func(state_action_prompt_next_initial, model_name="qwen2.5:14b
     response = LLaMA_response(messages, model_name)
     return response
 
+
 def input_prompt_1_func(state_update_prompt):
-    '''design input prompt'''
+    """design input prompt"""
 
     user_prompt_1 = f"""
         You are a central planner directing agents in a grid-like field to move colored boxes.
@@ -57,26 +62,31 @@ def input_prompt_1_func(state_update_prompt):
         """
     return user_prompt_1
 
-def rplh_prompt_func(state_update_prompt, data, dialogue_history_method, HCA_agent_location):
-    '''
-    design input prompt for role-playing leader-hellucinating agent using in-context learning + chain-of-thought
-    '''
 
-    response_total_list = data['response_total_list']
-    pg_state_list = data['pg_state_list']
-    dialogue_history_list = data['dialogue_history_list']
-    
+def rplh_prompt_func(
+    state_update_prompt, data, dialogue_history_method, HCA_agent_location
+):
+    """
+    design input prompt for role-playing leader-hellucinating agent using in-context learning + chain-of-thought
+    """
+
+    response_total_list = data["response_total_list"]
+    pg_state_list = data["pg_state_list"]
+    dialogue_history_list = data["dialogue_history_list"]
+
     if len(pg_state_list) - len(response_total_list) != 1:
         raise ValueError("state and response list do not match")
     # if len(pg_state_list) - len(dialogue_history_list) != 1:
     #     raise ValueError("state and dialogue history list do not match")
-    
-    user_prompt_1 = f'''...''' # check for prompt length, no need for us
+
+    user_prompt_1 = f"""..."""  # check for prompt length, no need for us
     token_num_count = len(enc.encode(user_prompt_1))
 
-    if dialogue_history_method in ("_w_only_state_action_history",
-                                   "_w_compressed_dialogue_history",
-                                   "_w_all_dialogue_history"):
+    if dialogue_history_method in (
+        "_w_only_state_action_history",
+        "_w_compressed_dialogue_history",
+        "_w_all_dialogue_history",
+    ):
 
         if dialogue_history_method == "_w_only_state_action_history":
             state_action_prompt = ""
@@ -170,24 +180,26 @@ def rplh_prompt_func(state_update_prompt, data, dialogue_history_method, HCA_age
             """
     return HCA_prompt
 
+
 def dialogue_func(
     state_update_prompt_local_agent,
     state_update_prompt_other_agent,
     central_response,
     data,
     dialogue_history_method,
-    local_agent_location):
+    local_agent_location,
+):
 
-    response_total_list = data['response_total_list']
-    pg_state_list = data['pg_state_list']
-    dialogue_history_list = data['dialogue_history_list']
+    response_total_list = data["response_total_list"]
+    pg_state_list = data["pg_state_list"]
+    dialogue_history_list = data["dialogue_history_list"]
 
     if len(pg_state_list) - len(response_total_list) != 1:
         raise ValueError("state and response list do not match")
     # if len(pg_state_list) - len(dialogue_history_list) != 1:
     #     raise ValueError("state and dialogue history list do not match")
-    
-    user_prompt_1 = f'''...''' # check for prompt length, no need for us
+
+    user_prompt_1 = f"""..."""  # check for prompt length, no need for us
     token_num_count = len(enc.encode(user_prompt_1))
 
     if dialogue_history_method in (
@@ -288,18 +300,21 @@ def input_reprompt_func(state_update_prompt):
 
 def message_construct_func(
     user_prompt_list, response_total_list, dialogue_history_method
-    ):
+):
 
-    messages = [{"role": "system", 
-                 "content": f'''You are a helpful assistant. 
+    messages = [
+        {
+            "role": "system",
+            "content": f"""You are a helpful assistant. 
                  
                  When asked to specifiy your action plan, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}. 
                  
                  Make sure that:
                  - If no action for an agent in the next step, do not include it in JSON output. 
                  - At most one action for each agent in each step.
-                 '''
-                 }]
+                 """,
+        }
+    ]
 
     if f"{dialogue_history_method}" == "_w_all_dialogue_history":
         # print('length of user_prompt_list', len(user_prompt_list))
