@@ -6,26 +6,25 @@ assert enc.decode(enc.encode("hello world")) == "hello world"
 enc = tiktoken.encoding_for_model("gpt-4")
 input_prompt_token_limit = 3000
 
-#TODO: Added Common Sense + Sensory Information
+N=10
 
 def judge_propmt_func(local_response, cen_response, prev_states):
     '''function for the judge to use'''
 
     #TODO: figure out can't have more explanations?
     judge_prompt = f'''
-    You a a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
-    You personally do not need to make any moves.
+        You a a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
+        You personally do not need to make any moves but only serve as the decision maker to judge others' moves.
 
-    The first agent is giving command of {cen_response}, but the second agent is sayin {local_response}.
-    Here is all the previous actions of all the agents have taken : {prev_states}.
-    Please judge which of the action from the first agent or the second agent is better.
-    Do not come-up with something new, only choose one of them:
+        The first agent is giving command of {cen_response}, but the second agent is sayin {local_response}.
+        Here is all the previous actions of all the agents have taken : {prev_states}.
+        Please judge which of the action from the first agent or the second agent is better.
+        Do not come-up with something new, only choose one of them, but do give explanations of your choice after saying EXPLAINATION:
 
-    Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
-    Remanber to assign action to your self as well.
-    Include an agent only if it has a task next.
-    Now, plan the next step:
-    '''
+        Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+        Include an agent only if it has a task next.
+        Now, plan the next step:
+        '''
     return judge_prompt
 
 def LLM_summarize_func(state_action_prompt_next_initial, model_name="qwen2.5:14b-instruct-q3_K_L"):
@@ -43,23 +42,25 @@ def input_prompt_1_func(state_update_prompt):
     '''design input prompt'''
 
     user_prompt_1 = f"""
-    You are a central planner directing agents in a grid-like field to move colored boxes.
-    Each agent is assigned to a 1x1 square and can only interact with objects in its area.
-    Agents can move a box to a neighboring square or a same-color target.
-    Each square can contain many targets and boxes.
-    The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
-    Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
-    Your task is to instruct each agent to match all boxes to their color-coded targets.
-    After each move, agents provide updates for the next sequence of actions.
-    Your job is to coordinate the agents optimally.
-    {state_update_prompt}
-    Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
-    Include an agent only if it has a task next. Now, plan the next step:
-    """
+        You are a central planner directing agents in a grid-like field to move colored boxes.
+        Each agent is assigned to a 1x1 square and can only interact with objects in its area.
+        Agents can move a box to a neighboring square or a same-color target.
+        Each square can contain many targets and boxes.
+        The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
+        Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
+        Your task is to instruct each agent to match all boxes to their color-coded targets.
+        After each move, agents provide updates for the next sequence of actions.
+        Your job is to coordinate the agents optimally.
+        {state_update_prompt}
+        Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+        Include an agent only if it has a task next. Now, plan the next step:
+        """
     return user_prompt_1
 
-def rplh_prompt_func(state_update_prompt, data, dialogue_history_method):
-    '''design input prompt for role-playing leader-hellucinating agent'''
+def rplh_prompt_func(state_update_prompt, data, dialogue_history_method, HCA_agent_location):
+    '''
+    design input prompt for role-playing leader-hellucinating agent using in-context learning + chain-of-thought
+    '''
 
     response_total_list = data['response_total_list']
     pg_state_list = data['pg_state_list']
@@ -70,26 +71,7 @@ def rplh_prompt_func(state_update_prompt, data, dialogue_history_method):
     # if len(pg_state_list) - len(dialogue_history_list) != 1:
     #     raise ValueError("state and dialogue history list do not match")
     
-    user_prompt_1 = f'''
-    You are a central planner directing agents in a grid-like field to move colored boxes.
-    Each agent is assigned to a 1x1 square and can only interact with objects in its area.
-    Agents can move a box to a neighboring square or a same-color target.
-    Each square can contain many targets and boxes.
-    The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
-    Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
-    Your task is to instruct each agent to match all boxes to their color-coded targets.
-    After each move, agents provide updates for the next sequence of actions.
-    Your job is to coordinate the agents optimally.
-    The previous state and action pairs at each step are:
-    Please learn from previous steps.
-    Not purely repeat the actions but learn why the state changes or remains in a dead loop.
-    Avoid being stuck in action loops.
-    Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}
-    Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
-    Include an agent only if it has a task next.
-    Now, plan the next step:
-    '''
-    
+    user_prompt_1 = f'''...''' # check for prompt length, no need for us
     token_num_count = len(enc.encode(user_prompt_1))
 
     if dialogue_history_method in ("_w_only_state_action_history",
@@ -140,37 +122,61 @@ def rplh_prompt_func(state_update_prompt, data, dialogue_history_method):
                 else:
                     break
 
-        user_prompt_1 = f"""
-        You are a central planner directing agent in a grid-like field to move colored boxes.
-        You are agent at ...
-        You need to make moves and other agents need to make moves as well.
-        Each agent is assigned to a 1x1 square and can only interact with objects in its area.
-        Agents can move a box to a neighboring square or a same-color target.
-        Each square can contain many targets and boxes.
-        The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
-        Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
-        Your task is to instruct each agent to match all boxes to their color-coded targets.
-        After each move, agents provide updates for the next sequence of actions.
-        Your job is to coordinate the agents optimally.
-        The previous state and action pairs at each step are: {state_action_prompt}
-        
-        Please learn from previous steps.
-        Not purely repeat the actions but learn why the state changes or remains in a dead loop. Avoid being stuck in action loops.
-        Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}
-        Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
-        Remanber to assign action to your self as well.
-        Include an agent only if it has a task next.
-        You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
-        Now, plan the next step:
-        """
-    return user_prompt_1
+        HCA_prompt = f"""
+            You are a central planner directing agent in a grid-like field to move colored boxes.
+            You are agent at grid [{HCA_agent_location}]. You need to make moves and other agents need to make moves as well.
+            
+            First let's understand the goal.
+            Each agent is assigned to a 1x1 square and can only interact with objects in its area.
+            Agents can move a box to a neighboring square or a same-color target.
+            Each square can contain many targets and boxes.
+            The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
+            Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
+            Your task is to instruct each agent to match all boxes to their color-coded targets.
+            After each move, agents provide updates for the next sequence of actions.
+            You are the central agent and your job is to coordinate the agents optimally.
+            The previous state and action pairs at each step are: {state_action_prompt}
+
+            If the previous state and action pairs at each step is empty, you don't need to deduct any of the reaosning below.
+
+            Please learn from previous steps in the following ways:
+
+                1. Please undrstand the attitude of each agents in this environment,
+                including yourself based on what you see from previous conversation that all agents have.
+                Please write out some justification and list out the attitute of each agent, including yourself.
+
+                2. Based on this charcteristics of each agent, pelase do two things and added them after each agent's attitude:
+                    i. Reason about the reactions each agent would have towards your command.
+                    ii. Reason about how they would give actions if they are the central agent.
+            
+            Use the following format:
+            - Attitude of agent...
+            - Reaction of agent...
+            - Commanding action of agent...
+  
+            Remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop. Avoid being stuck in action loops.
+            Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}.
+
+            Think about waht the future {N} actions would be if you want to achieve the goal and write this justification out.
+            
+            Please use thf ollowing format:
+            - hallucination of future {N} steps...
+
+            Based on this, generate the action plan for the immediate next step for each agent and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+            Remanber to assign action to your self as well.
+            Include an agent only if it has a task next.
+            You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+            Now, plan the next step:
+            """
+    return HCA_prompt
 
 def dialogue_func(
     state_update_prompt_local_agent,
     state_update_prompt_other_agent,
     central_response,
     data,
-    dialogue_history_method):
+    dialogue_history_method,
+    local_agent_location):
 
     response_total_list = data['response_total_list']
     pg_state_list = data['pg_state_list']
@@ -181,22 +187,7 @@ def dialogue_func(
     # if len(pg_state_list) - len(dialogue_history_list) != 1:
     #     raise ValueError("state and dialogue history list do not match")
     
-    user_prompt_1 = f'''
-    You're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground.
-    You can only interact with objects in your square.
-    Squares are denoted by their center coordinates (e.g., square[0.5, 0.5]), and actions involve moving boxes to targets or nearby squares, represented by colors (e.g., move(box_red, target_red)).
-    Each square can contain many targets and boxes.
-    A central planner coordinates all agents to achieve the goal: match each box with its color-coded target.
-    The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
-    The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
-    The previous state and action pairs at each step are:
-    Please learn from previous steps.
-    Not purely repeat the actions but learn why the state changes or remains in a dead loop. Avoid being stuck in action loops.
-    The central planner's current action plan is: {{{central_response}}}.
-    Please evaluate the given plan. If you agree with it, respond 'I Agree', without any extra words.
-    If not, briefly explain your objections to the central planner.
-    Your response:
-    '''
+    user_prompt_1 = f'''...''' # check for prompt length, no need for us
     token_num_count = len(enc.encode(user_prompt_1))
 
     if dialogue_history_method in (
@@ -248,32 +239,40 @@ def dialogue_func(
                 else:
                     break
 
-        user_prompt_1 = f"""
-        You are a central planner directing agent in a grid-like field to move colored boxes.
-        Particularly, you're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground.
-        You can only interact with objects in your square.
-        Squares are denoted by their center coordinates (e.g., square[0.5, 0.5]), and actions involve moving boxes to targets or nearby squares, represented by colors (e.g., move(box_red, target_red)).
-        Each square can contain many targets and boxes.
-        Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
-        The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
-        The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
-        The previous state and action pairs at each step are: {state_action_prompt}
-        Please learn from previous steps.
-        Not purely repeat the actions but learn why the state changes or remains in a dead loop.
-        Avoid being stuck in action loops.
-        You can imagine first about how you would plan these actions and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
-        Remanber to assign action to your self as well.
+        local_HCA_prompt = f"""
+            Imagine that you are a central planner directing agent in a grid-like field to move colored boxes.
+            Particularly, you're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground at grid location of [{local_agent_location}].
+            You can only interact with objects in your square.
+            Squares are denoted by their center coordinates (e.g., square[0.5, 0.5]), and actions involve moving boxes to targets or nearby squares, represented by colors (e.g., move(box_red, target_red)).
+            Each square can contain many targets and boxes.
+            Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
+            
+            The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
+            The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
+            The previous state and action pairs at each step are: {state_action_prompt}
+            Please learn from previous steps in a few steps:
+                
+                1. Please pick up an attitude on this problem for yourself, a "characteristic" that you think you should have based on what you see from previous conversation you have,
+                please write the justification for your attitude and state clearly what your attitude is.
 
-        The other central planner's current action plan is giving as: {{{central_response}}}.
-        Please be very critical in thinking about this plan.
+                2. You would recieve an plan from the other central planner, please evaluate the given plan and give critical feedbacks.
 
-        Please evaluate the given plan.
-        If you agree with it, respond 'I Agree', without any extra words.
-        If not, briefly explain your objections to this other central planner and an judger agent will get involved.
-        Ensure that you still include the actions that you agree with. This is crucial, include all actions.
-        Your response:
+            Remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop. Avoid being stuck in action loops.
+            You can imagine first about how you would plan these actions and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+            Remanber to assign action to your self as well.
+
+            The other central planner's current action plan is giving as: {{{central_response}}}.
+            Please be very critical in thinking about this plan.
+
+            Please evaluate the given plan.
+            If you agree with it, respond 'I Agree', without any extra words.
+            If not, briefly explain your objections to this other central planner and an judger agent will get involved.
+            Ensure that you still include the actions that you agree with.
+            
+            Pleas remanber to only change the actions you disagree with and not change other actions, remanber to include all actions for each agents.
+            Your response:
         """
-    return user_prompt_1
+    return local_HCA_prompt
 
 
 def input_reprompt_func(state_update_prompt):
@@ -306,10 +305,10 @@ def message_construct_func(
         # print('length of user_prompt_list', len(user_prompt_list))
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
-            if i < len(user_prompt_list) - 1:
-                messages.append(
-                    {"role": "assistant", "content": response_total_list[i]}
-                )
+            # if i < len(user_prompt_list) - 1:
+            #     messages.append(
+            #         {"role": "assistant", "content": response_total_list[i]}
+            #     )
         # print('Length of messages', len(messages))
     elif f"{dialogue_history_method}" in (
         "_wo_any_dialogue_history",
