@@ -33,7 +33,7 @@ def surround_index_func(row_num, coloum_num, row_index, coloum_index):
 
 
 def state_update_func(pg_row_num, pg_column_num, pg_dict):
-    '''describes the environment and possible actions for the central HCA agent'''
+    """describes the environment and possible actions for the central HCA agent"""
 
     pg_dict_copy = copy.deepcopy(pg_dict)
     state_update_prompt = ""
@@ -58,7 +58,7 @@ def state_update_func(pg_row_num, pg_column_num, pg_dict):
 def state_update_func_local_agent(
     pg_row_num, pg_column_num, pg_row_i, pg_column_j, pg_dict
 ):
-    '''describes the environment and possible actions for each local HCA agents'''
+    """describes the environment and possible actions for each local HCA agents"""
 
     pg_dict_copy = copy.deepcopy(pg_dict)
     state_update_prompt_local_agent = ""
@@ -115,6 +115,7 @@ def with_action_syntactic_check_func(
     response_total_list_input,
     model_name,
     dialogue_history_method,
+    is_judge=False,
 ):
     """This only checks if the actions are valid, doesn't care about if it's json,
     if not json, directly fails it."""
@@ -197,8 +198,11 @@ def with_action_syntactic_check_func(
                 ):
                     pass
                 else:
-                    # print(f"Error, Iteration Num: {iteration_num}, Key: {key}, Value1: {value[0]}, Value2: {value[1]}")
-                    feedback += f"Your assigned task for {key[0]}_{key[1]} is not in the doable action list; "
+                    if is_judge:
+                        feedback += f"You are the judge and your assigned task for {key[0]}_{key[1]} is not in the doable action list, so choose the alternative action of the central planner;"
+                    else:
+                        # print(f"Error, Iteration Num: {iteration_num}, Key: {key}, Value1: {value[0]}, Value2: {value[1]}")
+                        feedback += f"Your assigned task for {key[0]}_{key[1]} is not in the doable action list; "
         except:
             raise error(f"The response in wrong json format: {response}")
             feedback = "Your assigned plan is not in the correct json format as before. If your answer is empty dict, please check whether you miss to move box into the same colored target like move(box_blue, target_blue)"
@@ -225,8 +229,8 @@ def with_action_syntactic_check_func(
 
 
 def action_from_response(pg_dict_input, original_response_dict):
-    '''Processes the actions specified in original_response_dict and updates the environment's state (pg_dict_input)'''
-    
+    """Processes the actions specified in original_response_dict and updates the environment's state (pg_dict_input)"""
+
     system_error_feedback = ""
     pg_dict_original = copy.deepcopy(pg_dict_input)
     transformed_dict = {}

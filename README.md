@@ -1,15 +1,25 @@
 # Role Playing Leader Hellucination System
 Using Large Language Models' ***In-context Learning*** abilities, we are developing frameworks for multi-agent collaborations using **R**ole-**P**laying **L**eader-**H**ellucinating LLM, or in short, **RPLH-LLM**. We are currently developing on minimal example and we are planning to adapt to MCTS fine-tuned LLM with VirtualHome later.
 
+## TODOs:
+1. Make synthetic check better and re better for getting json format answer (jusge get stuck).
+  - Try bigger models for base LLM.
+  - How to handle edge cases when the action that one of the action is not doable? If local agent action not doable, fall back to HCA action.
+2. "Finetune" RPLH details. 
+3. Add logging of each step of the process for visualization.
+4. Modularize code with RPLH class and good documentation baked into the strcuture and organization of the code.
+5. Evaluation metrics and run numbers of experiment runs.
+  - Run scalable experiments with 2x2, 2x4, 4x4, 4x8 just as in env create.
+
 ## Simplified Schematic
 <div align=center>
-<img src="img/rplh.png" width = "70%" alt="struct" align=center />
+<img src="img/rplh.png" width = "60%" alt="struct" align=center/>
 </div>
 
 We hope to build agent that is caplable of ***Social-reasoning and expecting what the other agent should be doing***. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to ***Level-one agent***.
 
 
-## Communication Example
+## Communication
 Example demonstrating the communication. This is an fun example of lcoal agent complaining of the action given by others
 
 ```
@@ -52,24 +62,22 @@ Install the dependencies by:
 conda env create
 ```
 
-Instantiate LLM agent by (this need to be done in your system terminal directly, not in VScode):
+Download SLM from: https://ollama.com/library/qwen
 
+Instantiate SLM agent by (this need to be done in your system terminal directly, not in VScode):
 ```
 ollama run qwen2.5:14b-instruct-q3_K_L
 ```
 
+Create local environment first by:
+```
+python env_create.py
+```
+
 Then running main inference by:
-
 ```
-python minimal_contained/run_rplh.py
+python run_rplh.py
 ```
-
-## TODO:
-1. Make synthetic check better and re better for getting json format answer (finished).
-  - Try bigger models for base LLM.
-  - Check complexity of the algorithm.
-2. Adaptation to the VirtualHome environment
-3. Use fine-tuned MCTS-World-Model LLM for task
 
 ## Adapting on:
 1. https://yongchao98.github.io/MIT-REALM-Multi-Robot/
