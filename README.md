@@ -6,7 +6,9 @@ Using Large Language Models' ***In-context Learning*** abilities, we are develop
   - Try bigger models for base LLM.
 2. "Finetune" RPLH details. 
 3. Add logging of each step of the process for visualization.
-4. Evaluation metrics and run numbers of experiment runs.
+4. Modularize code with RPLH class and good documentation baked into the strcuture and organization of the code.
+5. Evaluation metrics and run numbers of experiment runs.
+  - Run scalable experiments with 2x2, 2x4, 4x4, 4x8 just as in env create.
 
 ## Simplified Schematic
 <div align=center>

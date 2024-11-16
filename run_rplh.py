@@ -59,6 +59,7 @@ def run_exp(
     with open(
         Saving_path_result + "/pg_state" + "/pg_state" + str(1) + ".json", "w"
     ) as f:
+        print("\n SAVE INITIAL STATE \n")
         json.dump(pg_dict, f)
 
     print(f"query_time_limit: {query_time_limit}")
@@ -315,6 +316,7 @@ def run_exp(
                 + ".json",
                 "w",
             ) as f:
+                print("\n SAVE RESPONSE \n")
                 json.dump(original_response_dict, f)
 
             with open(
@@ -325,7 +327,19 @@ def run_exp(
                 + ".json",
                 "w",
             ) as f:
+                print("\n SAVE NEW STATE \n")
                 json.dump(data_dict["pg_dict"], f)
+
+            with open(
+                Saving_path_result
+                + "/dialogue_history"
+                + "/dialogue_history"
+                + str(index_query_times + 2)
+                + ".json",
+                "w",
+            ) as f:
+                print("\n SAVE DIALOGUE \n")
+                json.dump(data_dict["dialogue_history_list"], f)
 
             try:
                 system_error_feedback, pg_dict_returned = action_from_response(
@@ -398,11 +412,14 @@ print(f"-------------------Model name: {model_name}-------------------")
 )
 
 with open(Saving_path_result + "/token_num_count.txt", "w") as f:
+    print("\n SAVE TOKEN NUM \n")
     for token_num_num_count in token_num_count_list:
         f.write(str(token_num_num_count) + "\n")
 
 with open(Saving_path_result + "/success_failure.txt", "w") as f:
+    print("\n SAVE RESULT \n")
     f.write(success_failure)
 
 with open(Saving_path_result + "/env_action_times.txt", "w") as f:
+    print("\n SAVE ACTION TIME \n")
     f.write(f"{index_query_times+1}")
