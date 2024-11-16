@@ -1,6 +1,17 @@
 # Role Playing Leader Hellucination System
 Using Large Language Models' ***In-context Learning*** abilities, we are developing frameworks for multi-agent collaborations using **R**ole-**P**laying **L**eader-**H**ellucinating LLM, or in short, **RPLH-LLM**. We are currently developing on minimal example and we are planning to adapt to MCTS fine-tuned LLM with VirtualHome later.
 
+## Demo:
+Here is a demo of our RPLH performing multi-agent resasoning
+
+<div style="width: 100%; padding: 5px; display: flex; justify-content: center;">
+  <video controls autoplay style="width: 60%; height: auto;" muted>
+    <source src="img/demo.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+
 ## TODOs:
 1. Make synthetic check better and re better for getting json format answer (jusge get stuck).
   - Try bigger models for base LLM.
