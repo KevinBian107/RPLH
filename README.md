@@ -92,6 +92,11 @@ Then running main inference by:
 python run_rplh.py
 ```
 
+To visualize the reasoning process:
+```
+python vis_conversation.py
+```
+
 ## Adapting on:
 1. https://yongchao98.github.io/MIT-REALM-Multi-Robot/
 2. https://github.com/szxiangjn/world-model-for-language-model
