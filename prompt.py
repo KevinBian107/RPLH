@@ -1,5 +1,6 @@
 from LLM import *
 import tiktoken
+from typing import Dict, List, Tuple, Union
 
 enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"
@@ -8,10 +9,20 @@ input_prompt_token_limit = 3000
 N = 10
 
 
-def judge_propmt_func(local_response, cen_response, prev_states):
-    """function for the judge to use"""
+def judge_prompt_func(local_response: str, cen_response: str, prev_states: Dict) -> str:
+    """
+    Constructs a prompt for the judge agent to evaluate and select the best plan.
 
-    #TODO: Judge usually give need-syhthetic-check message, re-prompt
+    Args:
+        local_response (str): Response from a local agent.
+        cen_response (str): Central planner's proposed plan.
+        prev_states (Dict): Previous states and actions taken by all agents.
+
+    Returns:
+        str: The constructed prompt for the judge.
+    """
+
+    # TODO: Judge usually give need-syhthetic-check message, re-prompt
     judge_prompt = f"""
         You a a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
         You personally do not need to make any moves but only serve as the decision maker to judge others' moves.
@@ -29,9 +40,19 @@ def judge_propmt_func(local_response, cen_response, prev_states):
 
 
 def LLM_summarize_func(
-    state_action_prompt_next_initial, model_name="qwen2.5:14b-instruct-q3_K_L"
-):
-    """Shorten the prompt given"""
+    state_action_prompt_next_initial: str,
+    model_name: str = "qwen2.5:14b-instruct-q3_K_L",
+) -> str:
+    """
+    Summarizes a lengthy prompt for more concise input to the model.
+
+    Args:
+        state_action_prompt_next_initial (str): The original, lengthy prompt.
+        model_name (str, optional): The model name to process the summarization.
+
+    Returns:
+        str: Summarized content.
+    """
 
     prompt1 = f"Please summarize the following content as concise as possible: \n{state_action_prompt_next_initial}"
     messages = [
@@ -42,8 +63,16 @@ def LLM_summarize_func(
     return response
 
 
-def input_prompt_1_func(state_update_prompt):
-    """design input prompt"""
+def input_prompt_1_func(state_update_prompt: str) -> str:
+    """
+    Creates an initial prompt for the central planner to direct agents.
+
+    Args:
+        state_update_prompt (str): The current state update.
+
+    Returns:
+        str: Input prompt for the central planner.
+    """
 
     user_prompt_1 = f"""
         You are a central planner directing agents in a grid-like field to move colored boxes.
@@ -63,12 +92,27 @@ def input_prompt_1_func(state_update_prompt):
 
 
 def rplh_prompt_func(
-    state_update_prompt, data, dialogue_history_method, HCA_agent_location
-):
+    state_update_prompt: str,
+    data: Dict,
+    dialogue_history_method: str,
+    HCA_agent_location: str,
+) -> str:
     """
-    design input prompt for role-playing leader-hellucinating agent using in-context learning + chain-of-thought
+    Designs an input prompt for a role-playing leader-hallucinating (RPLH) agent
+    using in-context learning and chain-of-thought reasoning.
 
-    boxes just need to be moved to the target location, not in the target location
+    Args:
+        state_update_prompt (str): Description of the current state and available actions.
+        data (Dict): Dictionary containing past responses, states, and dialogue history.
+        dialogue_history_method (str): Method to handle dialogue history, e.g.,
+                                       "_w_only_state_action_history", "_w_compressed_dialogue_history".
+        HCA_agent_location (str): Location of the HCA agent in the grid.
+
+    Returns:
+        str: A structured prompt for the role-playing leader-hallucinating agent.
+
+    Notes:
+        Boxes just need to be moved to the target location, not in the target location.
     """
 
     response_total_list = data["response_total_list"]
@@ -183,13 +227,27 @@ def rplh_prompt_func(
 
 
 def dialogue_func(
-    state_update_prompt_local_agent,
-    state_update_prompt_other_agent,
-    central_response,
-    data,
-    dialogue_history_method,
-    local_agent_location,
-):
+    state_update_prompt_local_agent: str,
+    state_update_prompt_other_agent: str,
+    central_response: str,
+    data: Dict,
+    dialogue_history_method: str,
+    local_agent_location: str,
+) -> str:
+    """
+    Constructs a dialogue prompt for a local agent in response to the central planner.
+
+    Args:
+        state_update_prompt_local_agent (str): State and actions specific to the local agent.
+        state_update_prompt_other_agent (str): State and actions of other agents.
+        central_response (str): Central planner's response.
+        data (Dict): Data containing historical responses and states.
+        dialogue_history_method (str): Method for managing dialogue history.
+        local_agent_location (str): Location of the local agent in the grid.
+
+    Returns:
+        str: Dialogue prompt for the local agent.
+    """
 
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
@@ -288,7 +346,17 @@ def dialogue_func(
     return local_HCA_prompt
 
 
-def input_reprompt_func(state_update_prompt):
+def input_reprompt_func(state_update_prompt: str) -> str:
+    """
+    Creates a re-prompt for agents to generate a new action plan based on the updated state.
+
+    Args:
+        state_update_prompt (str): Updated description of the current state.
+
+    Returns:
+        str: A re-prompt instructing agents to provide the next step in JSON format.
+    """
+
     user_reprompt = f"""
     Finished! The updated state is as follows(combined targets and boxes with the same color have been removed): {state_update_prompt}
     The output should be like json format like: {{Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}}.
@@ -300,15 +368,24 @@ def input_reprompt_func(state_update_prompt):
 
 
 def message_construct_func(
-    user_prompt_list, response_total_list, dialogue_history_method
-):
-    '''
+    user_prompt_list: List[str],
+    response_total_list: List[str],
+    dialogue_history_method: str,
+) -> List[Dict[str, str]]:
+    """
+    Constructs messages for the model with the appropriate dialogue context.
     Create a specialized LLM dictrionary with prompt information, later convert back in LLM class
 
-    say specialized roles here
+    (with all dialogue history concats)
 
-    with all dialogue history concats
-    '''
+    Args:
+        user_prompt_list (List[str]): List of user prompts.
+        response_total_list (List[str]): List of model responses.
+        dialogue_history_method (str): Method for managing dialogue history.
+
+    Returns:
+        List[Dict[str, str]]: List of message dictionaries for the model.
+    """
 
     messages = [
         {
@@ -328,27 +405,29 @@ def message_construct_func(
         # print('length of user_prompt_list', len(user_prompt_list))
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
-            
+
             # if i < len(user_prompt_list) - 1:
             #     messages.append(
             #         {"role": "assistant", "content": response_total_list[i]}
             #     )
-
-        # print('Length of messages', len(messages))
     elif f"{dialogue_history_method}" in (
         "_wo_any_dialogue_history",
         "_w_only_state_action_history",
     ):
         messages.append({"role": "user", "content": user_prompt_list[-1]})
-        # print('Length of messages', len(messages))
     return messages
 
 
+def judge_message_construct_func(user_prompt_list: List[str]) -> List[Dict[str, str]]:
+    """
+    Constructs a message sequence for a judge agent to evaluate conflicting plans.
 
-def judge_message_construct_func(user_prompt_list):
-    '''
-    Specialized message for judge
-    '''
+    Args:
+        user_prompt_list (List[str]): List of user prompts to provide context for the judge.
+
+    Returns:
+        List[Dict[str, str]]: A structured sequence of messages for the judge to process.
+    """
     messages = [
         {
             "role": "system",
@@ -364,22 +443,33 @@ def judge_message_construct_func(user_prompt_list):
     ]
     for i in range(len(user_prompt_list)):
         messages.append({"role": "user", "content": user_prompt_list[i]})
-    
+
     return messages
 
 
-def json_check_message_construct_func(response):
-    '''Construct messages for Json sythetic check'''
+def json_check_message_construct_func(response: str) -> List[Dict[str, str]]:
+    """
+    Constructs a message for validating and fixing JSON format in a response.
+
+    Args:
+        response (str): The response string to check and fix.
+
+    Returns:
+        List[Dict[str, str]]: Message sequence to fix the JSON.
     
+    Notes:
+        Must give example or else LLM give {"Agent0_50_5": "move(box_green, target_green)", "Agent1_50_5": "move(box_red, target_red)"}
+    """
+
     messages = [
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant specialized for fixing Json format.",
-                },
-                {
-                    "role": "user",
-                    "content": f'''Please fix the Json message in here {response} and give only this JSON as output.
-                                When asked to give json format, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}.''',
-                },
-            ]
+        {
+            "role": "system",
+            "content": "You are a helpful assistant specialized for fixing Json format.",
+        },
+        {
+            "role": "user",
+            "content": f"""Please fix the Json message in here {response} and give only this JSON as output.
+                                When asked to give json format, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}.""",
+        },
+    ]
     return messages
