@@ -1,5 +1,7 @@
 # Box moving to target without collision
 
+"""Working on changing environment to self charcterized env, also working on visualization"""
+
 from prompt import *
 from LLM import *
 from sre_constants import error
@@ -126,24 +128,22 @@ def with_action_syntactic_check_func(
     while iteration_num < 6:
         valid = is_valid_json(response)
         count = 0
-        # print("RESPONSE", response)
-        # TODO: need to check this
+        
         while not valid:
             count += 1
             print(f"----------JSON Syntactic Check {count} TIME----------")
-            messages = [
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant specialized for fixing Json format.",
-                },
-                {
-                    "role": "user",
-                    "content": f"Please fix the Json message in here {response} and give only this JSON as output",
-                },
-            ]
+
+            # need to give example or else LLM give {"Agent0_50_5": "move(box_green, target_green)", "Agent1_50_5": "move(box_red, target_red)"}
+            messages = json_check_message_construct_func(response)
             response, token_num_count = LLaMA_response(messages, model_name)
-            token_num_count_list_add.append(token_num_count)
-            valid = is_valid_json(response)
+
+            # print(response)
+
+            match = re.search(r"{.*}", response, re.DOTALL)
+            if match:
+                response = match.group()
+                token_num_count_list_add.append(token_num_count)
+                valid = is_valid_json(response)
 
         response_total_list.append(response)
         # print(iteration_num, response_total_list)
@@ -310,13 +310,27 @@ def env_create(
 
 
 def create_env1(Saving_path, repeat_num=10):
+    """
+    multi-agent-env/
+    └── env_pg_state_2_2/
+        ├── pg_state0/
+        │   └── pg_state0.json
+        ├── pg_state1/
+        │   └── pg_state1.json
+    ...
+
+    Each is unique configuration of the environment
+
+
+    """
     if not os.path.exists(Saving_path):
         os.makedirs(Saving_path, exist_ok=True)
     else:
         shutil.rmtree(Saving_path)
         os.makedirs(Saving_path, exist_ok=True)
 
-    for i, j in [(2, 2), (2, 4), (4, 4), (4, 8)]:
+    # for i, j in [(2, 2), (2, 4), (4, 4), (4, 8)]:
+    for i, j in [(2, 2)]:
 
         if not os.path.exists(Saving_path + f"/env_pg_state_{i}_{j}"):
             os.makedirs(Saving_path + f"/env_pg_state_{i}_{j}", exist_ok=True)
@@ -353,4 +367,6 @@ def create_env1(Saving_path, repeat_num=10):
 
 Code_dir_path = "multi-agent-env/"
 # The first time to create the environment, after that you can comment it
-create_env1(Code_dir_path, repeat_num=10)
+
+# Here we only create 1 instance of the random environment
+create_env1(Code_dir_path, repeat_num=1)
