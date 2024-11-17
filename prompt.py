@@ -21,10 +21,9 @@ def judge_propmt_func(local_response, cen_response, prev_states):
         Please judge which of the action from the first agent or the second agent is better.
         Do not come-up with something new, only choose one of them, but do give explanations of your choice after saying EXPLAINATION:
 
-        Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
         Notice that you do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
         Include an agent only if it has a task next.
-        Now, plan the next step:
+        Now, select the next step:
         """
     return judge_prompt
 
@@ -68,6 +67,8 @@ def rplh_prompt_func(
 ):
     """
     design input prompt for role-playing leader-hellucinating agent using in-context learning + chain-of-thought
+
+    boxes just need to be moved to the target location, not in the target location
     """
 
     response_total_list = data["response_total_list"]

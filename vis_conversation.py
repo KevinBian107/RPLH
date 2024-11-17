@@ -55,8 +55,13 @@ def load_experiment_results(Saving_path_result):
             with open(os.path.join(hca_agent_response_dir, file_name), "r") as f:
                 hca_response_list.append(json.load(f))
 
-
-    return user_prompt_list, response_total_list, pg_state_list, dialogue_history_list, hca_response_list
+    return (
+        user_prompt_list,
+        response_total_list,
+        pg_state_list,
+        dialogue_history_list,
+        hca_response_list,
+    )
 
 
 def print_token_by_token(text, delay=0.05):
@@ -89,7 +94,9 @@ def format_dialogue_history(dialogue_history):
         agent_match = re.match(r"(Agent\[[^\]]+\]):", dialogue)
         if agent_match:
             agent_title = agent_match.group(1)
-            conversation = dialogue[len(agent_title) + 1 :].strip()  # Remove the agent title from dialogue
+            conversation = dialogue[
+                len(agent_title) + 1 :
+            ].strip()  # Remove the agent title from dialogue
             formatted_history += f"\n--- {agent_title} ---\n{conversation}\n"
         else:
             # Add as-is if no specific agent title is found
@@ -98,7 +105,13 @@ def format_dialogue_history(dialogue_history):
 
 
 def roll_out_conversation(
-    user_prompt_list, response_total_list, pg_state_list, dialogue_history_list, hca_response_list, delay=1.0, token_delay=0.05
+    user_prompt_list,
+    response_total_list,
+    pg_state_list,
+    dialogue_history_list,
+    hca_response_list,
+    delay=1.0,
+    token_delay=0.05,
 ):
     """
     Simulates the conversation dynamically in the terminal with dialogue history.
@@ -113,13 +126,13 @@ def roll_out_conversation(
         token_delay (float): Delay between each token for simulating LLM-like output.
     """
     print("=== Conversation Rollout Start ===\n")
-    
+
     for step in range(len(user_prompt_list)):
         print(f"--- Step {step + 1} ---\n")
-        
+
         print("Environment State:")
         print_token_by_token(json.dumps(pg_state_list[step], indent=2), 0)
-        
+
         # print("\nUser Prompt:")
         # print_token_by_token(user_prompt_list[step], token_delay)
 
@@ -127,17 +140,17 @@ def roll_out_conversation(
         if step < len(hca_response_list):
             formatted_history = format_dialogue_history(hca_response_list[step])
             print_token_by_token(formatted_history, token_delay)
-        
+
         time.sleep(delay)  # Delay to simulate dynamic interaction
-        
+
         # print("\nAgent Response:")
         # print_token_by_token(json.dumps(response_total_list[step], indent=2), token_delay)
-        
+
         print("\nDialogue History:")
         if step < len(dialogue_history_list):
             formatted_history = format_dialogue_history(dialogue_history_list[step])
             print_token_by_token(formatted_history, token_delay)
-        
+
         print("\n")
         time.sleep(delay)  # Delay to allow readability between steps
 
@@ -146,14 +159,23 @@ def roll_out_conversation(
     print_token_by_token(json.dumps(pg_state_list[-1], indent=2), token_delay)
     print("=== Conversation Rollout End ===\n")
 
+
 # Load experiment data
 Saving_path_result = "multi-agent-env/env_pg_state_2_2/pg_state2/_w_all_dialogue_history_qwen2.5:14b-instruct-q3_K_L"
 
-user_prompt_list, response_total_list, pg_state_list, dialogue_history_list, hca_response_list = (
-    load_experiment_results(Saving_path_result)
-)
+(
+    user_prompt_list,
+    response_total_list,
+    pg_state_list,
+    dialogue_history_list,
+    hca_response_list,
+) = load_experiment_results(Saving_path_result)
 
 # Rollout the conversation with dialogue history visualization
 roll_out_conversation(
-    user_prompt_list, response_total_list, pg_state_list, dialogue_history_list, hca_response_list
+    user_prompt_list,
+    response_total_list,
+    pg_state_list,
+    dialogue_history_list,
+    hca_response_list,
 )

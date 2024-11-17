@@ -16,6 +16,7 @@ Here is a demo of our RPLH performing multi-agent resasoning
 1. Make synthetic check better and re better for getting json format answer (jusge get stuck).
   - Try bigger models for base LLM.
   - How to handle edge cases when the action that one of the action is not doable? If local agent action not doable, fall back to HCA action.
+  - `Function calling` LLM?
 2. "Finetune" RPLH details. 
 3. Add logging of each step of the process for visualization.
 4. Modularize code with RPLH class and good documentation baked into the strcuture and organization of the code.
