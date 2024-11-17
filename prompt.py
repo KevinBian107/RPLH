@@ -11,7 +11,7 @@ N = 10
 def judge_propmt_func(local_response, cen_response, prev_states):
     """function for the judge to use"""
 
-    # TODO: figure out can't have more explanations?
+    #TODO: Judge usually give need-syhthetic-check message, re-prompt
     judge_prompt = f"""
         You a a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
         You personally do not need to make any moves but only serve as the decision maker to judge others' moves.
@@ -302,6 +302,13 @@ def input_reprompt_func(state_update_prompt):
 def message_construct_func(
     user_prompt_list, response_total_list, dialogue_history_method
 ):
+    '''
+    Create a specialized LLM dictrionary with prompt information, later convert back in LLM class
+
+    say specialized roles here
+
+    with all dialogue history concats
+    '''
 
     messages = [
         {
@@ -321,10 +328,12 @@ def message_construct_func(
         # print('length of user_prompt_list', len(user_prompt_list))
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
+            
             # if i < len(user_prompt_list) - 1:
             #     messages.append(
             #         {"role": "assistant", "content": response_total_list[i]}
             #     )
+
         # print('Length of messages', len(messages))
     elif f"{dialogue_history_method}" in (
         "_wo_any_dialogue_history",
@@ -332,4 +341,45 @@ def message_construct_func(
     ):
         messages.append({"role": "user", "content": user_prompt_list[-1]})
         # print('Length of messages', len(messages))
+    return messages
+
+
+
+def judge_message_construct_func(user_prompt_list):
+    '''
+    Specialized message for judge
+    '''
+    messages = [
+        {
+            "role": "system",
+            "content": f"""You are a judge making decisions on two input actions, you will get get more info later. 
+                 
+                 When asked to specifiy your action plan, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}. 
+                 
+                 Make sure that:
+                 - If no action for an agent in the next step, do not include it in JSON output. 
+                 - At most one action for each agent in each step.
+                 """,
+        }
+    ]
+    for i in range(len(user_prompt_list)):
+        messages.append({"role": "user", "content": user_prompt_list[i]})
+    
+    return messages
+
+
+def json_check_message_construct_func(response):
+    '''Construct messages for Json sythetic check'''
+    
+    messages = [
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant specialized for fixing Json format.",
+                },
+                {
+                    "role": "user",
+                    "content": f'''Please fix the Json message in here {response} and give only this JSON as output.
+                                When asked to give json format, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}.''',
+                },
+            ]
     return messages

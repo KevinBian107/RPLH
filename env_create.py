@@ -128,22 +128,17 @@ def with_action_syntactic_check_func(
     while iteration_num < 6:
         valid = is_valid_json(response)
         count = 0
-        # print("RESPONSE", response)
-        # TODO: need to check this
+        
         while not valid:
             count += 1
             print(f"----------JSON Syntactic Check {count} TIME----------")
-            messages = [
-                {
-                    "role": "system",
-                    "content": "You are a helpful assistant specialized for fixing Json format.",
-                },
-                {
-                    "role": "user",
-                    "content": f"Please fix the Json message in here {response} and give only this JSON as output",
-                },
-            ]
+
+            # need to give example or else LLM give {"Agent0_50_5": "move(box_green, target_green)", "Agent1_50_5": "move(box_red, target_red)"}
+            messages = json_check_message_construct_func(response)
             response, token_num_count = LLaMA_response(messages, model_name)
+
+            # print(response)
+
             match = re.search(r"{.*}", response, re.DOTALL)
             if match:
                 response = match.group()
