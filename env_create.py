@@ -165,6 +165,7 @@ def is_valid_json(response: str) -> bool:
 def with_action_syntactic_check_func(
     pg_dict_input: Dict[str, List[str]],
     response: str,
+    alt_response: str,
     user_prompt_list_input: List[str],
     response_total_list_input: List[str],
     model_name: str,
@@ -177,6 +178,7 @@ def with_action_syntactic_check_func(
     Args:
         pg_dict_input (Dict[str, List[str]]): Current state of the playground.
         response (str): Proposed action plan in JSON format.
+        alt_response (str): Fall back response
         user_prompt_list_input (List[str]): List of user prompts.
         response_total_list_input (List[str]): List of previous responses.
         model_name (str): Name of the model generating the response.
@@ -196,22 +198,25 @@ def with_action_syntactic_check_func(
     while iteration_num < 6:
         valid = is_valid_json(response)
         count = 0
-
+        print(response)
         while not valid:
             count += 1
-            print(f"----------JSON Syntactic Check {count} TIME----------")
+            print(f"----------JSON Check {count} TIME----------")
 
             # need to give example or else LLM give {"Agent0_50_5": "move(box_green, target_green)", "Agent1_50_5": "move(box_red, target_red)"}
             messages = json_check_message_construct_func(response)
             response, token_num_count = LLaMA_response(messages, model_name)
-
-            # print(response)
 
             match = re.search(r"{.*}", response, re.DOTALL)
             if match:
                 response = match.group()
                 token_num_count_list_add.append(token_num_count)
                 valid = is_valid_json(response)
+            
+            if count == 6:
+                # if judge can't make right choice, fall back to HCA
+                response = alt_response
+                break
 
         response_total_list.append(response)
         # print(iteration_num, response_total_list)
@@ -278,8 +283,8 @@ def with_action_syntactic_check_func(
         if feedback != "":
             feedback += "Please replan for all the agents again with the same ouput format. The output should have the same json format {Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}. Do not explain, just directly output json directory. Your response:"
             print("----------Syntactic Check----------")
-            print(f"Response original: {response}")
-            print(f"Feedback: {feedback}")
+            # print(f"Response original: {response}")
+            # print(f"Feedback: {feedback}")
             user_prompt_list.append(feedback)
             messages = message_construct_func(
                 user_prompt_list, response_total_list, dialogue_history_method
@@ -287,7 +292,7 @@ def with_action_syntactic_check_func(
             print(f"Length of messages {len(messages)}")
             response, token_num_count = LLaMA_response(messages, model_name)
             token_num_count_list_add.append(token_num_count)
-            print(f"Response new: {response}\n")
+            # print(f"Response new: {response}\n")
             if response == "Out of tokens":
                 return response, token_num_count_list_add
             iteration_num += 1

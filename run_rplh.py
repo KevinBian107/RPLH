@@ -9,6 +9,7 @@ import re
 import sys
 import os
 from typing import Dict, List, Tuple, Union
+import pandas as pd
 
 
 def run_exp(
@@ -64,7 +65,7 @@ def run_exp(
         "token_num_count_list": [],
         "hca_agent_response_list": [],
         "pg_dict": None,  # For initial environment state
-        "env_step": 0,
+        "env_step": -1,
     }
 
     # Load initial environment state
@@ -87,6 +88,11 @@ def run_exp(
     for index_query_times in range(query_time_limit):
         # -----------------------------------------ONE HCA AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
         for a in range(num_agent):
+            result = {key: {"targets": sum(1 for item in items if "target" in item), "boxes": sum(1 for item in items if "box" in item)} for key, items in data_dict['pg_dict'].items()}
+            result_df = pd.DataFrame(result).T
+            print(result_df)
+            print(result_df.sum(axis=0))
+            
             print(
                 f"-------###-------###-------###-------HCA_AGENT_{a}-------###-------###-------###-------"
             )
@@ -94,7 +100,9 @@ def run_exp(
             """FOR NUM_AGENT, ITERATIVELY DO"""
 
             HCA_agent_location = list(data_dict["pg_dict"].keys())[a]
-            print(f"HCA Agent {a} is at: {HCA_agent_location}")
+            print(f"HCA Agent {a} is at: [{HCA_agent_location}]")
+            
+            data_dict["env_step"] += 1
 
             # sate0 is initial state
             with open(
@@ -107,8 +115,6 @@ def run_exp(
             ) as f:
                 print("\n SAVE INITIAL STATE \n")
                 json.dump(data_dict["pg_dict"], f)
-
-            data_dict["env_step"] += 1
 
             # at second iter, should have more info, get available actions
             state_update_prompt = state_update_func(
@@ -142,9 +148,11 @@ def run_exp(
             match = re.search(r"{.*}", raw_response, re.DOTALL)
             if match:
                 response = match.group()
+                HCA_response = response
             if response[0] == "{" and response[-1] == "}":
                 response, token_num_count_list_add = with_action_syntactic_check_func(
                     data_dict["pg_dict"],
+                    response,
                     response,
                     [user_prompt_1],
                     [],
@@ -296,15 +304,17 @@ def run_exp(
                         "feedback1"
                     ]
                     cen_response = data_dict["user_prompt_list"][-1]
-                    judge_prompt = judge_propmt_func(
+                    judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
                     messages = judge_message_construct_func(
-                        [cen_response, local_response, judge_prompt]
+                        [judge_prompt]
                     )
                     response_judge, token_num_count = LLaMA_response(
                         messages, model_name
                     )
+                    
+                    # print(response_judge)
 
                     # -----------------------------------------SYNTACTIC CHECK FOR JUDGE-----------------------------------------#
                     data_dict["token_num_count_list"].append(token_num_count)
@@ -312,12 +322,11 @@ def run_exp(
                     if match:
                         response = match.group()
 
-                        # print(response)
-
                         response, token_num_count_list_add = (
                             with_action_syntactic_check_func(
                                 data_dict["pg_dict"],
                                 response_judge,
+                                HCA_response, # fallback response
                                 [judge_prompt],
                                 [response],
                                 model_name,
@@ -328,7 +337,7 @@ def run_exp(
                         data_dict["token_num_count_list"] = (
                             data_dict["token_num_count_list"] + token_num_count_list_add
                         )
-                        print(f"response: {response}")
+                        # print(f"response: {response}")
 
                     print(f"JUDGE MODIFIED:\n {response}")
                 else:
@@ -338,8 +347,8 @@ def run_exp(
 
                 # after syntactic checks
                 with open("conversation.txt", "a") as f:
-                    message = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_judge} \n \n"
-                    f.write(message)
+                    messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_judge} \n \n"
+                    f.write(messages)
 
             # -----------------------------------------EXECUTION OF ACTION AT EACH HCA AGENT LEVEL-----------------------------------------#
             print(
@@ -382,7 +391,7 @@ def run_exp(
                 )
                 if system_error_feedback != "":
                     print(system_error_feedback)
-                pg_dict = pg_dict_returned
+                data_dict["pg_dict"] = pg_dict_returned
 
             except:
                 success_failure = "Hallucination of wrong plan"
@@ -390,13 +399,16 @@ def run_exp(
 
             # need to append new states to state list
             data_dict["pg_state_list"].append(data_dict["pg_dict"])
+            
+            
+            # -----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
             count = 0
             for ky, value in data_dict["pg_dict"].items():
                 count += len(value)
             if count == 0:
                 break
-
-    # -----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
+    
+    # -----------------------------------------TASK SUCCESS OUT-----------------------------------------#
     if index_query_times < query_time_limit - 1:
         success_failure = "success"
     else:

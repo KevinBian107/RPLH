@@ -9,7 +9,7 @@ input_prompt_token_limit = 3000
 N = 10
 
 
-def judge_prompt_func(local_response: str, cen_response: str, prev_states: Dict) -> str:
+def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -> str:
     """
     Constructs a prompt for the judge agent to evaluate and select the best plan.
 
@@ -20,20 +20,23 @@ def judge_prompt_func(local_response: str, cen_response: str, prev_states: Dict)
 
     Returns:
         str: The constructed prompt for the judge.
+    
+    Note:
+        Most important!!! Prompting is very important, make sure to give a accurate prompting.
     """
 
-    # TODO: Judge usually give need-syhthetic-check message, re-prompt
     judge_prompt = f"""
         You a a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
         You personally do not need to make any moves but only serve as the decision maker to judge others' moves.
 
         The first agent is giving command of {cen_response}, but the second agent is sayin {local_response}.
-        Here is all the previous actions of all the agents have taken : {prev_states}.
+        Here is the current state : {cur_state}.
         Please judge which of the action from the first agent or the second agent is better.
-        Do not come-up with something new, only choose one of them, but do give explanations of your choice after saying EXPLAINATION:
+        Do not come-up with something new, only choose one of them, do not give explantion, just choose one of them.
 
-        Notice that you do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
-        Include an agent only if it has a task next.
+        Notice that you do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_green, target_green)"}}.
+        Include an agent only if it has a task next. If the agent does not have task, do not include.
+        There are at most only 4 agents action, but try to perfer over choices that assign more agents into actions.
         Now, select the next step:
         """
     return judge_prompt
@@ -184,6 +187,7 @@ def rplh_prompt_func(
             First let's understand the goal.
             Each agent is assigned to a 1x1 square and can only interact with objects in its area.
             Agents can move a box to a neighboring square or a same-color target.
+            You can only move same color boxes to same color targets.
             Each square can contain many targets and boxes.
             The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
             Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
@@ -217,10 +221,13 @@ def rplh_prompt_func(
             Please use thf ollowing format:
             - hallucination of future {N} steps...
 
-            Based on this, generate the action plan for the immediate next step for each agent and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+            Based on this, generate the action plan for the immediate next step for each agent and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5]), Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
             Remanber to assign action to your self as well.
-            Include an agent only if it has a task next.
-            You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+            Include an agent only if it has a task next. No agent name should be given if the agent does not have a task next, don't say anything in the item terms other than "move(...)".
+            You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5]),  Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
+            
+            Ideally, all agents should make action, try to arange in a way such that the most number of agent makes useful action.
+            
             Now, plan the next step:
             """
     return HCA_prompt
@@ -316,7 +323,10 @@ def dialogue_func(
             You can only interact with objects in your square.
             Squares are denoted by their center coordinates (e.g., square[0.5, 0.5]), and actions involve moving boxes to targets or nearby squares, represented by colors (e.g., move(box_red, target_red)).
             Each square can contain many targets and boxes.
+            The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
+            Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
             Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
+            You can only move same color boxes to same color targets.
             
             The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
             The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
@@ -329,7 +339,7 @@ def dialogue_func(
                 2. You would recieve an plan from the other central planner, please evaluate the given plan and give critical feedbacks.
 
             Remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop. Avoid being stuck in action loops.
-            You can imagine first about how you would plan these actions and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move...}}.
+            You can imagine first about how you would plan these actions and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])",  Agent[0.5, 1.5]": "move(box_blue, target_blue)}}.
             Remanber to assign action to your self as well.
 
             The other central planner's current action plan is giving as: {{{central_response}}}.
@@ -341,6 +351,10 @@ def dialogue_func(
             Ensure that you still include the actions that you agree with.
             
             Pleas remanber to only change the actions you disagree with and not change other actions, remanber to include all actions for each agents.
+            No agent name should be given if the agent does not have a task next, don't say anything in the item terms other than "move(...)".
+            
+            Ideally, all agents should make action, try to arange in a way such that the most number of agent makes useful action.
+            
             Your response:
         """
     return local_HCA_prompt
@@ -359,7 +373,7 @@ def input_reprompt_func(state_update_prompt: str) -> str:
 
     user_reprompt = f"""
     Finished! The updated state is as follows(combined targets and boxes with the same color have been removed): {state_update_prompt}
-    The output should be like json format like: {{Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}}.
+    The output should be like json format like: {{Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]),  Agent[0.5, 1.5]": "move(box_blue, target_blue)}}.
     If no action for one agent in the next step, just do not include its action in the output.
     Also remember at most one action for each agent in each step.
     Next step output:
@@ -431,7 +445,7 @@ def judge_message_construct_func(user_prompt_list: List[str]) -> List[Dict[str, 
     messages = [
         {
             "role": "system",
-            "content": f"""You are a judge making decisions on two input actions, you will get get more info later. 
+            "content": f"""You are a helpful assistant specialized for judging conflicting plans.
                  
                  When asked to specifiy your action plan, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}. 
                  
