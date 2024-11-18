@@ -284,9 +284,7 @@ def run_exp(
                     if (
                         data_local["local_agent_response_list_dir"]["feedback1"] != ""
                     ):  # if not I agree
-                        data_local["local_agent_response_list_dir"][
-                            "feedback1"
-                        ] += """
+                        data_local["local_agent_response_list_dir"]["feedback1"] += """
                             This is the feedback from local agents.
                             If you find some errors in your previous plan, try to modify it.
                             Otherwise, output the same plan as before.
@@ -300,10 +298,12 @@ def run_exp(
                     print(
                         f"-------###-------###-------###-------JUDGE_ON_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
                     )
-                    local_response = data_local["local_agent_response_list_dir"][
-                        "feedback1"
-                    ]
+                    local_response = data_local["local_agent_response_list_dir"]["feedback1"]
                     cen_response = data_dict["user_prompt_list"][-1]
+                    
+                    # print(f"LOCAL RESPONSE: {local_response}")
+                    # print(f"CEN RESPONSE: {cen_response}")
+                    
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
@@ -319,13 +319,14 @@ def run_exp(
                     # -----------------------------------------SYNTACTIC CHECK FOR JUDGE-----------------------------------------#
                     data_dict["token_num_count_list"].append(token_num_count)
                     match = re.search(r"{.*}", response_judge, re.DOTALL)
+                    # match not right
                     if match:
                         response = match.group()
 
                         response, token_num_count_list_add = (
                             with_action_syntactic_check_func(
                                 data_dict["pg_dict"],
-                                response_judge,
+                                response,
                                 HCA_response, # fallback response
                                 [judge_prompt],
                                 [response],
