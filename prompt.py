@@ -6,7 +6,7 @@ enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"
 enc = tiktoken.encoding_for_model("gpt-4")
 input_prompt_token_limit = 3000
-N = 10
+N = 5
 GOAL_RULES = f"""You are an agentin a grid-like field to move colored boxes.
                 Each agent is assigned to a 1x1 square and can only interact with objects in its area.
                 Agents can move a box to a neighboring square or a same-color target.
@@ -226,6 +226,7 @@ def rplh_prompt_func(
             Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}.
 
             Think about waht the future {N} actions would be if you want to achieve the goal and write this justification out.
+            Remanber to wirte out for each step, what you plan fro every agent to do and what would teh consequences state change be.
             
             Please use thf ollowing format:
             - hallucination of future {N} steps...
