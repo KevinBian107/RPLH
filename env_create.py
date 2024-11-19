@@ -13,9 +13,24 @@ import copy
 import numpy as np
 import shutil
 import time
+from typing import Dict, List, Tuple, Union
 
 
-def surround_index_func(row_num, coloum_num, row_index, coloum_index):
+def surround_index_func(
+    row_num: int, coloum_num: int, row_index: int, coloum_index: int
+) -> List[List[float]]:
+    """
+    Calculates the indices of surrounding cells for a given cell in a grid.
+
+    Args:
+        row_num (int): Total number of rows.
+        col_num (int): Total number of columns.
+        row_index (int): Row index of the target cell.
+        col_index (int): Column index of the target cell.
+
+    Returns:
+        List[List[float]]: List of coordinates for surrounding cells.
+    """
     surround_index_list = []
     for i, j in (
         [row_index - 1, coloum_index],
@@ -34,8 +49,20 @@ def surround_index_func(row_num, coloum_num, row_index, coloum_index):
     return surround_index_list
 
 
-def state_update_func(pg_row_num, pg_column_num, pg_dict):
-    """describes the environment and possible actions for the central HCA agent"""
+def state_update_func(
+    pg_row_num: int, pg_column_num: int, pg_dict: Dict[str, List[str]]
+) -> str:
+    """
+    Describes the environment and possible actions for the central agent.
+
+    Args:
+        pg_row_num (int): Number of rows in the playground.
+        pg_column_num (int): Number of columns in the playground.
+        pg_dict (Dict[str, List[str]]): State of the playground.
+
+    Returns:
+        str: State update prompt for the central agent.
+    """
 
     pg_dict_copy = copy.deepcopy(pg_dict)
     state_update_prompt = ""
@@ -58,9 +85,26 @@ def state_update_func(pg_row_num, pg_column_num, pg_dict):
 
 
 def state_update_func_local_agent(
-    pg_row_num, pg_column_num, pg_row_i, pg_column_j, pg_dict
-):
-    """describes the environment and possible actions for each local HCA agents"""
+    pg_row_num: int,
+    pg_column_num: int,
+    pg_row_i: int,
+    pg_column_j: int,
+    pg_dict: Dict[str, List[str]],
+) -> Tuple[str, str]:
+    """
+    Describes the environment and possible actions for a specific local agent.
+
+    Args:
+        pg_row_num (int): Number of rows in the playground.
+        pg_column_num (int): Number of columns in the playground.
+        pg_row_i (int): Row index of the local agent.
+        pg_column_j (int): Column index of the local agent.
+        pg_dict (Dict[str, List[str]]): State of the playground.
+
+    Returns:
+        Tuple[str, str]: Prompts describing the environment and actions for the local agent
+        and for other agents.
+    """
 
     pg_dict_copy = copy.deepcopy(pg_dict)
     state_update_prompt_local_agent = ""
@@ -101,8 +145,16 @@ def state_update_func_local_agent(
     return state_update_prompt_local_agent, state_update_prompt_other_agent
 
 
-def is_valid_json(response):
-    """Check if a response string is in valid JSON format."""
+def is_valid_json(response: str) -> bool:
+    """
+    Checks if a response string is in valid JSON format.
+
+    Args:
+        response (str): The response string to validate.
+
+    Returns:
+        bool: True if the response is valid JSON, False otherwise.
+    """
     try:
         json.loads(response)
         return True
@@ -111,16 +163,34 @@ def is_valid_json(response):
 
 
 def with_action_syntactic_check_func(
-    pg_dict_input,
-    response,
-    user_prompt_list_input,
-    response_total_list_input,
-    model_name,
-    dialogue_history_method,
-    is_judge=False,
-):
-    """This only checks if the actions are valid, doesn't care about if it's json,
-    if not json, directly fails it."""
+    pg_dict_input: Dict[str, List[str]],
+    response: str,
+    alt_response: str,
+    user_prompt_list_input: List[str],
+    response_total_list_input: List[str],
+    model_name: str,
+    dialogue_history_method: str,
+    is_judge: bool = False,
+) -> Tuple[Union[str, Dict], List[int]]:
+    """
+    Checks and validates the syntactic correctness of the action plan.
+
+    Args:
+        pg_dict_input (Dict[str, List[str]]): Current state of the playground.
+        response (str): Proposed action plan in JSON format.
+        alt_response (str): Fall back response
+        user_prompt_list_input (List[str]): List of user prompts.
+        response_total_list_input (List[str]): List of previous responses.
+        model_name (str): Name of the model generating the response.
+        dialogue_history_method (str): Method for managing dialogue history.
+        is_judge (bool, optional): Flag to indicate if the check is for a judge's response.
+
+    Returns:
+        Tuple[Union[str, Dict], List[int]]: Validated response and token count list.
+
+    Notes:
+        This only checks if the actions are valid, doesn't care about if it's json, if not json, directly fails it.
+    """
     user_prompt_list = copy.deepcopy(user_prompt_list_input)
     response_total_list = copy.deepcopy(response_total_list_input)
     iteration_num = 0
@@ -128,22 +198,25 @@ def with_action_syntactic_check_func(
     while iteration_num < 6:
         valid = is_valid_json(response)
         count = 0
-        
+        print(response)
         while not valid:
             count += 1
-            print(f"----------JSON Syntactic Check {count} TIME----------")
+            print(f"----------JSON Check {count} TIME----------")
 
             # need to give example or else LLM give {"Agent0_50_5": "move(box_green, target_green)", "Agent1_50_5": "move(box_red, target_red)"}
             messages = json_check_message_construct_func(response)
             response, token_num_count = LLaMA_response(messages, model_name)
-
-            # print(response)
 
             match = re.search(r"{.*}", response, re.DOTALL)
             if match:
                 response = match.group()
                 token_num_count_list_add.append(token_num_count)
                 valid = is_valid_json(response)
+            
+            if count == 6:
+                # if judge can't make right choice, fall back to HCA
+                response = alt_response
+                break
 
         response_total_list.append(response)
         # print(iteration_num, response_total_list)
@@ -210,8 +283,8 @@ def with_action_syntactic_check_func(
         if feedback != "":
             feedback += "Please replan for all the agents again with the same ouput format. The output should have the same json format {Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}. Do not explain, just directly output json directory. Your response:"
             print("----------Syntactic Check----------")
-            print(f"Response original: {response}")
-            print(f"Feedback: {feedback}")
+            # print(f"Response original: {response}")
+            # print(f"Feedback: {feedback}")
             user_prompt_list.append(feedback)
             messages = message_construct_func(
                 user_prompt_list, response_total_list, dialogue_history_method
@@ -219,7 +292,7 @@ def with_action_syntactic_check_func(
             print(f"Length of messages {len(messages)}")
             response, token_num_count = LLaMA_response(messages, model_name)
             token_num_count_list_add.append(token_num_count)
-            print(f"Response new: {response}\n")
+            # print(f"Response new: {response}\n")
             if response == "Out of tokens":
                 return response, token_num_count_list_add
             iteration_num += 1
@@ -228,9 +301,19 @@ def with_action_syntactic_check_func(
     return "Syntactic Error", token_num_count_list_add
 
 
-def action_from_response(pg_dict_input, original_response_dict):
-    """Processes the actions specified in original_response_dict and updates the environment's state (pg_dict_input)"""
+def action_from_response(
+    pg_dict_input: Dict[str, List[str]], original_response_dict: Dict
+) -> Tuple[str, Dict[str, List[str]]]:
+    """
+    Updates the environment state based on the actions in the response.
 
+    Args:
+        pg_dict_input (Dict[str, List[str]]): Current state of the playground.
+        original_response_dict (Dict): Actions to be executed.
+
+    Returns:
+        Tuple[str, Dict[str, List[str]]]: Feedback string and updated playground state.
+    """
     system_error_feedback = ""
     pg_dict_original = copy.deepcopy(pg_dict_input)
     transformed_dict = {}
@@ -281,12 +364,26 @@ def action_from_response(pg_dict_input, original_response_dict):
 
 
 def env_create(
-    pg_row_num=5,
-    pg_column_num=5,
-    box_num_low_bound=2,
-    box_num_upper_bound=2,
-    color_list=["blue", "red", "green", "purple", "orange"],
-):
+    pg_row_num: int = 5,
+    pg_column_num: int = 5,
+    box_num_low_bound: int = 2,
+    box_num_upper_bound: int = 2,
+    color_list: List[str] = ["blue", "red", "green", "purple", "orange"],
+) -> Dict[str, List[str]]:
+    """
+    Creates a randomized environment state for the playground.
+
+    Args:
+        pg_row_num (int): Number of rows in the playground.
+        pg_column_num (int): Number of columns in the playground.
+        box_num_low_bound (int): Minimum number of boxes per color.
+        box_num_upper_bound (int): Maximum number of boxes per color.
+        color_list (List[str]): List of colors for boxes and targets.
+
+    Returns:
+        Dict[str, List[str]]: Initial state of the playground.
+    """
+
     # pg_dict records the items in each square over steps, here in the initial setting, we randomly assign items into each square
     pg_dict = {}
     for i in range(pg_row_num):

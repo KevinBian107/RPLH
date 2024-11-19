@@ -8,17 +8,42 @@ import json
 import re
 import sys
 import os
+from typing import Dict, List, Tuple, Union
+import pandas as pd
 
 
 def run_exp(
-    Saving_path,
-    pg_row_num,
-    pg_column_num,
-    iteration_num,
-    query_time_limit,
-    dialogue_history_method="_w_only_state_action_history",
-):
-    """Saving path info"""
+    Saving_path: str,
+    pg_row_num: int,
+    pg_column_num: int,
+    iteration_num: int,
+    query_time_limit: int,
+    dialogue_history_method: str = "_w_only_state_action_history",
+) -> Tuple[
+    List[str],
+    List[str],
+    List[Dict],
+    List[int],
+    str,
+    int,
+    str,
+]:
+    """
+    Runs the experiment for a multi-agent environment.
+
+    Args:
+        Saving_path (str): Path to save results.
+        pg_row_num (int): Number of rows in the grid.
+        pg_column_num (int): Number of columns in the grid.
+        iteration_num (int): Iteration number of the environment.
+        query_time_limit (int): Maximum number of queries allowed.
+        dialogue_history_method (str): Method to handle dialogue history.
+
+    Returns:
+        Tuple: Contains lists of user prompts, responses, states, token counts,
+        success/failure status, query index, and saving path result.
+    """
+
     Saving_path_result = (
         Saving_path
         + f"/env_pg_state_{pg_row_num}_{pg_column_num}/pg_state{iteration_num}/{dialogue_history_method}_{model_name}"
@@ -40,7 +65,7 @@ def run_exp(
         "token_num_count_list": [],
         "hca_agent_response_list": [],
         "pg_dict": None,  # For initial environment state
-        "env_step": 0,
+        "env_step": -1,
     }
 
     # Load initial environment state
@@ -59,22 +84,15 @@ def run_exp(
     with open("conversation.txt", "a") as f:
         f.truncate(0)
 
-    # save initial sates
-    # with open(
-    #     Saving_path_result
-    #     + "/pg_state"
-    #     + "/pg_state"
-    #     + str(data_dict["env_step"])
-    #     + ".json",
-    #     "w",
-    # ) as f:
-    #     print("\n SAVE INITIAL STATE \n")
-    #     json.dump(pg_dict, f)
-
     print(f"query_time_limit: {query_time_limit}")
     for index_query_times in range(query_time_limit):
         # -----------------------------------------ONE HCA AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
         for a in range(num_agent):
+            result = {key: {"targets": sum(1 for item in items if "target" in item), "boxes": sum(1 for item in items if "box" in item)} for key, items in data_dict['pg_dict'].items()}
+            result_df = pd.DataFrame(result).T
+            print(result_df)
+            print(result_df.sum(axis=0))
+            
             print(
                 f"-------###-------###-------###-------HCA_AGENT_{a}-------###-------###-------###-------"
             )
@@ -82,7 +100,9 @@ def run_exp(
             """FOR NUM_AGENT, ITERATIVELY DO"""
 
             HCA_agent_location = list(data_dict["pg_dict"].keys())[a]
-            print(f"HCA Agent {a} is at: {HCA_agent_location}")
+            print(f"HCA Agent {a} is at: [{HCA_agent_location}]")
+            
+            data_dict["env_step"] += 1
 
             # sate0 is initial state
             with open(
@@ -95,8 +115,6 @@ def run_exp(
             ) as f:
                 print("\n SAVE INITIAL STATE \n")
                 json.dump(data_dict["pg_dict"], f)
-
-            data_dict["env_step"] += 1
 
             # at second iter, should have more info, get available actions
             state_update_prompt = state_update_func(
@@ -130,9 +148,11 @@ def run_exp(
             match = re.search(r"{.*}", raw_response, re.DOTALL)
             if match:
                 response = match.group()
+                HCA_response = response
             if response[0] == "{" and response[-1] == "}":
                 response, token_num_count_list_add = with_action_syntactic_check_func(
                     data_dict["pg_dict"],
+                    response,
                     response,
                     [user_prompt_1],
                     [],
@@ -261,10 +281,10 @@ def run_exp(
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
 
                     # -----------------------------------------RECONSTRUCT MESSAGES-----------------------------------------#
-                    if data_local["local_agent_response_list_dir"]["feedback1"] != "": # if not I agree
-                        data_local["local_agent_response_list_dir"][
-                            "feedback1"
-                        ] += """
+                    if (
+                        data_local["local_agent_response_list_dir"]["feedback1"] != ""
+                    ):  # if not I agree
+                        data_local["local_agent_response_list_dir"]["feedback1"] += """
                             This is the feedback from local agents.
                             If you find some errors in your previous plan, try to modify it.
                             Otherwise, output the same plan as before.
@@ -278,30 +298,36 @@ def run_exp(
                     print(
                         f"-------###-------###-------###-------JUDGE_ON_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
                     )
-                    local_response = data_local["local_agent_response_list_dir"][
-                        "feedback1"
-                    ]
+                    local_response = data_local["local_agent_response_list_dir"]["feedback1"]
                     cen_response = data_dict["user_prompt_list"][-1]
-                    judge_prompt = judge_propmt_func(
+                    
+                    # print(f"LOCAL RESPONSE: {local_response}")
+                    # print(f"CEN RESPONSE: {cen_response}")
+                    
+                    judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
-                    messages = judge_message_construct_func([cen_response, local_response, judge_prompt])
+                    messages = judge_message_construct_func(
+                        [judge_prompt]
+                    )
                     response_judge, token_num_count = LLaMA_response(
                         messages, model_name
                     )
+                    
+                    # print(response_judge)
 
                     # -----------------------------------------SYNTACTIC CHECK FOR JUDGE-----------------------------------------#
                     data_dict["token_num_count_list"].append(token_num_count)
                     match = re.search(r"{.*}", response_judge, re.DOTALL)
+                    # match not right
                     if match:
                         response = match.group()
-
-                        # print(response)
 
                         response, token_num_count_list_add = (
                             with_action_syntactic_check_func(
                                 data_dict["pg_dict"],
-                                response_judge,
+                                response,
+                                HCA_response, # fallback response
                                 [judge_prompt],
                                 [response],
                                 model_name,
@@ -310,10 +336,9 @@ def run_exp(
                             )
                         )
                         data_dict["token_num_count_list"] = (
-                            data_dict["token_num_count_list"]
-                            + token_num_count_list_add
+                            data_dict["token_num_count_list"] + token_num_count_list_add
                         )
-                        print(f"response: {response}")
+                        # print(f"response: {response}")
 
                     print(f"JUDGE MODIFIED:\n {response}")
                 else:
@@ -323,8 +348,8 @@ def run_exp(
 
                 # after syntactic checks
                 with open("conversation.txt", "a") as f:
-                    message = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_judge} \n \n"
-                    f.write(message)
+                    messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_judge} \n \n"
+                    f.write(messages)
 
             # -----------------------------------------EXECUTION OF ACTION AT EACH HCA AGENT LEVEL-----------------------------------------#
             print(
@@ -350,17 +375,6 @@ def run_exp(
                 print("\n SAVE RESPONSE \n")
                 json.dump(original_response_dict, f)
 
-            # with open(
-            #     Saving_path_result
-            #     + "/pg_state"
-            #     + "/pg_state"
-            #     + str(data_dict["env_step"])
-            #     + ".json",
-            #     "w",
-            # ) as f:
-            #     print("\n SAVE NEW STATE \n")
-            #     json.dump(data_dict["pg_dict"], f)
-
             with open(
                 Saving_path_result
                 + "/dialogue_history"
@@ -378,7 +392,7 @@ def run_exp(
                 )
                 if system_error_feedback != "":
                     print(system_error_feedback)
-                pg_dict = pg_dict_returned
+                data_dict["pg_dict"] = pg_dict_returned
 
             except:
                 success_failure = "Hallucination of wrong plan"
@@ -386,13 +400,16 @@ def run_exp(
 
             # need to append new states to state list
             data_dict["pg_state_list"].append(data_dict["pg_dict"])
+            
+            
+            # -----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
             count = 0
             for ky, value in data_dict["pg_dict"].items():
                 count += len(value)
             if count == 0:
                 break
-
-    # -----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
+    
+    # -----------------------------------------TASK SUCCESS OUT-----------------------------------------#
     if index_query_times < query_time_limit - 1:
         success_failure = "success"
     else:
@@ -420,7 +437,7 @@ saving_path = Code_dir_path + "/multi-agent-env"
 pg_row_num = 2
 pg_column_num = 2
 iteration_num = 0
-query_time_limit = 10 # now it's iteration
+query_time_limit = 10  # now it's iteration
 model_name = "qwen2.5:14b-instruct-q3_K_L"
 print(f"-------------------Model name: {model_name}-------------------")
 
