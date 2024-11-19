@@ -1,2 +1,3 @@
 __pycache__
 multi-agent-env/
+*.ipynb_checkpoints

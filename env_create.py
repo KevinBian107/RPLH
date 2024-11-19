@@ -3,9 +3,7 @@
 """Working on changing environment to self charcterized env, also working on visualization"""
 
 from prompt import *
-from LLM import *
-from sre_constants import error
-import random
+from env_create import *
 import os
 import json
 import re
