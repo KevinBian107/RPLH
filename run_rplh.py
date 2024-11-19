@@ -12,7 +12,7 @@ def run_exp(
     Saving_path,
     pg_row_num,
     pg_column_num,
-    iteration_num,
+    iteration_num, 
     query_time_limit,
     dialogue_history_method="_w_only_state_action_history",
 ):
@@ -50,7 +50,7 @@ def run_exp(
         print(pg_dict)
         data_dict["pg_dict"] = pg_dict
 
-    num_agent = pg_row_num + pg_column_num
+    num_agent = pg_row_num * pg_column_num
     data_dict["pg_state_list"].append(data_dict["pg_dict"])
 
     with open("conversation.txt", "a") as f:
@@ -103,7 +103,7 @@ def run_exp(
             ) as f:
                 f.write(data_dict["user_prompt_list"][-1])
 
-            # -----------------------------------------SYNTACTIC CHECK-----------------------------------------#
+            # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
             match = re.search(r"{.*}", raw_response, re.DOTALL)
             if match:
@@ -166,6 +166,7 @@ def run_exp(
             data_local["agent_dict"] = json.loads(response)
 
             for local_agent_row_i in range(pg_row_num):
+                
                 for local_agent_column_j in range(pg_column_num):
                     print(
                         f"-------###-------###-------###-------LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
@@ -404,7 +405,7 @@ pg_row_num = 2
 pg_column_num = 2
 iteration_num = 2
 query_time_limit = 10
-model_name = "qwen2.5:14b-instruct-q3_K_L"
+model_name = "llama3.2:latest"#"qwen2.5:14b-instruct-q3_K_L"
 print(f"-------------------Model name: {model_name}-------------------")
 
 #'_w_all_dialogue_history', '_w_compressed_dialogue_history', '_w_only_state_action_history'
