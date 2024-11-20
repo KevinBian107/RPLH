@@ -19,10 +19,29 @@ GOAL_RULES = f"""You are an agentin a grid-like field to move colored boxes.
                 When planning for action, remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop.
                 Avoid being stuck in action loops.
                 Additionally, when there is a box still in the grid (i.e. the state space contains {{"0.5_0.5": ["box_red"]}}), then the agent in this grid (Agent[0.5, 0.5]) must make an action in the next step.
-                Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5]), Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
+                Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5]), Agent[0.5, 1.5]":"move(box_blue, target_blue)"}}.
                 Include an agent only if it has a task next. No agent name should be given if the agent does not have a task next.
-                You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5]),  Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
+                You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5]),  Agent[0.5, 1.5]":"move(box_blue, target_blue)"}}.
                 """
+
+# Few shot learning
+EXAMPLE_STATE_ACTION = f'''
+State: {{"0.5_0.5": ["target_blue", "box_blue", "target_orange"], "0.5_1.5": ["box_orange", "target_green", "target_blue"], "1.5_0.5": ["box_green", "target_green", "box_green"], "1.5_1.5": ["box_blue"]}}
+Action: {{"Agent[0.5, 0.5]":"move(box_blue, target_blue)", "Agent[0.5, 1.5]":"move(box_orange, square[0.5, 0.5])", "Agent[1.5, 0.5]":"move(box_green, target_green)", "Agent[1.5, 1.5]":"move(box_blue, square[0.5, 1.5])"}}
+
+State: {{"0.5_0.5": ["target_orange", "box_orange"], "0.5_1.5": ["target_green", "target_blue", "box_blue"], "1.5_0.5": ["box_green"], "1.5_1.5": []}}
+Action: {{"Agent[0.5, 0.5]":"move(box_orange, target_orange)", "Agent[0.5, 1.5]":"move(box_blue, target_blue)", "Agent[1.5, 0.5]":"move(box_green, square[0.5, 0.5])"}}
+
+State: {{"0.5_0.5": ["box_green"], "0.5_1.5": ["target_green"], "1.5_0.5": [], "1.5_1.5": []}}
+Action: {{"Agent[0.5, 0.5]":"move(box_green, square[0.5, 1.5]"}}
+
+State: {{"0.5_0.5": [], "0.5_1.5": ["box_green", "target_green"], "1.5_0.5": [], "1.5_1.5": []}}
+Action: {{"Agent[0.5, 1.5]":"move(box_green, target_green"}}
+'''
+
+EXMAPLE_JUDGE = f'''
+
+'''
 
 def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -> str:
     """
@@ -41,7 +60,7 @@ def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -
     """
 
     judge_prompt = f"""
-        You a a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
+        You are a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
         You personally do not need to make any moves but only serve as the decision maker to judge others' moves.
         
         The goals and rules of this environment are:
@@ -60,7 +79,7 @@ def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -
 
 def LLM_summarize_func(
     state_action_prompt_next_initial: str,
-    model_name: str = "qwen2.5:14b-instruct-q3_K_L",
+    model_name: str = "llama3.2:3b-instruct-q5_K_M",
 ) -> str:
     """
     Summarizes a lengthy prompt for more concise input to the model.

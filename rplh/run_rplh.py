@@ -439,7 +439,7 @@ pg_row_num = 2
 pg_column_num = 2
 iteration_num = 0
 query_time_limit = 10  # now it's iteration
-model_name = "qwen2.5:14b-instruct-q3_K_L"
+model_name = "llama3.2:3b-instruct-q5_K_M"
 print(f"-------------------Model name: {model_name}-------------------")
 
 #'_w_all_dialogue_history', '_w_compressed_dialogue_history', '_w_only_state_action_history'
