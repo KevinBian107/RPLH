@@ -11,6 +11,7 @@ from typing import Union
 
 CHECK_ITER = 10
 
+
 def is_valid_json(response: str) -> bool:
     """
     Checks if a response string is in valid JSON format.
@@ -205,9 +206,7 @@ def with_action_syntactic_check_func(
     while iteration_num < CHECK_ITER:
 
         # for action validity check, it must be in json format
-        feedback = action_checker(
-            response, pg_dict_input, is_judge
-        )
+        feedback = action_checker(response, pg_dict_input, is_judge)
 
         # gate loop: no feedback + no error -> pass
 

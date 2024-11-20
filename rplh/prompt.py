@@ -113,7 +113,7 @@ def rplh_prompt_func(
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
     dialogue_history_list = data["dialogue_history_list"]
-    print(f'HISTORY METHOD: {dialogue_history_method}')
+    print(f"HISTORY METHOD: {dialogue_history_method}")
 
     if len(pg_state_list) - len(response_total_list) != 1:
         raise ValueError("state and response list do not match")

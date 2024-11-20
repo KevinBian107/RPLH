@@ -164,11 +164,11 @@ def run_exp(
                 response, token_num_count_list_add = with_action_syntactic_check_func(
                     data_dict["pg_dict"],
                     response,
-                    response,
                     [user_prompt_1],
                     [],
                     model_name,
                     "_w_all_dialogue_history",
+                    False,
                 )
                 data_dict["token_num_count_list"] = (
                     data_dict["token_num_count_list"] + token_num_count_list_add
@@ -349,12 +349,12 @@ def run_exp(
                         data_dict["token_num_count_list"] = (
                             data_dict["token_num_count_list"] + token_num_count_list_add
                         )
-                    
+
                     # after syntactic checks
                     with open("conversation.txt", "a") as f:
                         messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_judge} \n \n"
                         f.write(messages)
-                    
+
                     print(f"JUDGE MODIFIED:\n {response}")
 
                 else:
