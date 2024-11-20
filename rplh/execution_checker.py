@@ -25,7 +25,7 @@ def is_valid_json(response: str) -> bool:
     try:
         json.loads(response)
         return True
-    except ValueError:
+    except: # all error return false
         return False
 
 
@@ -72,6 +72,8 @@ def action_checker(response: str, pg_dict_input: list, is_judge: bool) -> str:
     Returns:
         str: Feedback about any invalid actions. An empty string if all actions are valid.
     """
+    
+    # need to ensure this must be json
     original_response_dict = json.loads(response)
     pg_dict_original = copy.deepcopy(pg_dict_input)
     transformed_dict = {}

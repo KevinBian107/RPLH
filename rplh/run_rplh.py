@@ -13,7 +13,6 @@ from typing import Dict, List, Tuple, Union
 import pandas as pd
 from render_func import *
 
-
 def run_exp(
     Saving_path: str,
     pg_row_num: int,
@@ -68,6 +67,7 @@ def run_exp(
         "hca_agent_response_list": [],
         "pg_dict": None,  # For initial environment state
         "env_step": -1,
+        "agree_num":0,
     }
 
     # Load initial environment state
@@ -290,7 +290,12 @@ def run_exp(
                                 "feedback1"
                             ] += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
-
+                            
+                            data_dict['agree_num'] += 1
+                            
+                            if data_dict["agree_num"] >= (pg_column_num + pg_row_num)//2:
+                                break
+                            
                             # agree no judge, use HCA response diretcly, avoid error.
                             continue
 
@@ -410,6 +415,8 @@ def run_exp(
 
             # need to append new states to state list
             data_dict["pg_state_list"].append(data_dict["pg_dict"])
+            
+            data_dict['agree_num'] = 0
 
             # -----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
             count = 0
