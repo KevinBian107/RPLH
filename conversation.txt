@@ -1,4 +1,3 @@
-
 -------###-------###-------###--------------###-------###-------###-------
 ALL STATE STORAGE LENGTH: 1 
 ------###------###------HCA_0------###------###------: 
@@ -43,4 +42,3 @@ Given the current states and the proactive attitudes towards achieving the goal:
  I Agree
 
 {"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_purple, square[0.5, 0.5])"} 
- 
