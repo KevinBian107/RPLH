@@ -89,12 +89,12 @@ python env_create.py
 
 Then running main inference by:
 ```
-python run_rplh.py
+python rplh/run_rplh.py
 ```
 
 To visualize the reasoning process:
 ```
-python vis_conversation.py
+python rplh/vis_conversation.py
 ```
 
 ## Adapting on:
