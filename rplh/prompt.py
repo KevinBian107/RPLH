@@ -20,9 +20,9 @@ GOAL_RULES = f"""You are an agentin a grid-like field to move colored boxes.
                 Avoid being stuck in action loops.
                 Additionally, when there is a box still in the grid (i.e. the state space contains {{"0.5_0.5": ["box_red"]}}), then the agent in this grid (Agent[0.5, 0.5]) have to make an action in the next step.
                 Again, if there is a box in the grid, the corresponding agent in the grid has to make an action in this step.
-                Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5]), Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
+                Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
                 Include an agent only if it has a task next. No agent name should be given if the agent does not have a task next.
-                You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5]),  Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
+                You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
                 """
 
 def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -> str:
@@ -210,7 +210,7 @@ def rplh_prompt_func(
             Please use thf ollowing format:
             - hallucination of future {N} steps...
 
-            Based on this, generate the action plan for the immediate next step for each agent and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5]), Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
+            Based on this, generate the action plan for the immediate next step for each agent and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[0.5, 1.5]":"move(box_blue, target_blue)"}}.
             Remanber to assign action to your self as well.
             Now, plan the next step:
             """
@@ -322,7 +322,7 @@ def dialogue_func(
 
                 2. You would recieve an plan from the other central planner, please evaluate the given plan and give critical feedbacks.
 
-            You can imagine first about how you would plan these actions and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])",  Agent[0.5, 1.5]": "move(box_blue, target_blue)}}.
+            You can imagine first about how you would plan these actions and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])",  Agent[0.5, 1.5]":"move(box_blue, target_blue)"}}.
             Remanber to assign action to your self as well.
 
             The other central planner's current action plan is giving as: {{{central_response}}}.
@@ -352,7 +352,7 @@ def input_reprompt_func(state_update_prompt: str) -> str:
 
     user_reprompt = f"""
     Finished! The updated state is as follows(combined targets and boxes with the same color have been removed): {state_update_prompt}
-    The output should be like json format like: {{Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]),  Agent[0.5, 1.5]": "move(box_blue, target_blue)}}.
+    The output should be like json format like: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[0.5, 1.5]":"move(box_blue, target_blue)"}}.
     If no action for one agent in the next step, just do not include its action in the output.
     Also remember at most one action for each agent in each step.
     Next step output:
@@ -455,7 +455,7 @@ def json_check_message_construct_func(response: str) -> List[Dict[str, str]]:
         List[Dict[str, str]]: Message sequence to fix the JSON.
     
     Notes:
-        Must give example or else LLM give {"Agent0_50_5": "move(box_green, target_green)", "Agent1_50_5": "move(box_red, target_red)"}
+        Must give example or else LLM give {"Agent0_50_5":"move(box_green, target_green)", "Agent1_50_5":"move(box_red, target_red)"}
     """
 
     messages = [
