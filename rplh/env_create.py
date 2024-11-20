@@ -195,6 +195,8 @@ def with_action_syntactic_check_func(
     iteration_num = 0
     token_num_count_list_add = []
     while iteration_num < 6:
+        
+        # for action validity check, it must be in json format
         valid = is_valid_json(response)
         count = 0
         while not valid:
@@ -278,17 +280,37 @@ def with_action_syntactic_check_func(
             raise ValueError(f"The response in wrong json format: {response}")
 
         if feedback != "":
-            feedback += "Please replan for all the agents again with the same ouput format. The output should have the same json format {Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}. Do not explain, just directly output json directory. Your response:"
+            feedback += f"""Please replan for all the agents again with the same ouput format. The output should have the same json format {{"Agent0_50_5": "move(box_green, target_green)", "Agent1_50_5": "move(box_red, target_red)"}}.
+            Do not explain, just directly output json directory. Remenber to output in json format Your response:"""
+            
             print("----------Action Availability Syntactic Check----------")
             # print(f"Response original: {response}")
             # print(f"Feedback: {feedback}")
+            
             user_prompt_list.append(feedback)
             messages = message_construct_func(
                 user_prompt_list, response_total_list, dialogue_history_method
-            )  # message construction
+            )
+            
             print(f"Length of messages {len(messages)}")
             response, token_num_count = LLaMA_response(messages, model_name)
             token_num_count_list_add.append(token_num_count)
+            
+            valid = is_valid_json(response)
+            count = 0
+            while not valid:
+                count += 1
+                print(f"----------JSON Check {count} TIME IN ACTION CHECK----------")
+                response, token_num_count = LLaMA_response(messages, model_name)
+                
+                match = re.search(r"{.*}", response, re.DOTALL)
+                if match:
+                    response = match.group()
+                    token_num_count_list_add.append(token_num_count)
+                    valid = is_valid_json(response)
+            
+            response_total_list.append(response)
+            
             # print(f"Response new: {response}\n")
             if response == "Out of tokens":
                 return response, token_num_count_list_add
