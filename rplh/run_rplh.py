@@ -292,7 +292,7 @@ def run_exp(
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
 
                             # agree no judge, use HCA response diretcly, avoid error.
-                            break
+                            continue
 
                     # -----------------------------------------RECONSTRUCT MESSAGES-----------------------------------------#
                     if (

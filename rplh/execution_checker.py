@@ -2,6 +2,7 @@
 
 from prompt import *
 from env_create import *
+from LLM import *
 import json
 import re
 import copy
@@ -48,8 +49,6 @@ def json_checker(
         print(f"----------JSON CHECKER PERFORMING {count} NUMBER OF TIMES----------")
         messages = json_check_message_construct_func(response)
         response, token_num_count = LLaMA_response(messages, model_name)
-        
-        print(response)
 
         match = re.search(r"{.*}", response, re.DOTALL)
         if match:
