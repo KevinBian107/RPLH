@@ -197,7 +197,6 @@ def with_action_syntactic_check_func(
     while iteration_num < 6:
         valid = is_valid_json(response)
         count = 0
-        print(response)
         while not valid:
             count += 1
             print(f"----------JSON Check {count} TIME----------")
@@ -212,10 +211,10 @@ def with_action_syntactic_check_func(
                 token_num_count_list_add.append(token_num_count)
                 valid = is_valid_json(response)
             
-            if count == 6:
-                # if judge can't make right choice, fall back to HCA
-                response = alt_response
-                break
+            # if count == 6:
+            #     # if judge can't make right choice, fall back to HCA
+            #     response = alt_response
+            #     break
 
         response_total_list.append(response)
         # print(iteration_num, response_total_list)
@@ -276,12 +275,11 @@ def with_action_syntactic_check_func(
                         # print(f"Error, Iteration Num: {iteration_num}, Key: {key}, Value1: {value[0]}, Value2: {value[1]}")
                         feedback += f"Your assigned task for {key[0]}_{key[1]} is not in the doable action list; "
         except:
-            raise error(f"The response in wrong json format: {response}")
-            feedback = "Your assigned plan is not in the correct json format as before. If your answer is empty dict, please check whether you miss to move box into the same colored target like move(box_blue, target_blue)"
+            raise ValueError(f"The response in wrong json format: {response}")
 
         if feedback != "":
             feedback += "Please replan for all the agents again with the same ouput format. The output should have the same json format {Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}. Do not explain, just directly output json directory. Your response:"
-            print("----------Syntactic Check----------")
+            print("----------Action Availability Syntactic Check----------")
             # print(f"Response original: {response}")
             # print(f"Feedback: {feedback}")
             user_prompt_list.append(feedback)

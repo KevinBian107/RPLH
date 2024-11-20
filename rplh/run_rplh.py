@@ -10,6 +10,7 @@ import sys
 import os
 from typing import Dict, List, Tuple, Union
 import pandas as pd
+from render_func import *
 
 
 def run_exp(
@@ -18,7 +19,7 @@ def run_exp(
     pg_column_num: int,
     iteration_num: int,
     query_time_limit: int,
-    dialogue_history_method: str = "_w_only_state_action_history",
+    dialogue_history_method: str,
 ) -> Tuple[
     List[str],
     List[str],
@@ -85,6 +86,9 @@ def run_exp(
         f.truncate(0)
 
     print(f"query_time_limit: {query_time_limit}")
+    
+    render_graph_terminal_popup(data_dict["pg_dict"])
+    
     for index_query_times in range(query_time_limit):
         # -----------------------------------------ONE HCA AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
         for a in range(num_agent):
@@ -130,8 +134,8 @@ def run_exp(
             messages = message_construct_func(
                 [user_prompt_1], [], dialogue_history_method
             )
+            
             raw_response, token_num_count = LLaMA_response(messages, model_name)
-            # print(response)
 
             # save user prompt
             with open(
@@ -356,14 +360,13 @@ def run_exp(
             print(
                 "-------###-------###-------###-------EXECUTION-------###-------###-------###-------"
             )
-            # print(data_dict["pg_dict"])
 
             data_dict["response_total_list"].append(response)
             original_response_dict = json.loads(
                 data_dict["response_total_list"][index_query_times]
             )
-
-            # print(original_response_dict)
+            
+            render_map_terminal_popup(data_dict["pg_dict"], [original_response_dict])
 
             with open(
                 Saving_path_result
@@ -457,7 +460,7 @@ print(f"-------------------Model name: {model_name}-------------------")
     pg_column_num,
     iteration_num,
     query_time_limit,
-    dialogue_history_method="_w_all_dialogue_history",
+    dialogue_history_method="_w_compressed_dialogue_history",
 )
 
 with open(Saving_path_result + "/token_num_count.txt", "w") as f:
