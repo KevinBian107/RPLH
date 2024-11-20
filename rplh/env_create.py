@@ -288,14 +288,15 @@ def with_action_syntactic_check_func(
             # print(f"Feedback: {feedback}")
             
             user_prompt_list.append(feedback)
-            messages = message_construct_func(
-                user_prompt_list, response_total_list, dialogue_history_method
+            messages = json_check_message_construct_func(
+                user_prompt_list
             )
             
             print(f"Length of messages {len(messages)}")
             response, token_num_count = LLaMA_response(messages, model_name)
             token_num_count_list_add.append(token_num_count)
             
+            # what if after json check, action is not right?
             valid = is_valid_json(response)
             count = 0
             while not valid:

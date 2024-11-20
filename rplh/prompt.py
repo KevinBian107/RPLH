@@ -444,7 +444,7 @@ def judge_message_construct_func(user_prompt_list: List[str]) -> List[Dict[str, 
     return messages
 
 
-def json_check_message_construct_func(response: str) -> List[Dict[str, str]]:
+def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, str]]:
     """
     Constructs a message for validating and fixing JSON format in a response.
 
@@ -465,11 +465,15 @@ def json_check_message_construct_func(response: str) -> List[Dict[str, str]]:
         },
         {
             "role": "user",
-            "content": f"""Please fix the Json message in here {response} and give only this JSON as output.
+            "content": f"""Please fix the Json message in here {user_prompt_list} and give only this JSON as output.
                             Notice that we are using the environment where the rules and goals of the environment is {GOAL_RULES}
                             When asked to give json format, specificy it strictly in JSON format:
                             {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}.
                             """,
         },
     ]
+    
+    for i in range(len(user_prompt_list)):
+            messages.append({"role": "user", "content": user_prompt_list[i]})
+            
     return messages
