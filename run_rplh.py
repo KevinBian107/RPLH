@@ -143,7 +143,7 @@ def run_exp(
             ) as f:
                 f.write(data_dict["user_prompt_list"][-1])
 
-            # -----------------------------------------SYNTACTIC CHECK-----------------------------------------#
+            # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
             match = re.search(r"{.*}", raw_response, re.DOTALL)
             if match:
@@ -208,6 +208,7 @@ def run_exp(
             data_local["agent_dict"] = json.loads(response)
 
             for local_agent_row_i in range(pg_row_num):
+                
                 for local_agent_column_j in range(pg_column_num):
                     print(
                         f"-------###-------###-------###-------LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
