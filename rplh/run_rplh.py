@@ -20,6 +20,7 @@ def run_exp(
     iteration_num: int,
     query_time_limit: int,
     dialogue_history_method: str,
+
 ) -> Tuple[
     List[str],
     List[str],
@@ -88,7 +89,7 @@ def run_exp(
     print(f"query_time_limit: {query_time_limit}")
     
     render_graph_terminal_popup(data_dict["pg_dict"])
-    
+
     for index_query_times in range(query_time_limit):
         # -----------------------------------------ONE HCA AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
         for a in range(num_agent):
@@ -461,6 +462,7 @@ print(f"-------------------Model name: {model_name}-------------------")
     iteration_num,
     query_time_limit,
     dialogue_history_method="_w_compressed_dialogue_history",
+
 )
 
 with open(Saving_path_result + "/token_num_count.txt", "w") as f:

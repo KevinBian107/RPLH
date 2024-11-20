@@ -83,7 +83,6 @@ def LLM_summarize_func(
     print("SUMMARIZING")
     return response
 
-
 def rplh_prompt_func(
     state_update_prompt: str,
     data: Dict,
@@ -214,7 +213,6 @@ def rplh_prompt_func(
             Remanber to assign action to your self as well.
             Now, plan the next step:
             """
-    
     return HCA_prompt
 
 
@@ -394,10 +392,12 @@ def message_construct_func(
         }
     ]
 
+
     if f"{dialogue_history_method}" in (
         "_w_all_dialogue_history",
         "_w_compressed_dialogue_history"):
         
+
         # print('length of user_prompt_list', len(user_prompt_list))
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
@@ -443,7 +443,6 @@ def judge_message_construct_func(user_prompt_list: List[str]) -> List[Dict[str, 
 
     return messages
 
-
 def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, str]]:
     """
     Constructs a message for validating and fixing JSON format in a response.
@@ -475,5 +474,4 @@ def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, s
     
     for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
-            
     return messages

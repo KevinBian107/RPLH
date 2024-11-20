@@ -5,7 +5,6 @@ import copy
 import plotly.graph_objects as go
 import plotly.io as pio
 
-
 def render_graph_terminal_popup(box_map):
     fig = render_graph(box_map=trans_info_box(box_map))
     
