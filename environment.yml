@@ -31,4 +31,5 @@ dependencies:
       - openai
       - tiktoken
       - black
+      - plotly
 
