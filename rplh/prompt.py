@@ -20,10 +20,12 @@ GOAL_RULES = f"""You are an agentin a grid-like field to move colored boxes.
                 Avoid being stuck in action loops.
                 Additionally, when there is a box still in the grid (i.e. the state space contains {{"0.5_0.5": ["box_red"]}}), then the agent in this grid (Agent[0.5, 0.5]) have to make an action in the next step.
                 Again, if there is a box in the grid, the corresponding agent in the grid has to make an action in this step.
+                One agent can make any numbers of action if needed (i.e. {{"Agent[1.5, 1.5]":"move(box_blue, square[0.5, 1.5])","Agent[1.5, 1.5]": "move(box_green, target_green)"}}).
                 Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
                 Include an agent only if it has a task next. No agent name should be given if the agent does not have a task next.
                 You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
                 """
+
 
 def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -> str:
     """
@@ -36,7 +38,7 @@ def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -
 
     Returns:
         str: The constructed prompt for the judge.
-    
+
     Note:
         Most important!!! Prompting is very important, make sure to give a accurate prompting.
     """
@@ -83,6 +85,7 @@ def LLM_summarize_func(
     print("SUMMARIZING")
     return response
 
+
 def rplh_prompt_func(
     state_update_prompt: str,
     data: Dict,
@@ -110,8 +113,7 @@ def rplh_prompt_func(
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
     dialogue_history_list = data["dialogue_history_list"]
-    
-    print(dialogue_history_method)
+    print(f"HISTORY METHOD: {dialogue_history_method}")
 
     if len(pg_state_list) - len(response_total_list) != 1:
         raise ValueError("state and response list do not match")
@@ -126,7 +128,7 @@ def rplh_prompt_func(
         "_w_compressed_dialogue_history",
         "_w_all_dialogue_history",
     ):
-        
+
         # first iteration no summary
         if dialogue_history_method == "_w_only_state_action_history":
             state_action_prompt = ""
@@ -392,11 +394,10 @@ def message_construct_func(
         }
     ]
 
-
     if f"{dialogue_history_method}" in (
         "_w_all_dialogue_history",
-        "_w_compressed_dialogue_history"):
-        
+        "_w_compressed_dialogue_history",
+    ):
 
         # print('length of user_prompt_list', len(user_prompt_list))
         for i in range(len(user_prompt_list)):
@@ -406,7 +407,7 @@ def message_construct_func(
             #     messages.append(
             #         {"role": "assistant", "content": response_total_list[i]}
             #     )
-            
+
     elif f"{dialogue_history_method}" in (
         "_wo_any_dialogue_history",
         "_w_only_state_action_history",
@@ -443,6 +444,7 @@ def judge_message_construct_func(user_prompt_list: List[str]) -> List[Dict[str, 
 
     return messages
 
+
 def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, str]]:
     """
     Constructs a message for validating and fixing JSON format in a response.
@@ -452,10 +454,29 @@ def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, s
 
     Returns:
         List[Dict[str, str]]: Message sequence to fix the JSON.
-    
+
     Notes:
         Must give example or else LLM give {"Agent0_50_5":"move(box_green, target_green)", "Agent1_50_5":"move(box_red, target_red)"}
     """
+
+    EX = f""" Here are three wrong and correct json example pairs that you can learn from:
+    
+    Wrong format (missing quotation mark in the start):
+        {{Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}
+    Correct format:
+        {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}
+    
+    Wrong format (missing bracket in the end)
+        {{"Agent[1.5, 1.5]":"move(box_green, target_green])", "Agent[1.5, 1.5]":"move(box_purple, square[0.5, 0.5]"}}
+    Correct format:
+        {{"Agent[1.5, 1.5]":"move(box_green, target_green])", "Agent[1.5, 1.5]":"move(box_purple, square[0.5, 0.5])"}}
+    
+    Wrong format (missing multiple quotation marks):
+        {{"Agent[0.5, 1.5]":"move(box_red, square[1.5, 1.5])", Agent[0.5, 0.5]":move(box_blue, target_blue])"}}
+    Correct format:
+        {{"Agent[0.5, 1.5]":"move(box_red, square[1.5, 1.5])", "Agent[0.5, 0.5]":"move(box_blue, target_blue])"}}
+        
+        """
 
     messages = [
         {
@@ -465,13 +486,11 @@ def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, s
         {
             "role": "user",
             "content": f"""Please fix the Json message in here {user_prompt_list} and give only this JSON as output.
-                            Notice that we are using the environment where the rules and goals of the environment is {GOAL_RULES}
-                            When asked to give json format, specificy it strictly in JSON format:
-                            {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}.
-                            """,
+                            You should not change the content of the message that is  passed in.
+                            When asked to give json format, specificy it strictly in JSON format. Here is some example of corerct and wrong json pairs: {EX}.
+                            Now the fixed json format message is:""",
         },
     ]
-    
-    for i in range(len(user_prompt_list)):
-            messages.append({"role": "user", "content": user_prompt_list[i]})
+    messages.append({"role": "user", "content": user_prompt_list[-1]})
+
     return messages
