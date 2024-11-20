@@ -3,6 +3,7 @@
 from LLM import *
 from prompt import *
 from env_create import *
+from execution_checker import *
 import os
 import json
 import re
@@ -20,7 +21,6 @@ def run_exp(
     iteration_num: int,
     query_time_limit: int,
     dialogue_history_method: str,
-
 ) -> Tuple[
     List[str],
     List[str],
@@ -87,17 +87,23 @@ def run_exp(
         f.truncate(0)
 
     print(f"query_time_limit: {query_time_limit}")
-    
+
     render_graph_terminal_popup(data_dict["pg_dict"])
 
     for index_query_times in range(query_time_limit):
         # -----------------------------------------ONE HCA AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
         for a in range(num_agent):
-            result = {key: {"targets": sum(1 for item in items if "target" in item), "boxes": sum(1 for item in items if "box" in item)} for key, items in data_dict['pg_dict'].items()}
+            result = {
+                key: {
+                    "targets": sum(1 for item in items if "target" in item),
+                    "boxes": sum(1 for item in items if "box" in item),
+                }
+                for key, items in data_dict["pg_dict"].items()
+            }
             result_df = pd.DataFrame(result).T
             print(result_df)
             print(result_df.sum(axis=0))
-            
+
             print(
                 f"-------###-------###-------###-------HCA_AGENT_{a}-------###-------###-------###-------"
             )
@@ -106,7 +112,7 @@ def run_exp(
 
             HCA_agent_location = list(data_dict["pg_dict"].keys())[a]
             print(f"HCA Agent {a} is at: [{HCA_agent_location}]")
-            
+
             data_dict["env_step"] += 1
 
             # sate0 is initial state
@@ -118,7 +124,7 @@ def run_exp(
                 + ".json",
                 "w",
             ) as f:
-                print("\n SAVE INITIAL STATE \n")
+                print("SAVE INITIAL STATE \n")
                 json.dump(data_dict["pg_dict"], f)
 
             # at second iter, should have more info, get available actions
@@ -135,7 +141,7 @@ def run_exp(
             messages = message_construct_func(
                 [user_prompt_1], [], dialogue_history_method
             )
-            
+
             raw_response, token_num_count = LLaMA_response(messages, model_name)
 
             # save user prompt
@@ -153,7 +159,7 @@ def run_exp(
             match = re.search(r"{.*}", raw_response, re.DOTALL)
             if match:
                 response = match.group()
-                HCA_response = response
+
             if response[0] == "{" and response[-1] == "}":
                 response, token_num_count_list_add = with_action_syntactic_check_func(
                     data_dict["pg_dict"],
@@ -185,7 +191,7 @@ def run_exp(
                 + ".txt",
                 "w",
             ) as f:
-                print("\n SAVE HCA RESPONSE \n")
+                print("SAVE HCA RESPONSE \n")
                 json.dump(data_dict["hca_agent_response_list"], f)
 
             # write after syntactic check
@@ -213,7 +219,7 @@ def run_exp(
             data_local["agent_dict"] = json.loads(response)
 
             for local_agent_row_i in range(pg_row_num):
-                
+
                 for local_agent_column_j in range(pg_column_num):
                     print(
                         f"-------###-------###-------###-------LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
@@ -234,7 +240,6 @@ def run_exp(
                         data_local["response_list_dir"][
                             f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                         ] = []
-                        # print(data_local)
 
                         (
                             state_update_prompt_local_agent,
@@ -286,11 +291,17 @@ def run_exp(
                             ] += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
 
+                            # agree no judge, use HCA response diretcly, avoid error.
+                            break
+
                     # -----------------------------------------RECONSTRUCT MESSAGES-----------------------------------------#
                     if (
                         data_local["local_agent_response_list_dir"]["feedback1"] != ""
                     ):  # if not I agree
-                        data_local["local_agent_response_list_dir"]["feedback1"] += """
+                        print("I Don't Agree")
+                        data_local["local_agent_response_list_dir"][
+                            "feedback1"
+                        ] += """
                             This is the feedback from local agents.
                             If you find some errors in your previous plan, try to modify it.
                             Otherwise, output the same plan as before.
@@ -304,23 +315,18 @@ def run_exp(
                     print(
                         f"-------###-------###-------###-------JUDGE_ON_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
                     )
-                    local_response = data_local["local_agent_response_list_dir"]["feedback1"]
+                    local_response = data_local["local_agent_response_list_dir"][
+                        "feedback1"
+                    ]
                     cen_response = data_dict["user_prompt_list"][-1]
-                    
-                    # print(f"LOCAL RESPONSE: {local_response}")
-                    # print(f"CEN RESPONSE: {cen_response}")
-                    
+
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
-                    messages = judge_message_construct_func(
-                        [judge_prompt]
-                    )
+                    messages = judge_message_construct_func([judge_prompt])
                     response_judge, token_num_count = LLaMA_response(
                         messages, model_name
                     )
-                    
-                    # print(response_judge)
 
                     # -----------------------------------------SYNTACTIC CHECK FOR JUDGE-----------------------------------------#
                     data_dict["token_num_count_list"].append(token_num_count)
@@ -333,7 +339,6 @@ def run_exp(
                             with_action_syntactic_check_func(
                                 data_dict["pg_dict"],
                                 response,
-                                HCA_response, # fallback response
                                 [judge_prompt],
                                 [response],
                                 model_name,
@@ -344,18 +349,18 @@ def run_exp(
                         data_dict["token_num_count_list"] = (
                             data_dict["token_num_count_list"] + token_num_count_list_add
                         )
-                        # print(f"response: {response}")
-
+                    
+                    # after syntactic checks
+                    with open("conversation.txt", "a") as f:
+                        messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_judge} \n \n"
+                        f.write(messages)
+                    
                     print(f"JUDGE MODIFIED:\n {response}")
+
                 else:
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
                 data_dict["dialogue_history_list"].append(dialogue_history)
-
-                # after syntactic checks
-                with open("conversation.txt", "a") as f:
-                    messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_judge} \n \n"
-                    f.write(messages)
 
             # -----------------------------------------EXECUTION OF ACTION AT EACH HCA AGENT LEVEL-----------------------------------------#
             print(
@@ -366,7 +371,7 @@ def run_exp(
             original_response_dict = json.loads(
                 data_dict["response_total_list"][index_query_times]
             )
-            
+
             render_map_terminal_popup(data_dict["pg_dict"], [original_response_dict])
 
             with open(
@@ -377,7 +382,7 @@ def run_exp(
                 + ".json",
                 "w",
             ) as f:
-                print("\n SAVE RESPONSE \n")
+                print("SAVE RESPONSE \n")
                 json.dump(original_response_dict, f)
 
             with open(
@@ -388,7 +393,7 @@ def run_exp(
                 + ".txt",
                 "w",
             ) as f:
-                print("\n SAVE DIALOGUE \n")
+                print("SAVE DIALOGUE \n")
                 json.dump(data_dict["dialogue_history_list"], f)
 
             try:
@@ -405,15 +410,14 @@ def run_exp(
 
             # need to append new states to state list
             data_dict["pg_state_list"].append(data_dict["pg_dict"])
-            
-            
+
             # -----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
             count = 0
             for ky, value in data_dict["pg_dict"].items():
                 count += len(value)
             if count == 0:
                 break
-    
+
     # -----------------------------------------TASK SUCCESS OUT-----------------------------------------#
     if index_query_times < query_time_limit - 1:
         success_failure = "success"
@@ -461,19 +465,18 @@ print(f"-------------------Model name: {model_name}-------------------")
     pg_column_num,
     iteration_num,
     query_time_limit,
-    dialogue_history_method="_w_compressed_dialogue_history",
-
+    dialogue_history_method="_w_all_dialogue_history",
 )
 
 with open(Saving_path_result + "/token_num_count.txt", "w") as f:
-    print("\n SAVE TOKEN NUM \n")
+    print("SAVE TOKEN NUM \n")
     for token_num_num_count in token_num_count_list:
         f.write(str(token_num_num_count) + "\n")
 
 with open(Saving_path_result + "/success_failure.txt", "w") as f:
-    print("\n SAVE RESULT \n")
+    print("SAVE RESULT \n")
     f.write(success_failure)
 
 with open(Saving_path_result + "/env_action_times.txt", "w") as f:
-    print("\n SAVE ACTION TIME \n")
+    print("SAVE ACTION TIME \n")
     f.write(f"{index_query_times+1}")
