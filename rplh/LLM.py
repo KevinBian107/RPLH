@@ -8,9 +8,12 @@ assert enc.decode(enc.encode("hello world")) == "hello world"
 
 def LLaMA_response(messages, model_name, url="http://localhost:11434/api/generate"):
     """
-    messages: list of message dictionaries following ChatCompletion format
-    model_name: name of the LLaMA model
-    url: endpoint where LLaMA is hosted
+    LLM module to be called
+
+    Args
+        messages: list of message dictionaries following ChatCompletion format
+        model_name: name of the LLaMA model
+        url: endpoint where LLaMA is hosted
     """
     prompt = "\n".join(
         [f"{msg['role'].capitalize()}: {msg['content']}" for msg in messages]
