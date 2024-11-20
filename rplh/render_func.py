@@ -3,6 +3,19 @@ import pandas as pd
 import re
 import copy
 import plotly.graph_objects as go
+import plotly.io as pio
+
+def render_graph_terminal_popup(box_map):
+    fig = render_graph(box_map=trans_info_box(box_map))
+    
+    pio.renderers.default = "browser"
+    fig.show()
+    print("Graph displayed in a browser pop-up window.")
+    
+def render_map_terminal_popup(box_map, action_list):
+    box_map, action_list = trans_data(box_map, action_list)
+    render_map(box_map, action_list)
+    print("Graph displayed in a browser pop-up window.")
 
 
 # ------------------- preparation function ------------
@@ -197,6 +210,7 @@ def render_map(initial_map, action_list):
                                     axis=1)
 
         # Initialize the figure
+        pio.renderers.default = "browser"
         fig = go.Figure()
         
         # Add scatter trace
@@ -205,7 +219,7 @@ def render_map(initial_map, action_list):
             y=df['y'],
             mode='markers',
             marker=dict(
-                symbol=['square-open' if t == 'target' else 'square' for t in df['type']],  # Use square symbols
+                symbol=['diamond-open' if t == 'target' else 'square' for t in df['type']],  # Use square symbols
                 size=20,          # Set the size of the squares
                 color=df['color']  # Use the 'color' column for marker colors
             ),
@@ -286,7 +300,7 @@ def render_graph(box_map):
         y=df['y'],
         mode='markers',
         marker=dict(
-            symbol=['square-open' if t == 'target' else 'square' for t in df['type']],  # Use square symbols
+            symbol=['diamond-open' if t == 'target' else 'square' for t in df['type']],  # Use square symbols
             size=20,          # Set the size of the squares
             color=df['color']  # Use the 'color' column for marker colors
         ),
