@@ -156,15 +156,13 @@ def run_exp(
 
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
-            
-            #match = re.search(r"{.*}", raw_response, re.DOTALL)
-            #if match:
-            #    response = match.group()
-            #if response[0] == "{" and response[-1] == "}":
-            
-            try:
-                response = raw_response
-                response = process_raw_response(response)
+            match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
+            if match:
+                possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
+                response = possible_action_lst[-1]
+
+            if response[0] == "{" and response[-1] == "}":
+                response = process_response(response)
                 response, token_num_count_list_add = with_action_syntactic_check_func(
                     data_dict["pg_dict"],
                     response,
@@ -178,7 +176,7 @@ def run_exp(
                     data_dict["token_num_count_list"] + token_num_count_list_add
                 )
                 print(f"AGENT ACTION RESPONSE: {response}")
-            except:
+            else:
                 raise ValueError(f"Response format error: {response}")
             if response == "Out of tokens":
                 pass
@@ -339,13 +337,15 @@ def run_exp(
 
                     # -----------------------------------------SYNTACTIC CHECK FOR JUDGE-----------------------------------------#
                     data_dict["token_num_count_list"].append(token_num_count)
-                    #match = re.search(r"{.*}", response_judge, re.DOTALL)
+                    match = re.search(r"{.*}", response_judge, re.DOTALL)
                     # match not right
-                    #if match:
-                        #response = match.group()
-                    try:
-                        response = response_judge
-                        response = process_raw_response(response)
+                    if match:
+                        possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
+                        response = possible_action_lst[-1]
+
+                    if response[0] == "{" and response[-1] == "}":
+                        response = process_response(response)
+
                         response, token_num_count_list_add = (
                             with_action_syntactic_check_func(
                                 data_dict["pg_dict"],
@@ -360,7 +360,7 @@ def run_exp(
                         data_dict["token_num_count_list"] = (
                             data_dict["token_num_count_list"] + token_num_count_list_add
                         )
-                    except:
+                    else:
                         raise ValueError(f"Response format error: {response}")
 
                     # after syntactic checks
@@ -462,7 +462,7 @@ pg_row_num = 2
 pg_column_num = 2
 iteration_num = 0
 query_time_limit = 10  # now it's iteration
-model_name = "qwen2.5:14b-instruct-q3_K_L"
+model_name = "llama3.2:3b-instruct-q5_K_M"
 print(f"-------------------Model name: {model_name}-------------------")
 
 #'_w_all_dialogue_history', '_w_compressed_dialogue_history', '_w_only_state_action_history'

@@ -41,6 +41,7 @@ State: {{"0.5_0.5": [], "0.5_1.5": ["box_green", "target_green"], "1.5_0.5": [],
 Action: {{"Agent[0.5, 1.5]":"move(box_green, target_green"}}
 '''
 
+# not used 
 AGENT_OUTPUT_INSTRUCTION = f'''
     [Agent Output Instruction]
     When output final action plan,  
@@ -432,7 +433,7 @@ def message_construct_func(
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
             
-        messages.append({"role": "user", "content": AGENT_OUTPUT_INSTRUCTION})
+        # messages.append({"role": "user", "content": AGENT_OUTPUT_INSTRUCTION})
 
             # if i < len(user_prompt_list) - 1:
             #     messages.append(
@@ -461,8 +462,6 @@ def judge_message_construct_func(user_prompt_list: List[str]) -> List[Dict[str, 
         {
             "role": "system",
             "content": f"""You are a helpful assistant specialized for judging conflicting plans.
-                 
-                {AGENT_OUTPUT_INSTRUCTION}
                  
                  Make sure that:
                  - If no action for an agent in the next step, do not include it in JSON output. 

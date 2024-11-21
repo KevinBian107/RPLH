@@ -238,7 +238,7 @@ def with_action_syntactic_check_func(
 
     return "Syntactic Error", token_num_count_list_add
 
-def process_raw_response(raw_response: str) -> dict[str:str]:
+def process_response(response: str) -> dict[str:str]:
     """
     Processes a raw response string containing agent locations and actions, 
     extracts relevant information, and converts it into dictionary format for loading in json.
@@ -258,8 +258,6 @@ def process_raw_response(raw_response: str) -> dict[str:str]:
     """
 
     try:
-        response = raw_response# [re.search(r'EXECUTE', raw_response).end():].strip('\n')
-        
         pattern_1 = r'agent\[(\d+\.\d+), (\d+\.\d+)\]'
         agent_loc = re.findall(pattern_1, response, re.IGNORECASE)
 
@@ -269,7 +267,7 @@ def process_raw_response(raw_response: str) -> dict[str:str]:
         # print(agent_loc)
         # print(agent_action)
     except:
-        raise ValueError(f'ERROR IN PARSING THE RESPONSE: {raw_response}')
+        raise ValueError(f'ERROR IN PARSING THE RESPONSE: {response}')
 
     num_agent = len(agent_loc)
 
