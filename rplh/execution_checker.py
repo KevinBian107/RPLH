@@ -258,8 +258,7 @@ def process_raw_response(raw_response: str) -> dict[str:str]:
     """
 
     try:
-        response = raw_response[re.search(r'EXECUTE', raw_response).end():]
-        response = response[:re.search(r'EXECUTE', response).start()]
+        response = raw_response# [re.search(r'EXECUTE', raw_response).end():].strip('\n')
         
         pattern_1 = r'agent\[(\d+\.\d+), (\d+\.\d+)\]'
         agent_loc = re.findall(pattern_1, response, re.IGNORECASE)
@@ -282,6 +281,4 @@ def process_raw_response(raw_response: str) -> dict[str:str]:
 
     json_str = '{' + ', '.join(action) + '}'
     
-    # response_dict = json.loads(json_str)
-
     return json_str
