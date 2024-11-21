@@ -270,7 +270,7 @@ def process_raw_response(raw_response: str) -> dict[str:str]:
         # print(agent_loc)
         # print(agent_action)
     except:
-        print(f'ERROR IN PARSING THE RESPONSE: {raw_response}')
+        raise ValueError(f'ERROR IN PARSING THE RESPONSE: {raw_response}')
 
     num_agent = len(agent_loc)
 
