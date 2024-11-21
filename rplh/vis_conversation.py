@@ -130,8 +130,8 @@ def roll_out_conversation(
     for step in range(len(user_prompt_list)):
         print(f"--- Step {step + 1} ---\n")
 
-        print("Environment State:")
-        print_token_by_token(json.dumps(pg_state_list[step], indent=2), 0)
+        # print("Environment State:")
+        # print_token_by_token(json.dumps(pg_state_list[step], indent=2), 0)
 
         # print("\nUser Prompt:")
         # print_token_by_token(user_prompt_list[step], token_delay)
