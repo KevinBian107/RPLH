@@ -414,9 +414,7 @@ def message_construct_func(
     messages = [
         {
             "role": "system",
-            "content": f"""You are a helpful assistant. 
-                 
-                {AGENT_OUTPUT_INSTRUCTION}
+            "content": f"""You are a helpful assistant.
                  
                 Make sure that:
                 - If no action for an agent in the next step, do not include it in JSON output. 
@@ -433,6 +431,8 @@ def message_construct_func(
         # print('length of user_prompt_list', len(user_prompt_list))
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
+            
+        messages.append({"role": "user", "content": AGENT_OUTPUT_INSTRUCTION})
 
             # if i < len(user_prompt_list) - 1:
             #     messages.append(
