@@ -41,8 +41,21 @@ State: {{"0.5_0.5": [], "0.5_1.5": ["box_green", "target_green"], "1.5_0.5": [],
 Action: {{"Agent[0.5, 1.5]":"move(box_green, target_green"}}
 '''
 
-EXMAPLE_JUDGE = f'''
+AGENT_OUTPUT_INSTRUCTION = f'''
+    [Agent Output Instruction]
+    When output final action plan,  
+    first output 'EXECUTE'
+    then on the next line specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])"}}.
+    then on the next line output 'EXECUTE'.
+    Example 1: 
+    EXECUTE
+    {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_green, square[0.5, 0.5])"}}
+    EXECUTE
 
+    Example 2: 
+    EXECUTE
+    {{"Agent[0.5, 0.5]":"move(box_blue, target_blue)", "Agent[2.5, 1.5]":"move(box_red, square[1.5, 1.5])"}}
+    EXECUTE
 '''
 
 def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -> str:
@@ -223,10 +236,10 @@ def rplh_prompt_func(
   
             Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}.
 
-            Think about waht the future {N} actions would be if you want to achieve the goal and write this justification out.
-            Remanber to wirte out for each step, what you plan fro every agent to do and what would teh consequences state change be.
+            Think about what the future {N} actions would be if you want to achieve the goal and write this justification out.
+            Remanber to wirte out for each step, what you plan for every agent to do and what would the consequences state change be.
             
-            Please use thf ollowing format:
+            Please use the following format:
             - hallucination of future {N} steps...
 
             Based on this, generate the action plan for the immediate next step for each agent and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[0.5, 1.5]":"move(box_blue, target_blue)"}}.
@@ -343,7 +356,7 @@ def dialogue_func(
             You can imagine first about how you would plan these actions and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])",  Agent[0.5, 1.5]":"move(box_blue, target_blue)"}}.
             Remanber to assign action to your self as well.
 
-            The other central planner's current action plan is giving as: {{{central_response}}}.
+            The other central planner's current action plan is giving as: {{central_response}}.
             Please be critical in thinking about this plan.
 
             Please evaluate the given plan.
@@ -403,12 +416,12 @@ def message_construct_func(
             "role": "system",
             "content": f"""You are a helpful assistant. 
                  
-                 When asked to specifiy your action plan, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}. 
+                {AGENT_OUTPUT_INSTRUCTION}
                  
-                 Make sure that:
-                 - If no action for an agent in the next step, do not include it in JSON output. 
-                 - At most one action for each agent in each step.
-                 """,
+                Make sure that:
+                - If no action for an agent in the next step, do not include it in JSON output. 
+                - At most one action for each agent in each step.
+                """,
         }
     ]
 
@@ -449,7 +462,7 @@ def judge_message_construct_func(user_prompt_list: List[str]) -> List[Dict[str, 
             "role": "system",
             "content": f"""You are a helpful assistant specialized for judging conflicting plans.
                  
-                 When asked to specifiy your action plan, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}. 
+                {AGENT_OUTPUT_INSTRUCTION}
                  
                  Make sure that:
                  - If no action for an agent in the next step, do not include it in JSON output. 
@@ -509,6 +522,6 @@ def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, s
                             Now the fixed json format message is:""",
         },
     ]
-    messages.append({"role": "user", "content": user_prompt_list[-1]})
+    messages.append({"role": "user", "content": user_prompt_list})
 
     return messages

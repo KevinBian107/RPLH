@@ -237,3 +237,51 @@ def with_action_syntactic_check_func(
             return response, token_num_count_list_add
 
     return "Syntactic Error", token_num_count_list_add
+
+def process_raw_response(raw_response: str) -> dict[str:str]:
+    """
+    Processes a raw response string containing agent locations and actions, 
+    extracts relevant information, and converts it into dictionary format for loading in json.
+
+    Args:
+        raw_response (str): The string is expected to include an "EXECUTE" keyword followed by 
+            JSON-like content describing agent locations and actions 
+            (e.g "EXECUTE
+            {"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])")
+
+    Returns:
+        dict: A dictionary where keys are agent identifiers (e.g., "Agent[0.5, 0.5]") 
+              and values are actions (e.g., "move(box_blue, square[0.5, 1.5])").
+
+    Raises:
+        ValueError: If the input string cannot be parsed.
+    """
+
+    try:
+        response = raw_response[re.search(r'EXECUTE', raw_response).end():]
+        response = response[:re.search(r'EXECUTE', response).start()]
+        
+        pattern_1 = r'agent\[(\d+\.\d+), (\d+\.\d+)\]'
+        agent_loc = re.findall(pattern_1, response, re.IGNORECASE)
+
+        pattern_2 = r'move(\(\w+, (?:square.\d+\.\d+, \d+\.\d+.|\w+)\))'
+        agent_action = re.findall(pattern_2, response, re.IGNORECASE)
+
+        # print(agent_loc)
+        # print(agent_action)
+    except:
+        print(f'ERROR IN PARSING THE RESPONSE: {raw_response}')
+
+    num_agent = len(agent_loc)
+
+    action = []
+
+    for i in range(num_agent):
+        
+        action.append(f'"Agent[{agent_loc[i][0]}, {agent_loc[i][1]}]": "move{agent_action[i]}"')
+
+    json_str = '{' + ', '.join(action) + '}'
+    
+    # response_dict = json.loads(json_str)
+
+    return json_str
