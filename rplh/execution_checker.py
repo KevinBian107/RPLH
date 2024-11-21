@@ -50,10 +50,13 @@ def json_checker(
         print(f"----------JSON CHECKER PERFORMING {count} NUMBER OF TIMES----------")
         messages = json_check_message_construct_func(response)
         response, token_num_count = LLaMA_response(messages, model_name)
-
-        match = re.search(r"{.*}", response, re.DOTALL)
+            
+        match = re.search(r"\{.*?\}", response, re.DOTALL)
         if match:
-            response = match.group()
+            possible_action_lst = re.findall(r"\{.*?\}", response, re.DOTALL)
+            response = possible_action_lst[-1]
+            response = process_response(response)
+
             token_num_count_list_add.append(token_num_count)
             valid = is_valid_json(response)
 
@@ -162,6 +165,14 @@ def retake_action(
     response, token_num_count = LLaMA_response(messages, model_name)
     token_num_count_list_add.append(token_num_count)
 
+    match = re.search(r"\{.*?\}", response, re.DOTALL)
+    if match:
+        possible_action_lst = re.findall(r"\{.*?\}", response, re.DOTALL)
+        response = possible_action_lst[-1]
+        response = process_response(response)
+    else:
+        print('ERROR: NO CURLY BRACKET FOUND IN RETAKE ACTION STAGE')
+
     return response, token_num_count_list_add
 
 
@@ -207,6 +218,7 @@ def with_action_syntactic_check_func(
 
     while iteration_num < CHECK_ITER:
 
+        print(f"RESPONSE TO ACTION CHECKER: {response}")
         # for action validity check, it must be in json format
         feedback = action_checker(response, pg_dict_input, is_judge)
 
@@ -238,7 +250,7 @@ def with_action_syntactic_check_func(
 
     return "Syntactic Error", token_num_count_list_add
 
-def process_response(response: str) -> dict[str:str]:
+def process_response(response: str) -> dict:
     """
     Processes a raw response string containing agent locations and actions, 
     extracts relevant information, and converts it into dictionary format for loading in json.
@@ -261,22 +273,22 @@ def process_response(response: str) -> dict[str:str]:
         pattern_1 = r'agent\[(\d+\.\d+), (\d+\.\d+)\]'
         agent_loc = re.findall(pattern_1, response, re.IGNORECASE)
 
-        pattern_2 = r'move(\(\w+, (?:square.\d+\.\d+, \d+\.\d+.|\w+)\))'
+        pattern_2 =  r'move\((.*?),\s(.*?)\)' #r'move(\(\w+, (?:square.\d+\.\d+, \d+\.\d+.|\w+)\))'
         agent_action = re.findall(pattern_2, response, re.IGNORECASE)
 
-        # print(agent_loc)
-        # print(agent_action)
     except:
-        raise ValueError(f'ERROR IN PARSING THE RESPONSE: {response}')
+        raise ValueError(f'Error in parsing the response: {response}')
 
     num_agent = len(agent_loc)
-
     action = []
+    if len(agent_loc) == len(agent_action):
+        for i in range(num_agent):
+            action.append(f'"Agent[{agent_loc[i][0]}, {agent_loc[i][1]}]": "move({agent_action[i][0]}, {agent_action[i][1]})"')
 
-    for i in range(num_agent):
-        
-        action.append(f'"Agent[{agent_loc[i][0]}, {agent_loc[i][1]}]": "move{agent_action[i]}"')
-
-    json_str = '{' + ', '.join(action) + '}'
+        json_str = '{' + ', '.join(action) + '}'
+    else:
+        print(agent_loc)
+        print(agent_action)
+        raise ValueError(f'Agent-action pair is inconsistent: {response}')
     
     return json_str
