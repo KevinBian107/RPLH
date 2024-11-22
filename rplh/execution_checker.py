@@ -216,7 +216,7 @@ def with_action_syntactic_check_func(
             response, token_num_count_list_add = json_checker(
                 response, token_num_count_list_add, model_name
             )
-            print(response)
+            # print(response)
             
             # for action validity check, it must be in json format
             feedback = action_checker(response, pg_dict_input, is_judge)

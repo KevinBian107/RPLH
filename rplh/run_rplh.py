@@ -402,7 +402,7 @@ def run_exp(
                 data_dict['attitude_dialogue_dict']
             )
 
-            pg_dict["attitude_info"].appned(attitude_info)
+            data_dict["attitude_info"].append(attitude_info)
 
             # -----------------------------------------EXECUTION OF ACTION AT EACH HCA AGENT LEVEL-----------------------------------------#
             print(
@@ -412,8 +412,6 @@ def run_exp(
             original_response_dict = json.loads(
                 data_dict["response_total_list"][index_query_times]
             )
-
-            render_map_terminal_popup(data_dict["pg_dict"], [original_response_dict])
 
             with open(
                 Saving_path_result
@@ -425,6 +423,8 @@ def run_exp(
             ) as f:
                 print("SAVE RESPONSE \n")
                 json.dump(original_response_dict, f)
+            
+            render_map_terminal_popup(data_dict["pg_dict"], [original_response_dict])
 
             with open(
                 Saving_path_result
