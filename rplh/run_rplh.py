@@ -156,26 +156,30 @@ def run_exp(
 
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
-            match = re.search(r"{.*}", raw_response, re.DOTALL)
+            match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
+            print(f'RESPONSE BEFORE PROCESS: {raw_response}')
             if match:
-                response = match.group()
+                possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
+                response = possible_action_lst[-1]
 
-            if response[0] == "{" and response[-1] == "}":
-                response, token_num_count_list_add = with_action_syntactic_check_func(
-                    data_dict["pg_dict"],
-                    response,
-                    [user_prompt_1],
-                    [],
-                    model_name,
-                    "_w_all_dialogue_history",
-                    False,
-                )
-                data_dict["token_num_count_list"] = (
-                    data_dict["token_num_count_list"] + token_num_count_list_add
-                )
-                print(f"AGENT ACTION RESPONSE: {response}")
+                if response[0] == "{" and response[-1] == "}":
+                    response = process_response(response)
+                    print(f'RESPOSNE AFTER PROCESS: {response}')
+                    response, token_num_count_list_add = with_action_syntactic_check_func(
+                        data_dict["pg_dict"],
+                        response,
+                        [user_prompt_1],
+                        [],
+                        model_name,
+                        "_w_all_dialogue_history",
+                        False,
+                    )
+                    data_dict["token_num_count_list"] = (
+                        data_dict["token_num_count_list"] + token_num_count_list_add
+                    )
+                    print(f"AGENT ACTION RESPONSE: {response}")
             else:
-                raise ValueError(f"Response format error: {response}")
+                raise ValueError(f"No action format found in raw response: {raw_response}")
             if response == "Out of tokens":
                 pass
             elif response == "Syntactic Error":
@@ -337,23 +341,29 @@ def run_exp(
                     data_dict["token_num_count_list"].append(token_num_count)
                     match = re.search(r"{.*}", response_judge, re.DOTALL)
                     # match not right
+                    print(f'RESPONSE BEFORE PROCESS: {raw_response}')
                     if match:
-                        response = match.group()
+                        possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
+                        response = possible_action_lst[-1]
 
-                        response, token_num_count_list_add = (
-                            with_action_syntactic_check_func(
-                                data_dict["pg_dict"],
-                                response,
-                                [judge_prompt],
-                                [response],
-                                model_name,
-                                "_w_all_dialogue_history",
-                                is_judge=True,
+                        if response[0] == "{" and response[-1] == "}":
+                            response = process_response(response)
+                            print(f'RESPONSE AFTER PROCESS: {response}')
+
+                            response, token_num_count_list_add = (
+                                with_action_syntactic_check_func(
+                                    data_dict["pg_dict"],
+                                    response,
+                                    [judge_prompt],
+                                    [response],
+                                    model_name,
+                                    "_w_all_dialogue_history",
+                                    is_judge=True,
+                                )
                             )
-                        )
-                        data_dict["token_num_count_list"] = (
-                            data_dict["token_num_count_list"] + token_num_count_list_add
-                        )
+                            data_dict["token_num_count_list"] = (
+                                data_dict["token_num_count_list"] + token_num_count_list_add
+                            )
 
                     # after syntactic checks
                     with open("conversation.txt", "a") as f:
@@ -454,7 +464,7 @@ pg_row_num = 2
 pg_column_num = 2
 iteration_num = 0
 query_time_limit = 10  # now it's iteration
-model_name = "llama3.2:3b-instruct-q5_K_M"
+model_name = "qwen2.5:7b-instruct-q5_K_M"
 print(f"-------------------Model name: {model_name}-------------------")
 
 #'_w_all_dialogue_history', '_w_compressed_dialogue_history', '_w_only_state_action_history'
