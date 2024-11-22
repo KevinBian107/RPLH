@@ -26,6 +26,38 @@ GOAL_RULES = f"""You are an agentin a grid-like field to move colored boxes.
                 You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
                 """
 
+FEEDBACK_LCOAL1 = """
+            This is the feedback from local agents.
+            If you find some errors in your previous plan, try to modify it.
+            Otherwise, output the same plan as before.
+            The output should have the same json format {Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}, as above.
+            Do not explain, just directly output json directory.
+            Your response:
+            """
+
+
+def attitude_agent_prompt_func(history: dict) -> str:
+    '''
+    Generates a prompt to analyze and derive the attitudes of agents based on their dialogue history.
+
+    Args:
+        history (str): A string representing the dialogue history of the agents.
+
+    Returns:
+        str: The attitudes are expected in the format:
+             {Agent[0.5, 0.5]: attitude, Agent[0.5, 1.5]: attitude}.
+    '''
+    attitude_prompt = f"""
+        Given the dialogue history of each agent {history}. 
+        Please derive the attitude of each agents given their response. 
+        Please list out the attitute of each agent in the folloing format:
+        {{Agent[0.5, 0.5]: attitude, Agent[0.5, 1.5]: attitude}}
+        
+        State your justification after listing out attitudes
+        Justification: ...
+        """
+    return attitude_prompt
+
 
 def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -> str:
     """
@@ -91,6 +123,7 @@ def rplh_prompt_func(
     data: Dict,
     dialogue_history_method: str,
     HCA_agent_location: str,
+    attitude: str,
 ) -> str:
     """
     Designs an input prompt for a role-playing leader-hallucinating (RPLH) agent
@@ -174,6 +207,36 @@ def rplh_prompt_func(
                 else:
                     break
 
+        if attitude == None:
+            print("ATTITUDE IS NONE")
+            att_promt = ""
+        else:
+            att_promt = f"""
+            Please learn from attitude in the following ways:
+
+                1. Please undrstand the attitude of each agents in this environment,
+                including yourself based on this attitude report given from another agent: {attitude}.
+
+                2. Based on this charcteristics of each agent, pelase do two things and added them after each agent's attitude:
+                    i. Reason about the reactions each agent would have towards your command.
+                    ii. Reason about how they would give actions if they are the central agent.
+                
+                3. Based on each agent's attitude, you have the ability to "ban" an agent from making comments to your plan. Remanber to only ban one agent.
+                Think carefully for this action as this would result in less opinions, but may result in better plans depending on the attitude of the "banned" agent.
+                If you want to ban an agent, please specify the agent anme in the form {{Agent[0.5, 0.5]}} and the reason for the ban.
+                Give your response after saying the keyward "BAN":
+                
+                Here are two examples:
+                1. BAN: {{Agent[0.5, 0.5]}}
+                2. BAN: {{Agent[0.5, 0.5], Agent[1.5, 0.5]}}
+            
+            Use the following format:
+            - Attitude of agent...
+            - Reaction of agent...
+            - Commanding action of agent...
+            
+            """
+
         HCA_prompt = f"""
             You are a central planner directing agent in a grid-like field to move colored boxes.
             You are agent at grid [{HCA_agent_location}]. You need to make moves and other agents need to make moves as well.
@@ -186,22 +249,7 @@ def rplh_prompt_func(
             You are the central agent and your job is to coordinate the agents optimally.
             The previous state and action pairs at each step are: {state_action_prompt}
 
-            If the previous state and action pairs at each step is empty, you don't need to deduct any of the reaosning below.
-
-            Please learn from previous steps in the following ways:
-
-                1. Please undrstand the attitude of each agents in this environment,
-                including yourself based on what you see from previous conversation that all agents have.
-                Please write out some justification and list out the attitute of each agent, including yourself.
-
-                2. Based on this charcteristics of each agent, pelase do two things and added them after each agent's attitude:
-                    i. Reason about the reactions each agent would have towards your command.
-                    ii. Reason about how they would give actions if they are the central agent.
-            
-            Use the following format:
-            - Attitude of agent...
-            - Reaction of agent...
-            - Commanding action of agent...
+            {att_promt}
   
             Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}.
 
@@ -225,6 +273,7 @@ def dialogue_func(
     data: Dict,
     dialogue_history_method: str,
     local_agent_location: str,
+    attitude: str,
 ) -> str:
     """
     Constructs a dialogue prompt for a local agent in response to the central planner.
@@ -302,6 +351,14 @@ def dialogue_func(
                 else:
                     break
 
+        if attitude == None:
+            print("ATTITUDE IS NONE")
+            att_promt = "Be very critical"
+        else:
+            att_promt = f"""
+             Please pick up an attitude on this problem for yourself based on the attitude that this attitude report assigned to you: {attitude}.
+            """
+
         local_HCA_prompt = f"""
             Imagine that you are a central planner directing agent in a grid-like field to move colored boxes.
             Particularly, you're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground at grid location of [{local_agent_location}].
@@ -317,8 +374,7 @@ def dialogue_func(
             The previous state and action pairs at each step are: {state_action_prompt}
             Please learn from previous steps in a few steps:
                 
-                1. Please pick up an attitude on this problem for yourself, a "characteristic" that you think you should have based on what you see from previous conversation you have,
-                please write the justification for your attitude and state clearly what your attitude is.
+                1. {att_promt}
 
                 2. You would recieve an plan from the other central planner, please evaluate the given plan and give critical feedbacks.
 

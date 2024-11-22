@@ -25,7 +25,7 @@ def is_valid_json(response: str) -> bool:
     try:
         json.loads(response)
         return True
-    except: # all error return false
+    except:  # all error return false
         return False
 
 
@@ -72,7 +72,7 @@ def action_checker(response: str, pg_dict_input: list, is_judge: bool) -> str:
     Returns:
         str: Feedback about any invalid actions. An empty string if all actions are valid.
     """
-    
+
     # need to ensure this must be json
     original_response_dict = json.loads(response)
     pg_dict_original = copy.deepcopy(pg_dict_input)
@@ -160,7 +160,11 @@ def retake_action(
 
     print(f"Length of messages {len(messages)}")
     response, token_num_count = LLaMA_response(messages, model_name)
-    token_num_count_list_add.append(token_num_count)
+    
+    match = re.search(r"{.*}", response, re.DOTALL)
+    if match:
+        response = match.group()
+        token_num_count_list_add.append(token_num_count)
 
     return response, token_num_count_list_add
 
@@ -207,30 +211,30 @@ def with_action_syntactic_check_func(
 
     while iteration_num < CHECK_ITER:
 
-        # for action validity check, it must be in json format
-        feedback = action_checker(response, pg_dict_input, is_judge)
-
         # gate loop: no feedback + no error -> pass
-
-        if feedback != "":
-            response, token_num_count_list_add = retake_action(
-                feedback,
-                user_prompt_list,
-                response_total_list,
-                token_num_count_list_add,
-                dialogue_history_method,
-                model_name,
-            )
-            response_total_list.append(response)
-
-            if response == "Out of tokens":
-                return response, token_num_count_list_add
-            iteration_num += 1
-
-        elif not is_valid_json(response):
+        if not is_valid_json(response):
             response, token_num_count_list_add = json_checker(
                 response, token_num_count_list_add, model_name
             )
+            # print(response)
+            
+            # for action validity check, it must be in json format
+            feedback = action_checker(response, pg_dict_input, is_judge)
+    
+            if feedback != "":
+                response, token_num_count_list_add = retake_action(
+                    feedback,
+                    user_prompt_list,
+                    response_total_list,
+                    token_num_count_list_add,
+                    dialogue_history_method,
+                    model_name,
+                )
+                response_total_list.append(response)
+
+                if response == "Out of tokens":
+                    return response, token_num_count_list_add
+                iteration_num += 1
 
         else:
             # no feedback

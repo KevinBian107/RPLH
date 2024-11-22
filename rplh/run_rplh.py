@@ -13,6 +13,7 @@ from typing import Dict, List, Tuple, Union
 import pandas as pd
 from render_func import *
 
+
 def run_exp(
     Saving_path: str,
     pg_row_num: int,
@@ -65,9 +66,11 @@ def run_exp(
         "dialogue_history_list": [],
         "token_num_count_list": [],
         "hca_agent_response_list": [],
+        "attitude_info": [],
+        "attitude_dialogue_dict": {},
         "pg_dict": None,  # For initial environment state
         "env_step": -1,
-        "agree_num":0,
+        "agree_num": 0,
     }
 
     # Load initial environment state
@@ -131,11 +134,18 @@ def run_exp(
             state_update_prompt = state_update_func(
                 pg_row_num, pg_column_num, data_dict["pg_dict"]
             )
+
+            if data_dict["env_step"] == 0:
+                att_prompt = None
+            else:
+                att_prompt = data_dict["attitude_info"][-1]
+
             user_prompt_1 = rplh_prompt_func(
                 state_update_prompt,
                 data_dict,
                 dialogue_history_method,
                 HCA_agent_location,
+                att_prompt,
             )
             data_dict["user_prompt_list"].append(user_prompt_1)
             messages = message_construct_func(
@@ -156,6 +166,9 @@ def run_exp(
 
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
+
+            # TODO: ADD BAN HERE
+
             match = re.search(r"{.*}", raw_response, re.DOTALL)
             if match:
                 response = match.group()
@@ -182,6 +195,7 @@ def run_exp(
                 pass
 
             data_dict["hca_agent_response_list"].append(raw_response)
+            data_dict['attitude_dialogue_dict'][f'Agent[{HCA_agent_location}]'] = raw_response
 
             with open(
                 Saving_path_result
@@ -202,6 +216,7 @@ def run_exp(
                 length = str(len(data_dict["pg_state_list"]))
                 f.write(f"ALL STATE STORAGE LENGTH: {length} \n")
                 f.write(message)
+            
             """This for loop ends here for all agents doing centralized planning by themselves"""
 
             # -----------------------------------------FOR EACH AGENT RECIEVES COMMAND FROM THE CURRENT HELLUCINATING MAIN AGENT-----------------------------------------#
@@ -219,8 +234,11 @@ def run_exp(
             data_local["agent_dict"] = json.loads(response)
 
             for local_agent_row_i in range(pg_row_num):
-
+                
                 for local_agent_column_j in range(pg_column_num):
+
+                    # TODO: IF BAN TRIGGERED, SKIP
+
                     print(
                         f"-------###-------###-------###-------LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
                     )
@@ -260,6 +278,7 @@ def run_exp(
                             data_dict,
                             dialogue_history_method,
                             local_agent_location,
+                            att_prompt,  # refer back to HCA part
                         )
                         data_local["prompt_list_dir"][
                             f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
@@ -272,7 +291,9 @@ def run_exp(
                         ]
 
                         messages = message_construct_func(
-                            message_raw, response_raw, "_w_all_dialogue_history"
+                            message_raw,
+                            response_raw,
+                            dialogue_history_method,  # "_w_all_dialogue_history"
                         )
 
                         # given to other LLM, no synthetic check needed
@@ -290,12 +311,15 @@ def run_exp(
                                 "feedback1"
                             ] += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
-                            
-                            data_dict['agree_num'] += 1
-                            
-                            if data_dict["agree_num"] >= (pg_column_num + pg_row_num)//2:
+
+                            data_dict["agree_num"] += 1
+
+                            if (
+                                data_dict["agree_num"]
+                                >= (pg_column_num + pg_row_num) // 2
+                            ):
                                 break
-                            
+
                             # agree no judge, use HCA response diretcly, avoid error.
                             continue
 
@@ -303,17 +327,13 @@ def run_exp(
                     if (
                         data_local["local_agent_response_list_dir"]["feedback1"] != ""
                     ):  # if not I agree
+
+                        # once not agree, set to zero to re-discuss lat plan
+                        data_dict["agree_num"] = 0
                         print("I Don't Agree")
                         data_local["local_agent_response_list_dir"][
                             "feedback1"
-                        ] += """
-                            This is the feedback from local agents.
-                            If you find some errors in your previous plan, try to modify it.
-                            Otherwise, output the same plan as before.
-                            The output should have the same json format {Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}, as above.
-                            Do not explain, just directly output json directory.
-                            Your response:
-                            """
+                        ] += FEEDBACK_LCOAL1
 
                     # -----------------------------------------JUDGE IF NO AGREEMENT MET, SEND MESSAGE IF AGREE-----------------------------------------#
                     # This message should be constructed for teh judge, include both central and local response, agree on global plan
@@ -366,18 +386,32 @@ def run_exp(
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
                 data_dict["dialogue_history_list"].append(dialogue_history)
+                
+                data_dict['attitude_dialogue_dict'][f'Agent[{local_agent_location}]'] = response_local_agent
+
+            data_dict["response_total_list"].append(response)
+
+            # -----------------------------------------ATTITUDE CHECK AFTER ALL AGENT-----------------------------------------#
+            print(
+                "-------###-------###-------###-------ATTITUDE CHECK-------###-------###-------###-------"
+            )
+            
+            # print(data_dict['attitude_dialogue_dict'])
+
+            attitude_info = attitude_agent_prompt_func(
+                data_dict['attitude_dialogue_dict']
+            )
+
+            data_dict["attitude_info"].append(attitude_info)
 
             # -----------------------------------------EXECUTION OF ACTION AT EACH HCA AGENT LEVEL-----------------------------------------#
             print(
                 "-------###-------###-------###-------EXECUTION-------###-------###-------###-------"
             )
 
-            data_dict["response_total_list"].append(response)
             original_response_dict = json.loads(
                 data_dict["response_total_list"][index_query_times]
             )
-
-            render_map_terminal_popup(data_dict["pg_dict"], [original_response_dict])
 
             with open(
                 Saving_path_result
@@ -389,6 +423,8 @@ def run_exp(
             ) as f:
                 print("SAVE RESPONSE \n")
                 json.dump(original_response_dict, f)
+            
+            render_map_terminal_popup(data_dict["pg_dict"], [original_response_dict])
 
             with open(
                 Saving_path_result
@@ -415,8 +451,8 @@ def run_exp(
 
             # need to append new states to state list
             data_dict["pg_state_list"].append(data_dict["pg_dict"])
-            
-            data_dict['agree_num'] = 0
+
+            data_dict["agree_num"] = 0
 
             # -----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
             count = 0
@@ -472,7 +508,7 @@ print(f"-------------------Model name: {model_name}-------------------")
     pg_column_num,
     iteration_num,
     query_time_limit,
-    dialogue_history_method="_w_all_dialogue_history",
+    dialogue_history_method="_w_only_state_action_history",
 )
 
 with open(Saving_path_result + "/token_num_count.txt", "w") as f:
