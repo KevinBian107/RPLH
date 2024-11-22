@@ -176,7 +176,6 @@ def run_exp(
 
                 if response[0] == "{" and response[-1] == "}":
                     response = process_response(response)
-                    print(f'RESPOSNE AFTER PROCESS: {response}')
                     response, token_num_count_list_add = with_action_syntactic_check_func(
                         data_dict["pg_dict"],
                         response,
@@ -360,14 +359,14 @@ def run_exp(
                     data_dict["token_num_count_list"].append(token_num_count)
                     match = re.search(r"{.*}", response_judge, re.DOTALL)
                     # match not right
-                    print(f'RESPONSE BEFORE PROCESS: {raw_response}')
+
                     if match:
                         possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
                         response = possible_action_lst[-1]
 
                         if response[0] == "{" and response[-1] == "}":
                             response = process_response(response)
-                            print(f'RESPONSE AFTER PROCESS: {response}')
+
 
                             response, token_num_count_list_add = (
                                 with_action_syntactic_check_func(
