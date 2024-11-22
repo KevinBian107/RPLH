@@ -35,9 +35,29 @@ FEEDBACK_LCOAL1 = """
             Your response:
             """
 
-def attitude_agent_prompt_func(local_history: str, cen_history: str) -> str:
-    ''''''
-    
+
+def attitude_agent_prompt_func(history: dict) -> str:
+    '''
+    Generates a prompt to analyze and derive the attitudes of agents based on their dialogue history.
+
+    Args:
+        history (str): A string representing the dialogue history of the agents.
+
+    Returns:
+        str: The attitudes are expected in the format:
+             {Agent[0.5, 0.5]: attitude, Agent[0.5, 1.5]: attitude}.
+    '''
+    attitude_prompt = f"""
+        Given the dialogue history of each agent {history}. 
+        Please derive the attitude of each agents given their response. 
+        Please list out the attitute of each agent in the folloing format:
+        {{Agent[0.5, 0.5]: attitude, Agent[0.5, 1.5]: attitude}}
+        
+        State your justification after listing out attitudes
+        Justification: ...
+        """
+    return attitude_prompt
+
 
 def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -> str:
     """
@@ -186,7 +206,7 @@ def rplh_prompt_func(
                     state_action_prompt = state_action_prompt_next
                 else:
                     break
-        
+
         if attitude == None:
             print("ATTITUDE IS NONE")
             att_promt = ""
@@ -216,7 +236,7 @@ def rplh_prompt_func(
             - Commanding action of agent...
             
             """
-        
+
         HCA_prompt = f"""
             You are a central planner directing agent in a grid-like field to move colored boxes.
             You are agent at grid [{HCA_agent_location}]. You need to make moves and other agents need to make moves as well.
@@ -330,7 +350,7 @@ def dialogue_func(
                     state_action_prompt = state_action_prompt_next
                 else:
                     break
-        
+
         if attitude == None:
             print("ATTITUDE IS NONE")
             att_promt = "Be very critical"
