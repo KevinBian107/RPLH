@@ -200,8 +200,13 @@ def with_action_syntactic_check_func(
     Notes:
         This only checks if the actions are valid, doesn't care about if it's json, if not json, directly fails it.
     """
-    user_prompt_list = copy.deepcopy(user_prompt_list_input[0]) # 0 is always judge
-    central_response = copy.deepcopy(user_prompt_list_input[1]) # 1 is always central
+    if not is_judge:
+        user_prompt_list = copy.deepcopy(user_prompt_list_input)
+        central_response = ''
+    else:
+        user_prompt_list = copy.deepcopy([user_prompt_list_input[0]]) # 0 is always judge
+        central_response = copy.deepcopy(user_prompt_list_input[1]) # 1 is always central
+        
     response_total_list = copy.deepcopy(response_total_list_input)
     iteration_num = 0
     token_num_count_list_add = []    
