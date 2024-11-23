@@ -66,6 +66,7 @@ def run_exp(
         "dialogue_history_list": [],
         "token_num_count_list": [],
         "hca_agent_response_list": [],
+        "hca_conversation_list": [],
         "attitude_info": [],
         "attitude_dialogue_dict": {},
         "pg_dict": None,  # For initial environment state
@@ -165,6 +166,8 @@ def run_exp(
             # TODO: ADD BAN HERE
 
             match = re.search(r"{.*}", raw_response, re.DOTALL)
+            
+            #TODO: DEBUG, this is not getting the correct Json format out sometimes
             if match:
                 response = match.group()
 
@@ -191,7 +194,8 @@ def run_exp(
             elif response == "Syntactic Error":
                 pass
 
-            data_dict["hca_agent_response_list"].append(raw_response)
+            data_dict["hca_agent_response_list"].append(response)
+            data_dict["hca_conversation_list"].append(raw_response)
             data_dict["attitude_dialogue_dict"][
                 f"Agent[{HCA_agent_location}]"
             ] = raw_response
@@ -205,7 +209,7 @@ def run_exp(
                 "w",
             ) as f:
                 print("SAVE HCA RESPONSE \n")
-                json.dump(data_dict["hca_agent_response_list"], f)
+                json.dump(data_dict["hca_conversation_list"], f)
 
             # write after syntactic check
             with open("conversation.txt", "a") as f:
@@ -308,6 +312,7 @@ def run_exp(
                             data_local["local_agent_response_list_dir"][
                                 "feedback1"
                             ] += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
+                            
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
 
                             data_dict["agree_num"] += 1
@@ -331,6 +336,8 @@ def run_exp(
                         # once not agree, set to zero to re-discuss lat plan
                         data_dict["agree_num"] = 0
                         print("I Don't Agree")
+                        
+                        #TODO: Do we need this?
                         data_local["local_agent_response_list_dir"][
                             "feedback1"
                         ] += FEEDBACK_LCOAL1
@@ -340,8 +347,9 @@ def run_exp(
                     print(
                         f"-------###-------###-------###-------JUDGE_ON_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
                     )
-                    local_response = data_local["local_agent_response_list_dir"]["feedback1"][-1]
+                    local_response = data_local["local_agent_response_list_dir"]["feedback1"]
                     cen_response = data_dict["hca_agent_response_list"][-1]
+                    
                     print(f"LOCAL RESPONSE: {local_response}")
                     print(f"CEN RESPONSE: {cen_response}")
                     judge_prompt = judge_prompt_func(
