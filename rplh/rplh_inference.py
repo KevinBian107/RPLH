@@ -2,7 +2,7 @@
 
 from LLM import *
 from prompt import *
-from env_create import *
+from env import *
 from execution_checker import *
 import os
 import json
@@ -340,11 +340,10 @@ def run_exp(
                     print(
                         f"-------###-------###-------###-------JUDGE_ON_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
                     )
-                    local_response = data_local["local_agent_response_list_dir"][
-                        "feedback1"
-                    ]
-                    cen_response = data_dict["user_prompt_list"][-1]
-
+                    local_response = data_local["local_agent_response_list_dir"]["feedback1"][-1]
+                    cen_response = data_dict["hca_agent_response_list"][-1]
+                    print(f"LOCAL RESPONSE: {local_response}")
+                    print(f"CEN RESPONSE: {cen_response}")
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
@@ -364,8 +363,8 @@ def run_exp(
                             with_action_syntactic_check_func(
                                 data_dict["pg_dict"],
                                 response,
-                                [judge_prompt],
-                                [],
+                                [judge_prompt, cen_response],
+                                [response],
                                 model_name,
                                 dialogue_history_method,
                                 is_judge=True,
