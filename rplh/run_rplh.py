@@ -134,18 +134,13 @@ def run_exp(
             state_update_prompt = state_update_func(
                 pg_row_num, pg_column_num, data_dict["pg_dict"]
             )
-
-            if data_dict["env_step"] == 0:
-                att_prompt = None
-            else:
-                att_prompt = data_dict["attitude_info"][-1]
-
+                
+            
             user_prompt_1 = rplh_prompt_func(
                 state_update_prompt,
                 data_dict,
                 dialogue_history_method,
                 HCA_agent_location,
-                att_prompt,
             )
             data_dict["user_prompt_list"].append(user_prompt_1)
             messages = message_construct_func(
@@ -174,13 +169,15 @@ def run_exp(
                 response = match.group()
 
             if response[0] == "{" and response[-1] == "}":
+                
+                # REDO HCA
                 response, token_num_count_list_add = with_action_syntactic_check_func(
                     data_dict["pg_dict"],
                     response,
                     [user_prompt_1],
-                    [],
+                    [response],
                     model_name,
-                    "_w_all_dialogue_history",
+                    dialogue_history_method,
                     False,
                 )
                 data_dict["token_num_count_list"] = (
@@ -195,7 +192,9 @@ def run_exp(
                 pass
 
             data_dict["hca_agent_response_list"].append(raw_response)
-            data_dict['attitude_dialogue_dict'][f'Agent[{HCA_agent_location}]'] = raw_response
+            data_dict["attitude_dialogue_dict"][
+                f"Agent[{HCA_agent_location}]"
+            ] = raw_response
 
             with open(
                 Saving_path_result
@@ -216,7 +215,7 @@ def run_exp(
                 length = str(len(data_dict["pg_state_list"]))
                 f.write(f"ALL STATE STORAGE LENGTH: {length} \n")
                 f.write(message)
-            
+
             """This for loop ends here for all agents doing centralized planning by themselves"""
 
             # -----------------------------------------FOR EACH AGENT RECIEVES COMMAND FROM THE CURRENT HELLUCINATING MAIN AGENT-----------------------------------------#
@@ -234,7 +233,7 @@ def run_exp(
             data_local["agent_dict"] = json.loads(response)
 
             for local_agent_row_i in range(pg_row_num):
-                
+
                 for local_agent_column_j in range(pg_column_num):
 
                     # TODO: IF BAN TRIGGERED, SKIP
@@ -278,7 +277,6 @@ def run_exp(
                             data_dict,
                             dialogue_history_method,
                             local_agent_location,
-                            att_prompt,  # refer back to HCA part
                         )
                         data_local["prompt_list_dir"][
                             f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
@@ -319,7 +317,9 @@ def run_exp(
                                 >= (pg_column_num + pg_row_num) // 2
                             ):
                                 break
-
+                        
+                        else:
+                            print('I Agree')
                             # agree no judge, use HCA response diretcly, avoid error.
                             continue
 
@@ -365,9 +365,9 @@ def run_exp(
                                 data_dict["pg_dict"],
                                 response,
                                 [judge_prompt],
-                                [response],
+                                [],
                                 model_name,
-                                "_w_all_dialogue_history",
+                                dialogue_history_method,
                                 is_judge=True,
                             )
                         )
@@ -386,23 +386,32 @@ def run_exp(
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
                 data_dict["dialogue_history_list"].append(dialogue_history)
-                
-                data_dict['attitude_dialogue_dict'][f'Agent[{local_agent_location}]'] = response_local_agent
 
-            data_dict["response_total_list"].append(response)
+                data_dict["attitude_dialogue_dict"][
+                    f"Agent[{local_agent_location}]"
+                ] = response_local_agent
+
+            data_dict["response_total_list"].append(response) # response come from HCA if no in judgement
 
             # -----------------------------------------ATTITUDE CHECK AFTER ALL AGENT-----------------------------------------#
             print(
                 "-------###-------###-------###-------ATTITUDE CHECK-------###-------###-------###-------"
             )
-            
-            # print(data_dict['attitude_dialogue_dict'])
 
-            attitude_info = attitude_agent_prompt_func(
-                data_dict['attitude_dialogue_dict']
+            attitude_prompt = attitude_agent_prompt_func(
+                data_dict["attitude_dialogue_dict"]
             )
+            attitude_message = attitude_message_construct_func(attitude_prompt)
+            attitude_info, token_num_count = LLaMA_response(
+                attitude_message, model_name
+            )
+            data_dict["token_num_count_list"].append(token_num_count)
 
             data_dict["attitude_info"].append(attitude_info)
+
+            with open("conversation.txt", "a") as f:
+                message = f"------###------###------ATTITUDE_AGENT_{a}------###------###------: \n {attitude_info} \n \n"
+                f.write(message)
 
             # -----------------------------------------EXECUTION OF ACTION AT EACH HCA AGENT LEVEL-----------------------------------------#
             print(
@@ -423,8 +432,6 @@ def run_exp(
             ) as f:
                 print("SAVE RESPONSE \n")
                 json.dump(original_response_dict, f)
-            
-            render_map_terminal_popup(data_dict["pg_dict"], [original_response_dict])
 
             with open(
                 Saving_path_result
@@ -443,8 +450,14 @@ def run_exp(
                 )
                 if system_error_feedback != "":
                     print(system_error_feedback)
-                data_dict["pg_dict"] = pg_dict_returned
 
+                # print(data_dict["pg_dict"])
+                data_dict["pg_dict"] = pg_dict_returned
+                
+                # render_map_terminal_popup(data_dict["pg_dict"], [original_response_dict])
+                render_graph_terminal_popup(data_dict["pg_dict"])
+
+                # print(data_dict["pg_dict"])
             except:
                 success_failure = "Hallucination of wrong plan"
                 pass

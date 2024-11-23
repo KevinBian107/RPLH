@@ -37,8 +37,9 @@ FEEDBACK_LCOAL1 = """
 
 
 def attitude_agent_prompt_func(history: dict) -> str:
-    '''
+    """
     Generates a prompt to analyze and derive the attitudes of agents based on their dialogue history.
+    Usage for condensed memory
 
     Args:
         history (str): A string representing the dialogue history of the agents.
@@ -46,12 +47,22 @@ def attitude_agent_prompt_func(history: dict) -> str:
     Returns:
         str: The attitudes are expected in the format:
              {Agent[0.5, 0.5]: attitude, Agent[0.5, 1.5]: attitude}.
-    '''
+    """
     attitude_prompt = f"""
+        The goals and rules of this environment are:
+        {GOAL_RULES}
+
         Given the dialogue history of each agent {history}. 
-        Please derive the attitude of each agents given their response. 
+
+        Please derive the attitude of each agents given their response.  
         Please list out the attitute of each agent in the folloing format:
         {{Agent[0.5, 0.5]: attitude, Agent[0.5, 1.5]: attitude}}
+        
+        Example: 
+        {{Agent[0.5, 0.5]: "A Good Decision Maker", 
+          Agent[0.5, 1.5]: "Too Aggressive",
+          Agent[1.5, 0.5]: "Serious",
+          Agent[1.5, 1.5]: "Smart Agent"}}
         
         State your justification after listing out attitudes
         Justification: ...
@@ -123,7 +134,6 @@ def rplh_prompt_func(
     data: Dict,
     dialogue_history_method: str,
     HCA_agent_location: str,
-    attitude: str,
 ) -> str:
     """
     Designs an input prompt for a role-playing leader-hallucinating (RPLH) agent
@@ -142,10 +152,19 @@ def rplh_prompt_func(
     Notes:
         Boxes just need to be moved to the target location, not in the target location.
     """
-
+    
+    if data["env_step"] == 0:
+        attitude = None
+        success_action = f"""No previous action, here is an sample:
+        {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}"""
+    else:
+        attitude = data["attitude_info"][-1]
+        success_action = data["response_total_list"][-1]
+    
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
     dialogue_history_list = data["dialogue_history_list"]
+    
     print(f"HISTORY METHOD: {dialogue_history_method}")
 
     if len(pg_state_list) - len(response_total_list) != 1:
@@ -259,7 +278,8 @@ def rplh_prompt_func(
             Please use thf ollowing format:
             - hallucination of future {N} steps...
 
-            Based on this, generate the action plan for the immediate next step for each agent and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[0.5, 1.5]":"move(box_blue, target_blue)"}}.
+            Based on this, generate the action plan for the immediate next step for each agent.
+            This is the success response of previous state: {success_action}.
             Remanber to assign action to your self as well.
             Now, plan the next step:
             """
@@ -273,7 +293,6 @@ def dialogue_func(
     data: Dict,
     dialogue_history_method: str,
     local_agent_location: str,
-    attitude: str,
 ) -> str:
     """
     Constructs a dialogue prompt for a local agent in response to the central planner.
@@ -289,7 +308,22 @@ def dialogue_func(
     Returns:
         str: Dialogue prompt for the local agent.
     """
-
+    
+    if data["env_step"] == 0:
+        success_action = f"""No previous action, here is an sample:
+        {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}"""
+    else:
+        success_action = data["response_total_list"][-1]
+        
+    attitude = data["attitude_info"][-1]
+    if attitude == None:
+        print("ATTITUDE IS NONE")
+        att_promt = "Be very critical"
+    else:
+        att_promt = f"""
+            Please pick up an attitude on this problem for yourself based on the attitude that this attitude report assigned to you: {attitude}.
+        """
+    
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
     dialogue_history_list = data["dialogue_history_list"]
@@ -351,14 +385,6 @@ def dialogue_func(
                 else:
                     break
 
-        if attitude == None:
-            print("ATTITUDE IS NONE")
-            att_promt = "Be very critical"
-        else:
-            att_promt = f"""
-             Please pick up an attitude on this problem for yourself based on the attitude that this attitude report assigned to you: {attitude}.
-            """
-
         local_HCA_prompt = f"""
             Imagine that you are a central planner directing agent in a grid-like field to move colored boxes.
             Particularly, you're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground at grid location of [{local_agent_location}].
@@ -378,7 +404,8 @@ def dialogue_func(
 
                 2. You would recieve an plan from the other central planner, please evaluate the given plan and give critical feedbacks.
 
-            You can imagine first about how you would plan these actions and specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])",  Agent[0.5, 1.5]":"move(box_blue, target_blue)"}}.
+            You can imagine first about how you would plan these actions and specify your action plan.
+            This is the success response of previous state: {success_action}
             Remanber to assign action to your self as well.
 
             The other central planner's current action plan is giving as: {{{central_response}}}.
@@ -417,8 +444,8 @@ def input_reprompt_func(state_update_prompt: str) -> str:
 
 
 def message_construct_func(
-    user_prompt_list: List[str],
-    response_total_list: List[str],
+    user_prompt_list: list[str],
+    response_total_list: list[str],
     dialogue_history_method: str,
 ) -> List[Dict[str, str]]:
     """
@@ -453,22 +480,14 @@ def message_construct_func(
     if f"{dialogue_history_method}" in (
         "_w_all_dialogue_history",
         "_w_compressed_dialogue_history",
-    ):
-
-        # print('length of user_prompt_list', len(user_prompt_list))
-        for i in range(len(user_prompt_list)):
-            messages.append({"role": "user", "content": user_prompt_list[i]})
-
-            # if i < len(user_prompt_list) - 1:
-            #     messages.append(
-            #         {"role": "assistant", "content": response_total_list[i]}
-            #     )
-
-    elif f"{dialogue_history_method}" in (
-        "_wo_any_dialogue_history",
         "_w_only_state_action_history",
     ):
-        messages.append({"role": "user", "content": user_prompt_list[-1]})
+        for i in range(len(user_prompt_list)):
+            messages.append({"role": "user", "content": user_prompt_list[i]})
+        
+        for i in range(len(response_total_list)):
+            messages.append({"role": "assistant", "content": response_total_list[i]})
+
     return messages
 
 
@@ -549,4 +568,24 @@ def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, s
     ]
     messages.append({"role": "user", "content": user_prompt_list[-1]})
 
+    return messages
+
+
+def attitude_message_construct_func(user_prompt: str) -> List[Dict[str, str]]:
+    """
+    Constructs a message sequence for a attitude agent to evaluate conflicting plans.
+
+    Args:
+        user_prompt_list (str): User prompts to provide context for the judge.
+
+    Returns:
+        List[Dict[str, str]]: A structured sequence of messages for the judge to process.
+    """
+    messages = [
+        {
+            "role": "system",
+            "content": f"""You are a helpful assistant specialized in deriving attitude from dialogue""",
+        },
+    ]
+    messages.append({"role": "user", "content": user_prompt})
     return messages
