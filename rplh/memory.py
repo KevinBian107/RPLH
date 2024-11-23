@@ -310,12 +310,13 @@ def dialogue_func(
     """
     
     if data["env_step"] == 0:
+        attitude = None
         success_action = f"""No previous action, here is an sample:
         {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}"""
     else:
+        attitude = data["attitude_info"][-1]
         success_action = data["response_total_list"][-1]
-        
-    attitude = data["attitude_info"][-1]
+    
     if attitude == None:
         print("ATTITUDE IS NONE")
         att_promt = "Be very critical"

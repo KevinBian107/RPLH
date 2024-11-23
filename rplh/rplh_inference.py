@@ -1,7 +1,7 @@
 """Need good documentation"""
 
 from LLM import *
-from prompt import *
+from memory import *
 from env import *
 from execution_checker import *
 import os

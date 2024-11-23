@@ -1,6 +1,6 @@
 """Synthetic checker module/execution module"""
 
-from prompt import *
+from memory import *
 from env import *
 from LLM import *
 import json
@@ -201,8 +201,8 @@ def with_action_syntactic_check_func(
         This only checks if the actions are valid, doesn't care about if it's json, if not json, directly fails it.
     """
     if not is_judge:
-        user_prompt_list = copy.deepcopy(user_prompt_list_input)
-        central_response = ''
+        user_prompt_list = copy.deepcopy(user_prompt_list_input) # only one passed in if not judge
+        central_response = '' # wouldn't be used if not judge
     else:
         user_prompt_list = copy.deepcopy([user_prompt_list_input[0]]) # 0 is always judge
         central_response = copy.deepcopy(user_prompt_list_input[1]) # 1 is always central
