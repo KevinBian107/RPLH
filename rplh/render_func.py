@@ -276,9 +276,9 @@ def render_map(initial_map, action_list):
         fig.update_layout(
             title=dict(
                 text=(
-                    f"Box Item Plot with state {iteration}"
+                    f"Box Item Plot with current state"
                     if iteration < 1
-                    else f"Box Item Plot with state {iteration}<br>action {action}"
+                    else f"Box Item Plot with state after <br>action {iteration} {action}"
                 ),  # Use the formatted title
                 x=0.5,  # Center the title horizontally
                 xanchor="center",

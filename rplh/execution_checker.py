@@ -1,7 +1,7 @@
 """Synthetic checker module/execution module"""
 
-from prompt import *
-from env_create import *
+from memory import *
+from env import *
 from LLM import *
 import json
 import re
@@ -60,18 +60,21 @@ def json_checker(
     return response, token_num_count_list_add
 
 
-def action_checker(response: str, pg_dict_input: list, is_judge: bool) -> str:
+def action_checker(response: str, central_response: str, pg_dict_input: list, is_judge: bool) -> str:
     """
     Validates the actions proposed in a response against the playground's state.
 
     Args:
         response (str): The proposed action plan in JSON format.
+        central_response (str): central response
         pg_dict_input (list): The current state of the playground as a dictionary.
         is_judge (bool): Whether the check is performed in judge mode.
 
     Returns:
         str: Feedback about any invalid actions. An empty string if all actions are valid.
     """
+    
+    print("----------EXECUTION AVAILABILITY CHECKER----------")
 
     # need to ensure this must be json
     original_response_dict = json.loads(response)
@@ -90,7 +93,7 @@ def action_checker(response: str, pg_dict_input: list, is_judge: bool) -> str:
 
             transformed_dict[coordinates] = [item, location]
 
-    feedback = ""
+    feedback = ''
     for key, value in transformed_dict.items():
         if (
             value[0] in pg_dict_original[str(key[0]) + "_" + str(key[1])]
@@ -118,7 +121,8 @@ def action_checker(response: str, pg_dict_input: list, is_judge: bool) -> str:
             pass
         else:
             if is_judge:
-                feedback += f"You are the judge and your assigned task for {key[0]}_{key[1]} is not in the doable action list, so choose the alternative action of the central planner;"
+                feedback += f"""You are the judge and your assigned task for {key[0]}_{key[1]} is not in the doable action list,
+                                so choose the alternative action from the central central planner {central_response};"""
             else:
                 feedback += f"Your assigned task for {key[0]}_{key[1]} is not in the doable action list; "
 
@@ -146,8 +150,8 @@ def retake_action(
     Returns:
         tuple[str, list]: A tuple containing the corrected JSON response and updated token count list.
     """
-
-    print("----------EXECUTION AVAILABILITY CHECKER----------")
+    
+    print("----------RETAKE ACTION----------")
 
     feedback += f"""Please replan for all the agents again with the same ouput format. The output should have the same json format:
     {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}.
@@ -196,32 +200,38 @@ def with_action_syntactic_check_func(
     Notes:
         This only checks if the actions are valid, doesn't care about if it's json, if not json, directly fails it.
     """
-    user_prompt_list = copy.deepcopy(user_prompt_list_input)
+    if not is_judge:
+        user_prompt_list = copy.deepcopy(user_prompt_list_input) # only one passed in if not judge
+        central_response = '' # wouldn't be used if not judge
+    else:
+        user_prompt_list = copy.deepcopy([user_prompt_list_input[0]]) # 0 is always judge
+        central_response = copy.deepcopy(user_prompt_list_input[1]) # 1 is always central
+        
     response_total_list = copy.deepcopy(response_total_list_input)
     iteration_num = 0
-    token_num_count_list_add = []
-
-    # initial check json
-    response, token_num_count_list_add = json_checker(
-        response,
-        token_num_count_list_add,
-        model_name,
-    )
-    response_total_list.append(response)
-
+    token_num_count_list_add = []    
+    feedback = 'INITIAL_CHECK'
+    
+    # logic gate: put on DSC20 final exam please
     while iteration_num < CHECK_ITER:
 
         # gate loop: no feedback + no error -> pass
-        if not is_valid_json(response):
-            response, token_num_count_list_add = json_checker(
-                response, token_num_count_list_add, model_name
-            )
-            # print(response)
+        # always check Json + action (round 0), later Json + feedback
+        if ((not is_valid_json(response)) or (feedback != '')):
+            print('IN GATE CHECKING')
             
-            # for action validity check, it must be in json format
-            feedback = action_checker(response, pg_dict_input, is_judge)
+            if not is_valid_json(response):
+                print('BEFORE JSON: ',response)
+                response, token_num_count_list_add = json_checker(
+                    response, token_num_count_list_add, model_name
+                )
+                print('AFTER JSON:', response)
+                
+                # preventing JSON checker change action
+                feedback = action_checker(response, central_response, pg_dict_input, is_judge)
     
-            if feedback != "":
+            if feedback != '':
+                print('RETAKE ACTION')
                 response, token_num_count_list_add = retake_action(
                     feedback,
                     user_prompt_list,
@@ -234,10 +244,14 @@ def with_action_syntactic_check_func(
 
                 if response == "Out of tokens":
                     return response, token_num_count_list_add
-                iteration_num += 1
-
+                
+            # for action validity check, it must be in json format
+            feedback = action_checker(response, central_response, pg_dict_input, is_judge)
+            
         else:
             # no feedback
             return response, token_num_count_list_add
+        
+        iteration_num += 1
 
     return "Syntactic Error", token_num_count_list_add

@@ -2,8 +2,7 @@
 
 """Working on changing environment to self charcterized env, also working on visualization"""
 
-from prompt import *
-from env_create import *
+from memory import *
 import os
 import json
 import re
