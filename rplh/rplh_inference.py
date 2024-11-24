@@ -163,13 +163,14 @@ def run_exp(
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
             match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
-
             # TODO: ADD BAN HERE
 
             if match:
                 possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
                 response = possible_action_lst[-1]
+                print(f'Match response:{response}')
                 response = process_response(response)
+                print(f'Processed response:{response}\n')
 
                 # REDO HCA
                 response, token_num_count_list_add = with_action_syntactic_check_func(
@@ -366,7 +367,9 @@ def run_exp(
                     if match:
                         possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
                         response = possible_action_lst[-1]
+                        print(f'Match response:{response}')
                         response = process_response(response)
+                        print(f'Processed response:{response}\n')
 
                         response, token_num_count_list_add = (
                             with_action_syntactic_check_func(

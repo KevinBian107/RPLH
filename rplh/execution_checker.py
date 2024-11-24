@@ -168,18 +168,14 @@ def retake_action(
     print(f"Length of messages {len(messages)}")
     response, token_num_count = LLaMA_response(messages, model_name)
     
-    match = re.search(r"{.*}", response, re.DOTALL)
-    if match:
-        response = match.group()
-        token_num_count_list_add.append(token_num_count)
-
     match = re.search(r"\{.*?\}", response, re.DOTALL)
     if match:
         possible_action_lst = re.findall(r"\{.*?\}", response, re.DOTALL)
         response = possible_action_lst[-1]
         response = process_response(response)
+        token_num_count_list_add.append(token_num_count)
     else:
-        print('ERROR: NO CURLY BRACKET FOUND IN RETAKE ACTION STAGE')
+        print(f'ERROR: NO CURLY BRACKET FOUND IN RETAKE ACTION STAGE: {response}')
 
     return response, token_num_count_list_add
 
@@ -229,7 +225,7 @@ def with_action_syntactic_check_func(
         # gate loop: no feedback + no error -> pass
         # always check Json + action (round 0), later Json + feedback
         if ((not is_valid_json(response)) or (feedback != '')):
-            print('IN GATE CHECKING')
+            print(f'IN GATE CHECKING: {response}')
             
             if not is_valid_json(response):
                 print('BEFORE JSON: ',response)
@@ -239,6 +235,9 @@ def with_action_syntactic_check_func(
                 print('AFTER JSON:', response)
                 
                 # preventing JSON checker change action
+                feedback = action_checker(response, central_response, pg_dict_input, is_judge)
+            # if no json error, then check action
+            elif feedback == 'INITIAL_CHECK':
                 feedback = action_checker(response, central_response, pg_dict_input, is_judge)
     
             if feedback != '':
@@ -251,13 +250,14 @@ def with_action_syntactic_check_func(
                     dialogue_history_method,
                     model_name,
                 )
+                print(f'ACTION RETAKEN: {response}')
                 response_total_list.append(response)
 
                 if response == "Out of tokens":
                     return response, token_num_count_list_add
                 
             # for action validity check, it must be in json format
-            feedback = action_checker(response, central_response, pg_dict_input, is_judge)
+            # feedback = action_checker(response, central_response, pg_dict_input, is_judge)
             
         else:
             # no feedback
@@ -281,9 +281,8 @@ def process_response(response: str) -> dict:
     Returns:
         dict: A dictionary where keys are agent identifiers (e.g., "Agent[0.5, 0.5]") 
               and values are actions (e.g., "move(box_blue, square[0.5, 1.5])").
-
-    Raises:
-        ValueError: If the input string cannot be parsed.
+    Note:
+        Return input response back if error in parsing the response. 
     """
 
     try:
@@ -294,7 +293,8 @@ def process_response(response: str) -> dict:
         agent_action = re.findall(pattern_2, response, re.IGNORECASE)
 
     except:
-        raise ValueError(f'Error in parsing the response: {response}')
+        return response
+        # raise ValueError(f'Error in parsing the response: {response}')
 
     num_agent = len(agent_loc)
     action = []
@@ -304,8 +304,8 @@ def process_response(response: str) -> dict:
 
         json_str = '{' + ', '.join(action) + '}'
     else:
-        print(agent_loc)
-        print(agent_action)
-        raise ValueError(f'Agent-action pair is inconsistent: {response}')
+        print(f'Agent-action pair is inconsistent: {response}')
+        return response
+        # raise ValueError(f'Agent-action pair is inconsistent: {response}')
     
     return json_str
