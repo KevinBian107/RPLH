@@ -13,7 +13,6 @@ def render_graph_terminal_popup(box_map):
     fig.show()
     print("Graph displayed in a browser pop-up window.")
 
-
 def render_map_terminal_popup(box_map, action_list):
     box_map, action_list = trans_data(box_map, action_list)
     render_map(box_map, action_list)
@@ -52,7 +51,7 @@ def transform_action(action):
 
 def parse_action(action):
     """
-    Parse an action string into its components.
+    Parse an action string into its components. 
 
     Args:
         action (str): The action string to parse (e.g., 'move(box_red, target_blue)' or 'move(box_red, square[1.5, 1.5])').

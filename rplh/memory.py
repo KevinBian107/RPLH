@@ -87,7 +87,7 @@ def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -
     """
 
     judge_prompt = f"""
-        You a a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
+        You are a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
         You personally do not need to make any moves but only serve as the decision maker to judge others' moves.
         
         The goals and rules of this environment are:
@@ -106,7 +106,7 @@ def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -
 
 def LLM_summarize_func(
     state_action_prompt_next_initial: str,
-    model_name: str = "qwen2.5:14b-instruct-q3_K_L",
+    model_name: str = "llama3.2:3b-instruct-q5_K_M",
 ) -> str:
     """
     Summarizes a lengthy prompt for more concise input to the model.
@@ -272,10 +272,10 @@ def rplh_prompt_func(
   
             Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}.
 
-            Think about waht the future {N} actions would be if you want to achieve the goal and write this justification out.
-            Remanber to wirte out for each step, what you plan fro every agent to do and what would teh consequences state change be.
+            Think about what the future {N} actions would be if you want to achieve the goal and write this justification out.
+            Remanber to wirte out for each step, what you plan for every agent to do and what would the consequences state change be.
             
-            Please use thf ollowing format:
+            Please use the following format:
             - hallucination of future {N} steps...
 
             Based on this, generate the action plan for the immediate next step for each agent.
@@ -409,7 +409,7 @@ def dialogue_func(
             This is the success response of previous state: {success_action}
             Remanber to assign action to your self as well.
 
-            The other central planner's current action plan is giving as: {{{central_response}}}.
+            The other central planner's current action plan is giving as: {{central_response}}.
             Please be critical in thinking about this plan.
 
             Please evaluate the given plan.
@@ -467,14 +467,12 @@ def message_construct_func(
     messages = [
         {
             "role": "system",
-            "content": f"""You are a helpful assistant. 
+            "content": f"""You are a helpful assistant.
                  
-                 When asked to specifiy your action plan, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}. 
-                 
-                 Make sure that:
-                 - If no action for an agent in the next step, do not include it in JSON output. 
-                 - At most one action for each agent in each step.
-                 """,
+                Make sure that:
+                - If no action for an agent in the next step, do not include it in JSON output. 
+                - At most one action for each agent in each step.
+                """,
         }
     ]
 
@@ -506,8 +504,6 @@ def judge_message_construct_func(user_prompt_list: List[str]) -> List[Dict[str, 
         {
             "role": "system",
             "content": f"""You are a helpful assistant specialized for judging conflicting plans.
-                 
-                 When asked to specifiy your action plan, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}. 
                  
                  Make sure that:
                  - If no action for an agent in the next step, do not include it in JSON output. 
@@ -567,7 +563,7 @@ def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, s
                             Now the fixed json format message is:""",
         },
     ]
-    messages.append({"role": "user", "content": user_prompt_list[-1]})
+    messages.append({"role": "user", "content": user_prompt_list})
 
     return messages
 
