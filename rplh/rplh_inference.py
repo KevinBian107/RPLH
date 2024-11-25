@@ -4,6 +4,8 @@ from LLM import *
 from memory import *
 from env import *
 from execution_checker import *
+from render_func import *
+
 import os
 import json
 import re
@@ -11,7 +13,7 @@ import sys
 import os
 from typing import Dict, List, Tuple, Union
 import pandas as pd
-from render_func import *
+from functools import partial
 
 
 def run_exp(
@@ -143,6 +145,16 @@ def run_exp(
                 dialogue_history_method,
                 HCA_agent_location,
             )
+            
+            # partial function
+            partial_rplh_prompt_func = partial(
+                rplh_prompt_func,
+                state_update_prompt=state_update_prompt,
+                data_dict=data_dict,
+                dialogue_history_method=dialogue_history_method,
+                HCA_agent_location=HCA_agent_location
+                )
+            
             data_dict["user_prompt_list"].append(user_prompt_1)
             messages = message_construct_func(
                 [user_prompt_1], [], dialogue_history_method
@@ -180,6 +192,7 @@ def run_exp(
                     [response],
                     model_name,
                     dialogue_history_method,
+                    partial_rplh_prompt_func,
                     False,
                 )
                 data_dict["token_num_count_list"] = (
@@ -354,7 +367,19 @@ def run_exp(
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
-                    messages = judge_message_construct_func([judge_prompt])
+                    
+                    # partial function
+                    partial_judge_prompt_func = partial(
+                        judge_prompt_func,
+                        local_response=local_response,
+                        cen_response=cen_response,
+                        pg_dict=data_dict["pg_dict"]
+                        )
+        
+                    messages = message_construct_func(
+                        [judge_prompt], [], dialogue_history_method
+                    )
+                    
                     response_judge, token_num_count = LLaMA_response(
                         messages, model_name
                     )
@@ -379,6 +404,7 @@ def run_exp(
                                 [response],
                                 model_name,
                                 dialogue_history_method,
+                                partial_judge_prompt_func,
                                 is_judge=True,
                                 )
                             )

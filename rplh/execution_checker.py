@@ -7,7 +7,7 @@ import json
 import re
 import copy
 import numpy as np
-from typing import Union
+from typing import Union, Callable
 
 CHECK_ITER = 10
 
@@ -27,43 +27,8 @@ def is_valid_json(response: str) -> bool:
         return True
     except:  # all error return false
         return False
-
-
-def json_checker(
-    response: str, token_num_count_list_add: list, model_name: str
-) -> tuple[str, list]:
-    """
-    Continuously checks and corrects the JSON format of a response.
-
-    Args:
-        response (str): The initial response string to validate and correct.
-        token_num_count_list_add (list): A list to store token count data for each attempt.
-        model_name (str): The name of the model generating responses.
-
-    Returns:
-        tuple[str, list]: A tuple containing the corrected JSON response and updated token count list.
-    """
-    valid = is_valid_json(response)
-    count = 0
-    while not valid:
-        count += 1
-        print(f"----------JSON CHECKER PERFORMING {count} NUMBER OF TIMES----------")
-        messages = json_check_message_construct_func(response)
-        response, token_num_count = LLaMA_response(messages, model_name)
-            
-        match = re.search(r"\{.*?\}", response, re.DOTALL)
-        if match:
-            possible_action_lst = re.findall(r"\{.*?\}", response, re.DOTALL)
-            response = possible_action_lst[-1]
-            response = process_response(response)
-
-            token_num_count_list_add.append(token_num_count)
-            valid = is_valid_json(response)
-
-    return response, token_num_count_list_add
-
-
-def action_checker(response: str, central_response: str, pg_dict_input: list, is_judge: bool) -> str:
+    
+def is_valid_action(response: str, central_response: str, pg_dict_input: list, is_judge: bool) -> str:
     """
     Validates the actions proposed in a response against the playground's state.
 
@@ -132,6 +97,39 @@ def action_checker(response: str, central_response: str, pg_dict_input: list, is
     return feedback
 
 
+def reformat_json(
+    response: str, token_num_count_list_add: list, model_name: str,
+    prompt_func: Callable[[str, dict, str, str], str], dialogue_history_method: str
+) -> tuple[str, list]:
+    """
+    Continuously checks and corrects the JSON format of a response.
+    Args:
+        response (str): The initial response string to validate and correct.
+        token_num_count_list_add (list): A list to store token count data for each attempt.
+        model_name (str): The name of the model generating responses.
+        prompt_func (Callable): specific partial function passed in based on local/hca/judge agent
+        dialogue_history_method (str): Method for managing dialogue history.
+    Returns:
+        tuple[str, list]: A tuple containing the corrected JSON response and updated token count list.
+    """
+    valid = is_valid_json(response)
+    count = 0
+    feedback = 'This json format is incorrect, please check'
+    while not valid:
+        count += 1
+        print(f"----------JSON CHECKER PERFORMING {count} NUMBER OF TIMES----------")
+        check_prompt_1 = prompt_func(feedback)
+        messages = message_construct_func(
+                [check_prompt_1], [], dialogue_history_method
+        )
+        raw_response, token_num_count = LLaMA_response(messages, model_name)
+        match = re.search(r"{.*}", raw_response, re.DOTALL)
+        if match:
+            response = match.group()
+            token_num_count_list_add.append(token_num_count)
+            valid = is_valid_json(response)
+    return response, token_num_count_list_add
+
 def retake_action(
     feedback: str,
     user_prompt_list: list[str],
@@ -139,6 +137,7 @@ def retake_action(
     token_num_count_list_add: list[str],
     dialogue_history_method: str,
     model_name: str,
+    prompt_func: Callable[[str, dict, str, str], str],
 ) -> tuple[str, list]:
     """
     Prompts the model to regenerate actions based on feedback.
@@ -149,6 +148,7 @@ def retake_action(
         response_total_list (list): List of responses to maintain dialogue context.
         dialogue_history_method (str): Method to manage dialogue history.
         model_name (str): The name of the model generating responses.
+        prompt_func (Callable): specific partial function passed in based on local/hca/judge agent
 
     Returns:
         tuple[str, list]: A tuple containing the corrected JSON response and updated token count list.
@@ -160,22 +160,21 @@ def retake_action(
     {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}.
     Do not explain, just directly output json directory. Remenber to output in json format Your response:"""
 
-    user_prompt_list.append(feedback)
+    retake_action_prompt_1 = prompt_func(feedback)
     messages = message_construct_func(
-        user_prompt_list, response_total_list, dialogue_history_method
+            [retake_action_prompt_1], [], dialogue_history_method
     )
-
-    print(f"Length of messages {len(messages)}")
-    response, token_num_count = LLaMA_response(messages, model_name)
     
-    match = re.search(r"\{.*?\}", response, re.DOTALL)
+    print(f"Length of messages {len(messages)}")
+
+    raw_response, token_num_count = LLaMA_response(messages, model_name)
+
+    match = re.search(r"{.*}", raw_response, re.DOTALL)
     if match:
-        possible_action_lst = re.findall(r"\{.*?\}", response, re.DOTALL)
-        response = possible_action_lst[-1]
-        response = process_response(response)
+        response = match.group()
         token_num_count_list_add.append(token_num_count)
-    else:
-        print(f'ERROR: NO CURLY BRACKET FOUND IN RETAKE ACTION STAGE: {response}')
+
+    response, token_num_count = LLaMA_response(messages, model_name)
 
     return response, token_num_count_list_add
 
@@ -187,6 +186,7 @@ def with_action_syntactic_check_func(
     response_total_list_input: list[str],
     model_name: str,
     dialogue_history_method: str,
+    prompt_func: Callable[[str, dict, str, str], str],
     is_judge: bool = False,
 ) -> tuple[Union[str, dict], list[int]]:
     """
@@ -199,6 +199,7 @@ def with_action_syntactic_check_func(
         response_total_list_input (list[str]): List of previous responses.
         model_name (str): Name of the model generating the response.
         dialogue_history_method (str): Method for managing dialogue history.
+        prompt_func (Callable): specific partial function passed in based on local/hca/judge agent
         is_judge (bool, optional): Flag to indicate if the check is for a judge's response.
 
     Returns:
@@ -229,16 +230,17 @@ def with_action_syntactic_check_func(
             
             if not is_valid_json(response):
                 print('BEFORE JSON: ',response)
-                response, token_num_count_list_add = json_checker(
-                    response, token_num_count_list_add, model_name
+                response, token_num_count_list_add = reformat_json(
+                    response, token_num_count_list_add, model_name, prompt_func, dialogue_history_method
                 )
                 print('AFTER JSON:', response)
                 
                 # preventing JSON checker change action
-                feedback = action_checker(response, central_response, pg_dict_input, is_judge)
+                feedback = is_valid_action(response, central_response, pg_dict_input, is_judge)
+            
             # if no json error, then check action
             elif feedback == 'INITIAL_CHECK':
-                feedback = action_checker(response, central_response, pg_dict_input, is_judge)
+                feedback = is_valid_action(response, central_response, pg_dict_input, is_judge)
     
             if feedback != '':
                 print('RETAKE ACTION')
@@ -249,6 +251,7 @@ def with_action_syntactic_check_func(
                     token_num_count_list_add,
                     dialogue_history_method,
                     model_name,
+                    prompt_func,
                 )
                 print(f'ACTION RETAKEN: {response}')
                 response_total_list.append(response)
@@ -257,7 +260,7 @@ def with_action_syntactic_check_func(
                     return response, token_num_count_list_add
                 
             # for action validity check, it must be in json format
-            # feedback = action_checker(response, central_response, pg_dict_input, is_judge)
+            # feedback = is_valid_action(response, central_response, pg_dict_input, is_judge)
             
         else:
             # no feedback

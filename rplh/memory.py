@@ -134,6 +134,7 @@ def rplh_prompt_func(
     data: Dict,
     dialogue_history_method: str,
     HCA_agent_location: str,
+    feedback: str = '',
 ) -> str:
     """
     Designs an input prompt for a role-playing leader-hallucinating (RPLH) agent
@@ -281,6 +282,9 @@ def rplh_prompt_func(
             Based on this, generate the action plan for the immediate next step for each agent.
             This is the success response of previous state: {success_action}.
             Remanber to assign action to your self as well.
+            
+             {feedback}
+            
             Now, plan the next step:
             """
     return HCA_prompt
@@ -293,6 +297,7 @@ def dialogue_func(
     data: Dict,
     dialogue_history_method: str,
     local_agent_location: str,
+    feedback: str = '',
 ) -> str:
     """
     Constructs a dialogue prompt for a local agent in response to the central planner.
@@ -418,6 +423,9 @@ def dialogue_func(
             Ensure that you still include the actions that you agree with.
             
             Pleas remanber to only change the actions you disagree with and not change other actions, remanber to include all actions for each agents.
+            
+            {feedback}
+            
             Your response:
         """
     return local_HCA_prompt
@@ -462,17 +470,22 @@ def message_construct_func(
 
     Returns:
         List[Dict[str, str]]: List of message dictionaries for the model.
+        
+    Notes:
+        We all use this function now through out the RPLH system to maintain consistency, only other case is teh attitude agent.
     """
 
     messages = [
         {
             "role": "system",
-            "content": f"""You are a helpful assistant.
+            "content": f"""You are a helpful assistant. 
                  
-                Make sure that:
-                - If no action for an agent in the next step, do not include it in JSON output. 
-                - At most one action for each agent in each step.
-                """,
+                 When asked to specifiy your action plan, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}. 
+                 
+                 Make sure that:
+                 - If no action for an agent in the next step, do not include it in JSON output. 
+                 - At most one action for each agent in each step.
+                 """,
         }
     ]
 
@@ -486,84 +499,6 @@ def message_construct_func(
         
         for i in range(len(response_total_list)):
             messages.append({"role": "assistant", "content": response_total_list[i]})
-
-    return messages
-
-
-def judge_message_construct_func(user_prompt_list: List[str]) -> List[Dict[str, str]]:
-    """
-    Constructs a message sequence for a judge agent to evaluate conflicting plans.
-
-    Args:
-        user_prompt_list (List[str]): List of user prompts to provide context for the judge.
-
-    Returns:
-        List[Dict[str, str]]: A structured sequence of messages for the judge to process.
-    """
-    messages = [
-        {
-            "role": "system",
-            "content": f"""You are a helpful assistant specialized for judging conflicting plans.
-                 
-                 Make sure that:
-                 - If no action for an agent in the next step, do not include it in JSON output. 
-                 - At most one action for each agent in each step.
-                 """,
-        }
-    ]
-    for i in range(len(user_prompt_list)):
-        messages.append({"role": "user", "content": user_prompt_list[i]})
-
-    return messages
-
-
-def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, str]]:
-    """
-    Constructs a message for validating and fixing JSON format in a response.
-
-    Args:
-        response (str): The response string to check and fix.
-
-    Returns:
-        List[Dict[str, str]]: Message sequence to fix the JSON.
-
-    Notes:
-        Must give example or else LLM give {"Agent0_50_5":"move(box_green, target_green)", "Agent1_50_5":"move(box_red, target_red)"}
-    """
-
-    EX = f""" Here are three wrong and correct json example pairs that you can learn from:
-    
-    Wrong format (missing quotation mark in the start):
-        {{Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}
-    Correct format:
-        {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}
-    
-    Wrong format (missing bracket in the end)
-        {{"Agent[1.5, 1.5]":"move(box_green, target_green])", "Agent[1.5, 1.5]":"move(box_purple, square[0.5, 0.5]"}}
-    Correct format:
-        {{"Agent[1.5, 1.5]":"move(box_green, target_green])", "Agent[1.5, 1.5]":"move(box_purple, square[0.5, 0.5])"}}
-    
-    Wrong format (missing multiple quotation marks):
-        {{"Agent[0.5, 1.5]":"move(box_red, square[1.5, 1.5])", Agent[0.5, 0.5]":move(box_blue, target_blue])"}}
-    Correct format:
-        {{"Agent[0.5, 1.5]":"move(box_red, square[1.5, 1.5])", "Agent[0.5, 0.5]":"move(box_blue, target_blue])"}}
-        
-        """
-
-    messages = [
-        {
-            "role": "system",
-            "content": "You are a helpful assistant specialized for fixingJson format output by agents in a grid-like environment.",
-        },
-        {
-            "role": "user",
-            "content": f"""Please fix the Json message in here {user_prompt_list} and give only this JSON as output.
-                            You should not change the content of the message that is  passed in.
-                            When asked to give json format, specificy it strictly in JSON format. Here is some example of corerct and wrong json pairs: {EX}.
-                            Now the fixed json format message is:""",
-        },
-    ]
-    messages.append({"role": "user", "content": user_prompt_list})
 
     return messages
 
@@ -586,3 +521,53 @@ def attitude_message_construct_func(user_prompt: str) -> List[Dict[str, str]]:
     ]
     messages.append({"role": "user", "content": user_prompt})
     return messages
+
+# def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, str]]:
+#     """
+#     Constructs a message for validating and fixing JSON format in a response.
+
+#     Args:
+#         response (str): The response string to check and fix.
+
+#     Returns:
+#         List[Dict[str, str]]: Message sequence to fix the JSON.
+
+#     Notes:
+#         Must give example or else LLM give {"Agent0_50_5":"move(box_green, target_green)", "Agent1_50_5":"move(box_red, target_red)"}
+#     """
+
+#     EX = f""" Here are three wrong and correct json example pairs that you can learn from:
+    
+#     Wrong format (missing quotation mark in the start):
+#         {{Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}
+#     Correct format:
+#         {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}
+    
+#     Wrong format (missing bracket in the end)
+#         {{"Agent[1.5, 1.5]":"move(box_green, target_green])", "Agent[1.5, 1.5]":"move(box_purple, square[0.5, 0.5]"}}
+#     Correct format:
+#         {{"Agent[1.5, 1.5]":"move(box_green, target_green])", "Agent[1.5, 1.5]":"move(box_purple, square[0.5, 0.5])"}}
+    
+#     Wrong format (missing multiple quotation marks):
+#         {{"Agent[0.5, 1.5]":"move(box_red, square[1.5, 1.5])", Agent[0.5, 0.5]":move(box_blue, target_blue])"}}
+#     Correct format:
+#         {{"Agent[0.5, 1.5]":"move(box_red, square[1.5, 1.5])", "Agent[0.5, 0.5]":"move(box_blue, target_blue])"}}
+        
+#         """
+
+#     messages = [
+#         {
+#             "role": "system",
+#             "content": "You are a helpful assistant specialized for fixingJson format output by agents in a grid-like environment.",
+#         },
+#         {
+#             "role": "user",
+#             "content": f"""Please fix the Json message in here {user_prompt_list} and give only this JSON as output.
+#                             You should not change the content of the message that is  passed in.
+#                             When asked to give json format, specificy it strictly in JSON format. Here is some example of corerct and wrong json pairs: {EX}.
+#                             Now the fixed json format message is:""",
+#         },
+#     ]
+#     messages.append({"role": "user", "content": user_prompt_list})
+
+#     return messages
