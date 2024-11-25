@@ -27,8 +27,11 @@ def is_valid_json(response: str) -> bool:
         return True
     except:  # all error return false
         return False
-    
-def is_valid_action(response: str, central_response: str, pg_dict_input: list, is_judge: bool) -> str:
+
+
+def is_valid_action(
+    response: str, central_response: str, pg_dict_input: list, is_judge: bool
+) -> str:
     """
     Validates the actions proposed in a response against the playground's state.
 
@@ -41,7 +44,7 @@ def is_valid_action(response: str, central_response: str, pg_dict_input: list, i
     Returns:
         str: Feedback about any invalid actions. An empty string if all actions are valid.
     """
-    
+
     print("----------EXECUTION AVAILABILITY CHECKER----------")
 
     # need to ensure this must be json
@@ -61,7 +64,7 @@ def is_valid_action(response: str, central_response: str, pg_dict_input: list, i
 
             transformed_dict[coordinates] = [item, location]
 
-    feedback = ''
+    feedback = ""
     for key, value in transformed_dict.items():
         if (
             value[0] in pg_dict_original[str(key[0]) + "_" + str(key[1])]
@@ -98,8 +101,11 @@ def is_valid_action(response: str, central_response: str, pg_dict_input: list, i
 
 
 def reformat_json(
-    response: str, token_num_count_list_add: list, model_name: str,
-    prompt_func: Callable[[str, dict, str, str], str], dialogue_history_method: str
+    response: str,
+    token_num_count_list_add: list,
+    model_name: str,
+    prompt_func: Callable[[str, dict, str, str], str],
+    dialogue_history_method: str,
 ) -> tuple[str, list]:
     """
     Continuously checks and corrects the JSON format of a response.
@@ -114,21 +120,25 @@ def reformat_json(
     """
     valid = is_valid_json(response)
     count = 0
-    feedback = 'This json format is incorrect, please check'
+    feedback = "This json format is incorrect, please check"
     while not valid:
         count += 1
         print(f"----------JSON CHECKER PERFORMING {count} NUMBER OF TIMES----------")
         check_prompt_1 = prompt_func(feedback)
-        messages = message_construct_func(
-                [check_prompt_1], [], dialogue_history_method
-        )
+        messages = message_construct_func([check_prompt_1], [], dialogue_history_method)
         raw_response, token_num_count = LLaMA_response(messages, model_name)
-        match = re.search(r"{.*}", raw_response, re.DOTALL)
+
+        match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
         if match:
-            response = match.group()
+            possible_action_lst = re.findall(r"\{.*?\}", response, re.DOTALL)
+            response = possible_action_lst[-1]
+            response = process_response(response)
+
             token_num_count_list_add.append(token_num_count)
             valid = is_valid_json(response)
+
     return response, token_num_count_list_add
+
 
 def retake_action(
     feedback: str,
@@ -153,7 +163,7 @@ def retake_action(
     Returns:
         tuple[str, list]: A tuple containing the corrected JSON response and updated token count list.
     """
-    
+
     print("----------RETAKE ACTION----------")
 
     feedback += f"""Please replan for all the agents again with the same ouput format. The output should have the same json format:
@@ -162,19 +172,21 @@ def retake_action(
 
     retake_action_prompt_1 = prompt_func(feedback)
     messages = message_construct_func(
-            [retake_action_prompt_1], [], dialogue_history_method
+        [retake_action_prompt_1], [], dialogue_history_method
     )
-    
+
     print(f"Length of messages {len(messages)}")
 
     raw_response, token_num_count = LLaMA_response(messages, model_name)
 
-    match = re.search(r"{.*}", raw_response, re.DOTALL)
+    match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
     if match:
-        response = match.group()
+        possible_action_lst = re.findall(r"\{.*?\}", response, re.DOTALL)
+        response = possible_action_lst[-1]
+        response = process_response(response)
         token_num_count_list_add.append(token_num_count)
-
-    response, token_num_count = LLaMA_response(messages, model_name)
+    else:
+        print(f"ERROR: NO CURLY BRACKET FOUND IN RETAKE ACTION STAGE: {response}")
 
     return response, token_num_count_list_add
 
@@ -209,41 +221,55 @@ def with_action_syntactic_check_func(
         This only checks if the actions are valid, doesn't care about if it's json, if not json, directly fails it.
     """
     if not is_judge:
-        user_prompt_list = copy.deepcopy(user_prompt_list_input) # only one passed in if not judge
-        central_response = '' # wouldn't be used if not judge
+        user_prompt_list = copy.deepcopy(
+            user_prompt_list_input
+        )  # only one passed in if not judge
+        central_response = ""  # wouldn't be used if not judge
     else:
-        user_prompt_list = copy.deepcopy([user_prompt_list_input[0]]) # 0 is always judge
-        central_response = copy.deepcopy(user_prompt_list_input[1]) # 1 is always central
-        
+        user_prompt_list = copy.deepcopy(
+            [user_prompt_list_input[0]]
+        )  # 0 is always judge
+        central_response = copy.deepcopy(
+            user_prompt_list_input[1]
+        )  # 1 is always central
+
     response_total_list = copy.deepcopy(response_total_list_input)
     iteration_num = 0
-    token_num_count_list_add = []    
-    feedback = 'INITIAL_CHECK'
-    
+    token_num_count_list_add = []
+    feedback = "INITIAL_CHECK"
+
     # logic gate: put on DSC20 final exam please
     while iteration_num < CHECK_ITER:
 
         # gate loop: no feedback + no error -> pass
         # always check Json + action (round 0), later Json + feedback
-        if ((not is_valid_json(response)) or (feedback != '')):
-            print(f'IN GATE CHECKING: {response}')
-            
+        if (not is_valid_json(response)) or (feedback != ""):
+            print(f"IN GATE CHECKING: {response}")
+
             if not is_valid_json(response):
-                print('BEFORE JSON: ',response)
+                print("BEFORE JSON: ", response)
                 response, token_num_count_list_add = reformat_json(
-                    response, token_num_count_list_add, model_name, prompt_func, dialogue_history_method
+                    response,
+                    token_num_count_list_add,
+                    model_name,
+                    prompt_func,
+                    dialogue_history_method,
                 )
-                print('AFTER JSON:', response)
-                
+                print("AFTER JSON:", response)
+
                 # preventing JSON checker change action
-                feedback = is_valid_action(response, central_response, pg_dict_input, is_judge)
-            
+                feedback = is_valid_action(
+                    response, central_response, pg_dict_input, is_judge
+                )
+
             # if no json error, then check action
-            elif feedback == 'INITIAL_CHECK':
-                feedback = is_valid_action(response, central_response, pg_dict_input, is_judge)
-    
-            if feedback != '':
-                print('RETAKE ACTION')
+            elif feedback == "INITIAL_CHECK":
+                feedback = is_valid_action(
+                    response, central_response, pg_dict_input, is_judge
+                )
+
+            if feedback != "":
+                print("RETAKE ACTION")
                 response, token_num_count_list_add = retake_action(
                     feedback,
                     user_prompt_list,
@@ -253,46 +279,47 @@ def with_action_syntactic_check_func(
                     model_name,
                     prompt_func,
                 )
-                print(f'ACTION RETAKEN: {response}')
+                print(f"ACTION RETAKEN: {response}")
                 response_total_list.append(response)
 
                 if response == "Out of tokens":
                     return response, token_num_count_list_add
-                
+
             # for action validity check, it must be in json format
             # feedback = is_valid_action(response, central_response, pg_dict_input, is_judge)
-            
+
         else:
             # no feedback
             return response, token_num_count_list_add
-        
+
         iteration_num += 1
 
     return "Syntactic Error", token_num_count_list_add
 
+
 def process_response(response: str) -> dict:
     """
-    Processes a raw response string containing agent locations and actions, 
+    Processes a raw response string containing agent locations and actions,
     extracts relevant information, and converts it into dictionary format for loading in json.
 
     Args:
-        raw_response (str): The string is expected to include an "EXECUTE" keyword followed by 
-            JSON-like content describing agent locations and actions 
+        raw_response (str): The string is expected to include an "EXECUTE" keyword followed by
+            JSON-like content describing agent locations and actions
             (e.g "EXECUTE
             {"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])")
 
     Returns:
-        dict: A dictionary where keys are agent identifiers (e.g., "Agent[0.5, 0.5]") 
+        dict: A dictionary where keys are agent identifiers (e.g., "Agent[0.5, 0.5]")
               and values are actions (e.g., "move(box_blue, square[0.5, 1.5])").
     Note:
-        Return input response back if error in parsing the response. 
+        Return input response back if error in parsing the response.
     """
 
     try:
-        pattern_1 = r'agent\[(\d+\.\d+), (\d+\.\d+)\]'
+        pattern_1 = r"agent\[(\d+\.\d+), (\d+\.\d+)\]"
         agent_loc = re.findall(pattern_1, response, re.IGNORECASE)
 
-        pattern_2 =  r'move\((.*?),\s(.*?)\)' #r'move(\(\w+, (?:square.\d+\.\d+, \d+\.\d+.|\w+)\))'
+        pattern_2 = r"move\((.*?),\s(.*?)\)"  # r'move(\(\w+, (?:square.\d+\.\d+, \d+\.\d+.|\w+)\))'
         agent_action = re.findall(pattern_2, response, re.IGNORECASE)
 
     except:
@@ -303,12 +330,14 @@ def process_response(response: str) -> dict:
     action = []
     if len(agent_loc) == len(agent_action):
         for i in range(num_agent):
-            action.append(f'"Agent[{agent_loc[i][0]}, {agent_loc[i][1]}]": "move({agent_action[i][0]}, {agent_action[i][1]})"')
+            action.append(
+                f'"Agent[{agent_loc[i][0]}, {agent_loc[i][1]}]": "move({agent_action[i][0]}, {agent_action[i][1]})"'
+            )
 
-        json_str = '{' + ', '.join(action) + '}'
+        json_str = "{" + ", ".join(action) + "}"
     else:
-        print(f'Agent-action pair is inconsistent: {response}')
+        print(f"Agent-action pair is inconsistent: {response}")
         return response
         # raise ValueError(f'Agent-action pair is inconsistent: {response}')
-    
+
     return json_str
