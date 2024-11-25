@@ -5,13 +5,11 @@ from memory import *
 from env import *
 from execution_checker import *
 from render_func import *
-
 import os
 import json
 import re
 import sys
 import os
-from typing import Dict, List, Tuple, Union
 import pandas as pd
 from functools import partial
 
@@ -23,11 +21,11 @@ def run_exp(
     iteration_num: int,
     query_time_limit: int,
     dialogue_history_method: str,
-) -> Tuple[
-    List[str],
-    List[str],
-    List[Dict],
-    List[int],
+) -> tuple[
+    list[str],
+    list[str],
+    list[dict],
+    list[int],
     str,
     int,
     str,
@@ -160,7 +158,8 @@ def run_exp(
             )
 
             raw_response, token_num_count = LLaMA_response(messages, model_name)
-
+            print(raw_response) # empty after second
+            
             # save user prompt
             with open(
                 Saving_path_result
@@ -365,8 +364,9 @@ def run_exp(
                     ]
                     cen_response = data_dict["hca_agent_response_list"][-1]
 
-                    print(f"LOCAL RESPONSE: {local_response}")
-                    print(f"CEN RESPONSE: {cen_response}")
+                    # print(f"LOCAL RESPONSE: {local_response}")
+                    # print(f"CEN RESPONSE: {cen_response}")
+                    
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
@@ -390,7 +390,6 @@ def run_exp(
                     # -----------------------------------------SYNTACTIC CHECK FOR JUDGE-----------------------------------------#
                     data_dict["token_num_count_list"].append(token_num_count)
                     match = re.search(r"\{.*?\}", response_judge, re.DOTALL)
-                    # match not right
 
                     if match:
                         possible_action_lst = re.findall(
@@ -547,7 +546,7 @@ pg_row_num = 2
 pg_column_num = 2
 iteration_num = 0
 query_time_limit = 10  # now it's iteration
-model_name = "qwen2.5:7b-instruct-q5_K_M"
+model_name = "qwen2.5:14b-instruct-q3_K_L"
 print(f"-------------------Model name: {model_name}-------------------")
 
 #'_w_all_dialogue_history', '_w_compressed_dialogue_history', '_w_only_state_action_history'

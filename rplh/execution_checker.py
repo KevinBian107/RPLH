@@ -11,7 +11,6 @@ from typing import Union, Callable
 
 CHECK_ITER = 10
 
-
 def is_valid_json(response: str) -> bool:
     """
     Checks if a response string is in valid JSON format.
@@ -162,13 +161,16 @@ def retake_action(
 
     Returns:
         tuple[str, list]: A tuple containing the corrected JSON response and updated token count list.
+
+    Note:
+        Sending back to HCA agent for retaking action, keep things simple and direct.
     """
 
     print("----------RETAKE ACTION----------")
 
-    feedback += f"""Please replan for all the agents again with the same ouput format. The output should have the same json format:
-    {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}.
-    Do not explain, just directly output json directory. Remenber to output in json format Your response:"""
+    # feedback += f"""Please replan for all the agents again with the same ouput format. The output should have the same json format:
+    # {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}.
+    # Do not explain, just directly output json directory. Remenber to output in json format Your response:"""
 
     retake_action_prompt_1 = prompt_func(feedback)
     messages = message_construct_func(
@@ -241,8 +243,7 @@ def with_action_syntactic_check_func(
     # logic gate: put on DSC20 final exam please
     while iteration_num < CHECK_ITER:
 
-        # gate loop: no feedback + no error -> pass
-        # always check Json + action (round 0), later Json + feedback
+        # gate loop: no feedback + no error -> pass (always check Json + action (round 0), later Json + feedback)
         if (not is_valid_json(response)) or (feedback != ""):
             print(f"IN GATE CHECKING: {response}")
 
