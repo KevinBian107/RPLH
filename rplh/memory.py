@@ -1,5 +1,6 @@
 from LLM import *
 import tiktoken
+from typing import Dict, List, Tuple, Union
 
 enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"
@@ -37,7 +38,7 @@ FEEDBACK_LCOAL1 = """
 
 def rplh_prompt_func(
     state_update_prompt: str,
-    data: dict,
+    data: Dict,
     dialogue_history_method: str,
     HCA_agent_location: str,
     feedback: str = "",
@@ -48,7 +49,7 @@ def rplh_prompt_func(
 
     Args:
         state_update_prompt (str): Description of the current state and available actions.
-        data (dict): Dictionary containing past responses, states, and dialogue history.
+        data (Dict): Dictionary containing past responses, states, and dialogue history.
         dialogue_history_method (str): Method to handle dialogue history, e.g.,
                                        "_w_only_state_action_history", "_w_compressed_dialogue_history".
         HCA_agent_location (str): Location of the HCA agent in the grid.
@@ -90,19 +91,25 @@ def rplh_prompt_func(
 
         # first iteration no summary
         if dialogue_history_method == "_w_only_state_action_history":
-            state_action_prompt = ""
-            for i in range(len(response_total_list) - 1, -1, -1):
-                state_action_prompt_next = (
-                    f"State{i + 1}: {pg_state_list[i]}\nAction{i + 1}: {response_total_list[i]}\n\n"
-                    + state_action_prompt
-                )
-                if (
-                    token_num_count + len(enc.encode(state_action_prompt_next))
-                    < input_prompt_token_limit
-                ):
-                    state_action_prompt = state_action_prompt_next
-                else:
-                    break
+            # Markovian state-action history
+            previous_state_idx = len(response_total_list) - 1
+            state_action_prompt = f"""
+            Previous State: {pg_state_list[previous_state_idx]}
+            Previous Action: {response_total_list[previous_state_idx]}\n\n
+            """
+
+            # for i in range(len(response_total_list) - 1, -1, -1):
+            #     state_action_prompt_next = (
+            #         f"State{i + 1}: {pg_state_list[i]}\nAction{i + 1}: {response_total_list[i]}\n\n"
+            #         + state_action_prompt
+            #     )
+            #     if (
+            #         token_num_count + len(enc.encode(state_action_prompt_next))
+            #         < input_prompt_token_limit
+            #     ):
+            #         state_action_prompt = state_action_prompt_next
+            #     else:
+            #         break
         elif dialogue_history_method == "_w_compressed_dialogue_history":
             state_action_prompt = ""
             for i in range(len(response_total_list) - 1, -1, -1):
@@ -200,7 +207,7 @@ def dialogue_func(
     state_update_prompt_local_agent: str,
     state_update_prompt_other_agent: str,
     central_response: str,
-    data: dict,
+    data: Dict,
     dialogue_history_method: str,
     local_agent_location: str,
     feedback: str = "",
@@ -212,7 +219,7 @@ def dialogue_func(
         state_update_prompt_local_agent (str): State and actions specific to the local agent.
         state_update_prompt_other_agent (str): State and actions of other agents.
         central_response (str): Central planner's response.
-        data (dict): Data containing historical responses and states.
+        data (Dict): Data containing historical responses and states.
         dialogue_history_method (str): Method for managing dialogue history.
         local_agent_location (str): Location of the local agent in the grid.
 
@@ -328,7 +335,7 @@ def dialogue_func(
             If not, briefly explain your objections to this other central planner and an judger agent will get involved.
             Ensure that you still include the actions that you agree with.
             
-            Pleas remanber to only change the actions you disagree with and not change other actions, remanber to include all actions for each agents.
+            Please remanber to only change the actions you disagree with and not change other actions, remanber to include all actions for each agents.
             
             {feedback}
             
@@ -337,14 +344,14 @@ def dialogue_func(
     return local_HCA_prompt
 
 
-def judge_prompt_func(local_response: str, cen_response: str, cur_state: dict) -> str:
+def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -> str:
     """
     Constructs a prompt for the judge agent to evaluate and select the best plan.
 
     Args:
         local_response (str): Response from a local agent.
         cen_response (str): Central planner's proposed plan.
-        prev_states (dict): Previous states and actions taken by all agents.
+        prev_states (Dict): Previous states and actions taken by all agents.
 
     Returns:
         str: The constructed prompt for the judge.
@@ -377,7 +384,7 @@ def attitude_agent_prompt_func(history: dict) -> str:
     Usage for condensed memory
 
     Args:
-        history (dict): A dictionary representing the dialogue history of the agents.
+        history (str): A string representing the dialogue history of the agents.
 
     Returns:
         str: The attitudes are expected in the format:
@@ -455,7 +462,7 @@ def message_construct_func(
     user_prompt_list: list[str],
     response_total_list: list[str],
     dialogue_history_method: str,
-) -> list[dict[str, str]]:
+) -> List[Dict[str, str]]:
     """
     Constructs messages for the model with the appropriate dialogue context.
     Create a specialized LLM dictrionary with prompt information, later convert back in LLM class
@@ -463,12 +470,12 @@ def message_construct_func(
     (with all dialogue history concats)
 
     Args:
-        user_prompt_list (list[str]): list of user prompts.
-        response_total_list (list[str]): list of model responses.
+        user_prompt_list (List[str]): List of user prompts.
+        response_total_list (List[str]): List of model responses.
         dialogue_history_method (str): Method for managing dialogue history.
 
     Returns:
-        list[dict[str, str]]: List of message dictionaries for the model.
+        List[Dict[str, str]]: List of message dictionaries for the model.
 
     Notes:
         We all use this function now through out the RPLH system to maintain consistency, only other case is teh attitude agent.
@@ -502,7 +509,7 @@ def message_construct_func(
     return messages
 
 
-def attitude_message_construct_func(user_prompt: str) -> list[dict[str, str]]:
+def attitude_message_construct_func(user_prompt: str) -> List[Dict[str, str]]:
     """
     Constructs a message sequence for a attitude agent to evaluate conflicting plans.
 
