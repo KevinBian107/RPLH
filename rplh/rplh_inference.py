@@ -12,7 +12,7 @@ import os
 from typing import Dict, List, Tuple, Union
 import pandas as pd
 from render_func import *
-
+from response_model import *
 
 def run_exp(
     Saving_path: str,
@@ -148,7 +148,9 @@ def run_exp(
                 [user_prompt_1], [], dialogue_history_method
             )
 
-            raw_response, token_num_count = LLaMA_response(messages, model_name)
+            raw_response, token_num_count = LLaMA_response(messages, model_name, ActionPlan)
+            response = json.loads(raw_response)
+            response = response['actions_plan']
 
             # save user prompt
             with open(
@@ -162,32 +164,32 @@ def run_exp(
 
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
-            match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
+            # match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
             # TODO: ADD BAN HERE
 
-            if match:
-                possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
-                response = possible_action_lst[-1]
-                print(f'Match response:{response}')
-                response = process_response(response)
-                print(f'Processed response:{response}\n')
+            #if match:
+            #possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
+            #response = possible_action_lst[-1]
+            #print(f'Match response:{response}')
+            #response = process_response(response)
+            print(f'response:{response}\n')
 
-                # REDO HCA
-                response, token_num_count_list_add = with_action_syntactic_check_func(
-                    data_dict["pg_dict"],
-                    response,
-                    [user_prompt_1],
-                    [response],
-                    model_name,
-                    dialogue_history_method,
-                    False,
-                )
-                data_dict["token_num_count_list"] = (
-                    data_dict["token_num_count_list"] + token_num_count_list_add
-                )
-                print(f"AGENT ACTION RESPONSE: {response}")
-            else:
-                raise ValueError(f"No action format found in raw response: {raw_response}")
+            # REDO HCA
+            response, token_num_count_list_add = with_action_syntactic_check_func(
+                data_dict["pg_dict"],
+                response,
+                [user_prompt_1],
+                [response],
+                model_name,
+                dialogue_history_method,
+                False,
+            )
+            data_dict["token_num_count_list"] = (
+                data_dict["token_num_count_list"] + token_num_count_list_add
+            )
+            print(f"AGENT ACTION RESPONSE: {response}")
+            #else:
+            #    raise ValueError(f"No action format found in raw response: {raw_response}")
             if response == "Out of tokens":
                 pass
             elif response == "Syntactic Error":
@@ -386,7 +388,8 @@ def run_exp(
                             data_dict["token_num_count_list"] + 
                             token_num_count_list_add
                             )
-
+                    else:
+                        raise ValueError(f"No action format found in raw response: {raw_response}")
                     # after syntactic checks
                     with open("conversation.txt", "a") as f:
                         messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_judge} \n \n"

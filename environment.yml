@@ -30,4 +30,5 @@ dependencies:
       - tiktoken
       - black
       - plotly
+      - instructor
 
