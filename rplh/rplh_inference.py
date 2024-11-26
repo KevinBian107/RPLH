@@ -159,9 +159,10 @@ def run_exp(
                 [user_prompt_1], [], dialogue_history_method
             )
 
-            raw_response, token_num_count = LLaMA_response_json(messages, model_name, ActionPlan)
-            response = json.loads(raw_response)
-            response = response['actions_plan']
+            raw_response, token_num_count = LLaMA_response_json(messages, model_name, HCA)
+            raw_response = json.loads(raw_response)
+            response_str = "\n".join([f"{k}: {v}" for k, v, in raw_response.items()])
+            response = raw_response['actions_plan']
 
             # save user prompt
             with open(
@@ -209,10 +210,10 @@ def run_exp(
                 pass
 
             data_dict["hca_agent_response_list"].append(response)
-            data_dict["hca_conversation_list"].append(raw_response)
+            data_dict["hca_conversation_list"].append(response_str)
             data_dict["attitude_dialogue_dict"][
                 f"Agent[{HCA_agent_location}]"
-            ] = raw_response
+            ] = response_str
 
             with open(
                 Saving_path_result
@@ -227,7 +228,7 @@ def run_exp(
 
             # write after syntactic check
             with open("conversation.txt", "a") as f:
-                message = f"------###------###------HCA_{a}------###------###------: \n {raw_response} \n \n"
+                message = f"------###------###------HCA_{a}------###------###------: \n {response_str} \n \n"
                 sep = f"\n-------###-------###-------###--------------###-------###-------###-------\n"
                 f.write(sep)
                 length = str(len(data_dict["pg_state_list"]))
@@ -385,43 +386,44 @@ def run_exp(
                         [judge_prompt], [], dialogue_history_method
                     )
 
-                    response_judge, token_num_count = LLaMA_response(
-                        messages, model_name
-                    )
+                    raw_response_judge, token_num_count = LLaMA_response_json(messages, model_name, Judge)
+                    raw_response_judge = json.loads(raw_response_judge)
+                    response_str_judge = "\n".join([f"{k}: {v}" for k, v, in raw_response_judge.items()])
+                    response_judge = raw_response_judge['actions_plan']
 
                     # -----------------------------------------SYNTACTIC CHECK FOR JUDGE-----------------------------------------#
                     data_dict["token_num_count_list"].append(token_num_count)
-                    match = re.search(r"\{.*?\}", response_judge, re.DOTALL)
+                    #match = re.search(r"\{.*?\}", response_judge, re.DOTALL)
                     # match not right
 
-                    if match:
-                        possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
-                        response = possible_action_lst[-1]
-                        print(f'Match response:{response}')
-                        response = process_response(response)
-                        print(f'Processed response:{response}\n')
+                    #if match:
+                    #possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
+                    #response = possible_action_lst[-1]
+                    #print(f'Match response:{response}')
+                    #response = process_response(response)
+                    #print(f'Processed response:{response}\n')
 
-                        response, token_num_count_list_add = (
-                            with_action_syntactic_check_func(
-                                data_dict["pg_dict"],
-                                response,
-                                [judge_prompt, cen_response],
-                                [response],
-                                model_name,
-                                dialogue_history_method,
-                                partial_judge_prompt_func,
-                                is_judge=True,
-                                )
+                    response, token_num_count_list_add = (
+                        with_action_syntactic_check_func(
+                            data_dict["pg_dict"],
+                            response_judge,
+                            [judge_prompt, cen_response],
+                            [response_judge],
+                            model_name,
+                            dialogue_history_method,
+                            partial_judge_prompt_func,
+                            is_judge=True,
                             )
-                        data_dict["token_num_count_list"] = (
-                            data_dict["token_num_count_list"] + 
-                            token_num_count_list_add
-                            )
-                    else:
-                        raise ValueError(f"No action format found in raw response: {raw_response}")
+                        )
+                    data_dict["token_num_count_list"] = (
+                        data_dict["token_num_count_list"] + 
+                        token_num_count_list_add
+                        )
+                    #else:
+                    #    raise ValueError(f"No action format found in raw response: {raw_response}")
                     # after syntactic checks
                     with open("conversation.txt", "a") as f:
-                        messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_judge} \n \n"
+                        messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_str_judge} \n \n"
                         f.write(messages)
 
                     print(f"JUDGE MODIFIED:\n {response}")

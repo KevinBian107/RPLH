@@ -91,12 +91,15 @@ def rplh_prompt_func(
 
         # first iteration no summary
         if dialogue_history_method == "_w_only_state_action_history":
+            state_action_prompt = ""
             # Markovian state-action history
             previous_state_idx = len(response_total_list) - 1
-            state_action_prompt = f"""
-            Previous State: {pg_state_list[previous_state_idx]}
-            Previous Action: {response_total_list[previous_state_idx]}\n\n
-            """
+            if previous_state_idx != -1:
+                print(previous_state_idx)
+                state_action_prompt = f"""
+                Previous State: {pg_state_list[previous_state_idx]}
+                Previous Action: {response_total_list[previous_state_idx]}\n\n
+                """
 
             # for i in range(len(response_total_list) - 1, -1, -1):
             #     state_action_prompt_next = (

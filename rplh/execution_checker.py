@@ -8,6 +8,7 @@ import re
 import copy
 import numpy as np
 from typing import Union, Callable
+from response_model import *
 
 CHECK_ITER = 10
 
@@ -47,7 +48,8 @@ def is_valid_action(
     print("----------EXECUTION AVAILABILITY CHECKER----------")
 
     # need to ensure this must be json
-    original_response_dict = json.loads(response)
+    #original_response_dict = json.loads(response)
+    original_response_dict = response
     pg_dict_original = copy.deepcopy(pg_dict_input)
     transformed_dict = {}
     for key, value in original_response_dict.items():
@@ -146,6 +148,7 @@ def retake_action(
     token_num_count_list_add: list[str],
     dialogue_history_method: str,
     model_name: str,
+    is_judge: bool, 
     prompt_func: Callable[[str, dict, str, str], str],
 ) -> tuple[str, list]:
     """
@@ -178,17 +181,26 @@ def retake_action(
     )
 
     print(f"Length of messages {len(messages)}")
-
-    raw_response, token_num_count = LLaMA_response(messages, model_name)
-
-    match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
-    if match:
-        possible_action_lst = re.findall(r"\{.*?\}", response, re.DOTALL)
-        response = possible_action_lst[-1]
-        response = process_response(response)
-        token_num_count_list_add.append(token_num_count)
+    
+    # choose response_model depends on 
+    response_model = None
+    if is_judge:
+        response_model = Judge
     else:
-        print(f"ERROR: NO CURLY BRACKET FOUND IN RETAKE ACTION STAGE: {response}")
+        response_model = HCA
+
+    raw_response, token_num_count = LLaMA_response_json(messages, model_name, response_model)
+    response = json.loads(raw_response)
+    response = response['actions_plan']
+    token_num_count_list_add.append(token_num_count)
+
+    #match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
+    #if match:
+        #possible_action_lst = re.findall(r"\{.*?\}", response, re.DOTALL)
+        #response = possible_action_lst[-1]
+        #response = process_response(response)
+    #else:
+    #    print(f"ERROR: NO CURLY BRACKET FOUND IN RETAKE ACTION STAGE: {response}")
 
     return response, token_num_count_list_add
 
@@ -246,8 +258,8 @@ def with_action_syntactic_check_func(
         feedback = is_valid_action(
             response, central_response, pg_dict_input, is_judge
         )
-        
         if feedback != "":
+            print("RETAKE ACTION")
             response, token_num_count_list_add = retake_action(
                 feedback,
                 user_prompt_list,
@@ -257,6 +269,15 @@ def with_action_syntactic_check_func(
                 model_name,
                 prompt_func,
             )
+            print(f"ACTION RETAKEN: {response}")
+            response_total_list.append(response)
+            if response == "Out of tokens":
+                return response, token_num_count_list_add
+        else:
+            #  no feedback
+            return response, token_num_count_list_add
+        
+        iteration_num += 1
 
         # # gate loop: no feedback + no error -> pass (always check Json + action (round 0), later Json + feedback)
         # if (not is_valid_json(response)) or (feedback != ""):
@@ -307,8 +328,6 @@ def with_action_syntactic_check_func(
         # else:
         #     # no feedback
         #     return response, token_num_count_list_add
-
-        # iteration_num += 1
 
     return "Syntactic Error", token_num_count_list_add
 
