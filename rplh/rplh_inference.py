@@ -149,7 +149,7 @@ def run_exp(
             partial_rplh_prompt_func = partial(
                 rplh_prompt_func,
                 state_update_prompt=state_update_prompt,
-                data_dict=data_dict,
+                data=data_dict,
                 dialogue_history_method=dialogue_history_method,
                 HCA_agent_location=HCA_agent_location,
             )
@@ -196,6 +196,7 @@ def run_exp(
                 [response],
                 model_name,
                 dialogue_history_method,
+                partial_rplh_prompt_func,
                 False,
             )
             data_dict["token_num_count_list"] = (
@@ -249,7 +250,7 @@ def run_exp(
             }
 
             data_local["local_agent_response_list_dir"]["feedback1"] = ""
-            data_local["agent_dict"] = json.loads(response)
+            data_local["agent_dict"] = response #json.loads(response)
 
             for local_agent_row_i in range(pg_row_num):
 
@@ -466,9 +467,7 @@ def run_exp(
                 "-------###-------###-------###-------EXECUTION-------###-------###-------###-------"
             )
 
-            original_response_dict = json.loads(
-                data_dict["response_total_list"][index_query_times]
-            )
+            original_response_dict = data_dict["response_total_list"][index_query_times]
 
             with open(
                 Saving_path_result

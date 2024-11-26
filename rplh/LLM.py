@@ -31,7 +31,6 @@ def LLaMA_response_json(
             mode=instructor.Mode.JSON,
         )
         while True:
-            print(count)
             if count >= MAX_RETRY:
                 print(f'''Max retries reach. LLM failed at outputing the correct result. 
                 Input parameter response_model might have issue: {response_model.schema_json(indent=2)}''')
@@ -48,7 +47,7 @@ def LLaMA_response_json(
                 token_num_count = sum(
                 len(enc.encode(msg["content"])) for msg in messages
                 ) + len(enc.encode(response))
-                return response
+                return response, token_num_count
             except ValidationError as ve:
                 count += 1
                 print(f"Validation failed during LLM output generation: {ve} for {count} times. Retrying...")

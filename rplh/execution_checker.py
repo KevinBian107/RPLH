@@ -148,8 +148,8 @@ def retake_action(
     token_num_count_list_add: list[str],
     dialogue_history_method: str,
     model_name: str,
-    is_judge: bool, 
     prompt_func: Callable[[str, dict, str, str], str],
+    is_judge: bool = False,
 ) -> tuple[str, list]:
     """
     Prompts the model to regenerate actions based on feedback.
@@ -175,7 +175,7 @@ def retake_action(
     # {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}.
     # Do not explain, just directly output json directory. Remenber to output in json format Your response:"""
 
-    retake_action_prompt_1 = prompt_func(feedback)
+    retake_action_prompt_1 = prompt_func(feedback=feedback)
     messages = message_construct_func(
         [retake_action_prompt_1], [], dialogue_history_method
     )
@@ -212,7 +212,7 @@ def with_action_syntactic_check_func(
     response_total_list_input: list[str],
     model_name: str,
     dialogue_history_method: str,
-    prompt_func: Callable[[str, dict, str, str], str],
+    prompt_func: Callable[[str]],
     is_judge: bool = False,
 ) -> tuple[Union[str, dict], list[int]]:
     """
@@ -268,6 +268,7 @@ def with_action_syntactic_check_func(
                 dialogue_history_method,
                 model_name,
                 prompt_func,
+                is_judge,
             )
             print(f"ACTION RETAKEN: {response}")
             response_total_list.append(response)

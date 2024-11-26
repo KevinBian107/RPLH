@@ -199,7 +199,7 @@ def rplh_prompt_func(
             This is the success response of previous state: {success_action}.
             Remanber to assign action to your self as well.
             
-             {feedback}
+            {feedback}
             
             Now, plan the next step:
             """
@@ -376,6 +376,9 @@ def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -
         Do not come-up with something new, only choose one of them, do not give explantion, just choose one of them.
 
         Include an agent only if it has a task next. If the agent does not have task, do not include.
+
+        {feedback}
+        
         Now, select the next step:
         """
     return judge_prompt
