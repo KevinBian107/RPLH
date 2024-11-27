@@ -162,7 +162,6 @@ def rplh_prompt_func(
             Use the following format:
             - Attitude of agent...
             - Reaction of agent...
-            
             """
         if feedback != '':
             feedback = 'There is error in preivous action plan. Here is the feedbcak: ' + feedback
@@ -177,20 +176,17 @@ def rplh_prompt_func(
             Your task is to instruct each agent to match all boxes to their color-coded targets.
             After each move, agents provide updates for the next sequence of actions.
             You are the central agent and your job is to coordinate the agents optimally.
-            The previous state and action are: {state_action_prompt}
   
             Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}.
 
             {att_promt}
 
-            Think about what the future {N} actions would be if you want to achieve the goal and write this justification out.
-            Remanber to wirte out for each step, what you plan for every agent to do and what would the consequences state change be.
-
-            Based on this, generate the action plan for the immediate next step for each agent.
+            Think about what the future {N} actions would be if you want to achieve the goal with the reasoning.
+            Remanber to wirte out for each step, what you plan for every agent to do and what would the state change be.
             
             {feedback}
             
-            Now, plan the next step:
+            Now, plan the next action plan:
             """
     return HCA_prompt
 
