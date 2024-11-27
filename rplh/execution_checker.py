@@ -212,7 +212,7 @@ def with_action_syntactic_check_func(
     response_total_list_input: list[str],
     model_name: str,
     dialogue_history_method: str,
-    prompt_func: Callable[[str]],
+    prompt_func: Callable[[str, dict, str, str], str],
     is_judge: bool = False,
 ) -> tuple[Union[str, dict], list[int]]:
     """

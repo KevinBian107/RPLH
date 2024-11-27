@@ -134,9 +134,10 @@ def run_exp(
                 json.dump(data_dict["pg_dict"], f)
 
             # at second iter, should have more info, get available actions
-            state_update_prompt = state_update_func(
+            state_update_prompt, agent_action = state_update_func(
                 pg_row_num, pg_column_num, data_dict["pg_dict"]
             )
+            print(f'STATE UPDATE PROMPT: {state_update_prompt}')
 
             user_prompt_1 = rplh_prompt_func(
                 state_update_prompt,
@@ -186,7 +187,7 @@ def run_exp(
             #print(f'Match response:{response}')
             #response = process_response(response)
 
-            print(f'Response: {response}')
+            print(f'HCA Raw Response: {raw_response}')
 
             # REDO HCA
             response, token_num_count_list_add = with_action_syntactic_check_func(
@@ -380,7 +381,7 @@ def run_exp(
                         judge_prompt_func,
                         local_response=local_response,
                         cen_response=cen_response,
-                        pg_dict=data_dict["pg_dict"],
+                        cur_state=data_dict["pg_dict"],
                     )
 
                     messages = message_construct_func(

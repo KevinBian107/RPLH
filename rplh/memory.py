@@ -9,28 +9,28 @@ input_prompt_token_limit = 3000
 N = 5
 
 # critical, prompt is a hyperparameter
-GOAL_RULES = f"""You are an agentin a grid-like field to move colored boxes.
-                Each agent is assigned to a 1x1 square and can only interact with objects in its area.
-                Agents can move a box to a neighboring square or a same-color target.
-                You can only move same color boxes to same color targets.
-                Each square can contain many targets and boxes.
-                The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
-                Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
-                When planning for action, remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop.
-                Avoid being stuck in action loops.
-                Additionally, when there is a box still in the grid (i.e. the state space contains {{"0.5_0.5": ["box_red"]}}), then the agent in this grid (Agent[0.5, 0.5]) have to make an action in the next step.
-                Again, if there is a box in the grid, the corresponding agent in the grid has to make an action in this step.
-                One agent can make any numbers of action if needed (i.e. {{"Agent[1.5, 1.5]":"move(box_blue, square[0.5, 1.5])","Agent[1.5, 1.5]": "move(box_green, target_green)"}}).
-                Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
-                Include an agent only if it has a task next. No agent name should be given if the agent does not have a task next.
-                You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
-                """
+GOAL_RULES = f"""
+            You are an agent in a grid-like field to move colored boxes.
+            Each agent is assigned to a 1x1 square and can only interact with objects in its area.
+            Agents can move a box to a neighboring square or a same-color target.
+            You can only move same color boxes to same color targets.
+            Each square can contain many targets and boxes.
+            The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
+            Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
+            When planning for action, remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop.
+            Avoid being stuck in action loops.
+            Additionally, when there is a box still in the grid (i.e. the state space contains {{"0.5, 0.5": ["box_red"]}}), then the agent in this grid (Agent[0.5, 0.5]) have to make an action in the next step.
+            Again, if there is a box in the grid, the corresponding agent in the grid has to make an action in this step.
+            Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
+            One agent can only make one action. Include an agent only if it has a task next. 
+            No agent name should be given if the agent does not have a task next. 
+            """
 
 FEEDBACK_LCOAL1 = """
             This is the feedback from local agents.
             If you find some errors in your previous plan, try to modify it.
             Otherwise, output the same plan as before.
-            The output should have the same json format {Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}, as above.
+            The output should have the same json format. 
             Do not explain, just directly output json directory.
             Your response:
             """
@@ -97,9 +97,9 @@ def rplh_prompt_func(
             if previous_state_idx != -1:
                 print(previous_state_idx)
                 state_action_prompt = f"""
-                Previous State: {pg_state_list[previous_state_idx]}
-                Previous Action: {response_total_list[previous_state_idx]}\n\n
-                """
+            Previous State: {pg_state_list[previous_state_idx]}
+            Previous Action: {response_total_list[previous_state_idx]}\n\n
+            """
 
             # for i in range(len(response_total_list) - 1, -1, -1):
             #     state_action_prompt_next = (
@@ -151,27 +151,21 @@ def rplh_prompt_func(
             Please learn from attitude in the following ways:
 
                 1. Please undrstand the attitude of each agents in this environment,
-                including yourself based on this attitude report given from another agent: {attitude}.
+                including yourself based on this attitude report given from another agent: 
+                
+                {attitude}.
 
-                2. Based on this charcteristics of each agent, pelase do two things and added them after each agent's attitude:
+                2. Based on this charcteristics of each agent, please do two things and added them after each agent's attitude:
                     i. Reason about the reactions each agent would have towards your command.
                     ii. Reason about how they would give actions if they are the central agent.
-                
-                3. Based on each agent's attitude, you have the ability to "ban" an agent from making comments to your plan. Remanber to only ban one agent.
-                Think carefully for this action as this would result in less opinions, but may result in better plans depending on the attitude of the "banned" agent.
-                If you want to ban an agent, please specify the agent anme in the form {{Agent[0.5, 0.5]}} and the reason for the ban.
-                Give your response after saying the keyward "BAN":
-                
-                Here are two examples:
-                1. BAN: {{Agent[0.5, 0.5]}}
-                2. BAN: {{Agent[0.5, 0.5], Agent[1.5, 0.5]}}
             
             Use the following format:
             - Attitude of agent...
             - Reaction of agent...
-            - Commanding action of agent...
             
             """
+        if feedback != '':
+            feedback = 'There is error in preivous action plan. Here is the feedbcak: ' + feedback
 
         HCA_prompt = f"""
             You are a central planner directing agent in a grid-like field to move colored boxes.
@@ -183,21 +177,16 @@ def rplh_prompt_func(
             Your task is to instruct each agent to match all boxes to their color-coded targets.
             After each move, agents provide updates for the next sequence of actions.
             You are the central agent and your job is to coordinate the agents optimally.
-            The previous state and action pairs at each step are: {state_action_prompt}
-
-            {att_promt}
+            The previous state and action are: {state_action_prompt}
   
             Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}.
 
+            {att_promt}
+
             Think about what the future {N} actions would be if you want to achieve the goal and write this justification out.
             Remanber to wirte out for each step, what you plan for every agent to do and what would the consequences state change be.
-            
-            Please use the following format:
-            - hallucination of future {N} steps...
 
             Based on this, generate the action plan for the immediate next step for each agent.
-            This is the success response of previous state: {success_action}.
-            Remanber to assign action to your self as well.
             
             {feedback}
             
@@ -347,7 +336,9 @@ def dialogue_func(
     return local_HCA_prompt
 
 
-def judge_prompt_func(local_response: str, cen_response: str, cur_state: Dict) -> str:
+def judge_prompt_func(
+        local_response: str, cen_response: str, cur_state: Dict, feedback: str = "",
+        ) -> str:
     """
     Constructs a prompt for the judge agent to evaluate and select the best plan.
 
