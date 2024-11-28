@@ -1,4 +1,4 @@
-from rplh_original.LLM import *
+from rplh_vanilla.LLM import *
 import tiktoken
 from typing import Dict, List, Tuple, Union
 
@@ -157,7 +157,7 @@ def rplh_prompt_func(
 
         HCA_prompt = f"""
             You are a central planner directing agent in a grid-like field to move colored boxes.
-            You are agent at grid [{HCA_agent_location}]. You need to make moves and other agents need to make moves as well.
+            You are agent [{HCA_agent_location}]. You need to make moves and other agents need to make moves as well.
             
             The goals and rules of this environment are:
             {GOAL_RULES}

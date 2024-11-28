@@ -7,11 +7,11 @@ main_path = Path(__file__).resolve().parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
 
-from rplh_original.LLM import *
-from rplh_original.memory import *
-from rplh_original.env import *
-from rplh_original.execution_checker import *
-from rendering.render_func import *
+from rplh_vanilla.LLM import *
+from rplh_vanilla.memory import *
+from rplh_vanilla.env import *
+from rplh_vanilla.execution_checker import *
+from rendering.render_state import *
 import os
 import json
 import re
@@ -121,8 +121,9 @@ def run_exp(
 
             """FOR NUM_AGENT, ITERATIVELY DO"""
 
-            HCA_agent_location = list(data_dict["pg_dict"].keys())[a]
-            print(f"HCA Agent {a} is at: [{HCA_agent_location}]")
+            location = (list(data_dict["pg_dict"].keys())[a]).split('_')
+            HCA_agent_location = f'Agent[{location[0]}, {location[1]}]'
+            print(f"HCA Agent {a} is [{HCA_agent_location}]")
 
             data_dict["env_step"] += 1
 
@@ -165,7 +166,7 @@ def run_exp(
             )
 
             raw_response, token_num_count = LLaMA_response(messages, model_name)
-            # print(raw_response) # empty after second
+            # print(raw_response) # empty after second round
             
             # save user prompt
             with open(
