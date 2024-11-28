@@ -2,7 +2,7 @@
 
 """Working on changing environment to self charcterized env, also working on visualization"""
 
-from rplh_efficient.memory import *
+from rplh_original.memory import *
 import os
 import json
 import re
@@ -64,27 +64,22 @@ def state_update_func(
 
     pg_dict_copy = copy.deepcopy(pg_dict)
     state_update_prompt = ""
-    agent_action = dict()
     for i in range(pg_row_num):
-        for j in range(pg_column_num): 
+        for j in range(pg_column_num):
             square_item_list = pg_dict_copy[str(i + 0.5) + "_" + str(j + 0.5)]
             square_item_only_box = [
                 item for item in square_item_list if item[:3] == "box"
             ]
             surround_index_list = surround_index_func(pg_row_num, pg_column_num, i, j)
-            state_update_prompt += f"Agent[{i+0.5}, {j+0.5}]: I am in square[{i+0.5}, {j+0.5}], I can observe {square_item_list}, "
+            state_update_prompt += f"Agent[{i+0.5}, {j+0.5}]: I am in square[{i+0.5}, {j+0.5}], I can observe {square_item_list}, I can do "
             action_list = []
             for box in square_item_only_box:
                 for surround_index in surround_index_list:
                     action_list.append(f"move({box}, square{surround_index})")
                 if "target" + box[3:] in square_item_list:
                     action_list.append(f"move({box}, target{box[3:]})")
-            if len(action_list) != 0:
-                state_update_prompt += f"I can do one of the following action: {action_list}\n"
-            else:
-                state_update_prompt += '\n' # I can do nothing
-            agent_action[f'Agent[{i+0.5}, {j+0.5}]'] = action_list
-    return state_update_prompt, agent_action
+            state_update_prompt += f"{action_list}\n"
+    return state_update_prompt
 
 
 def state_update_func_local_agent(
