@@ -4,14 +4,14 @@ from LLM import *
 from memory import *
 from env import *
 from execution_checker import *
-from render_func import *
+from rendering.render_func import *
 import os
 import json
 import re
 import sys
 import os
 import pandas as pd
-from render_func import *
+from rendering.render_func import *
 from response_model import *
 from functools import partial
 
@@ -177,15 +177,6 @@ def run_exp(
 
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
-            
-            # match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
-            # TODO: ADD BAN HERE
-
-            #if match:
-            #possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
-            #response = possible_action_lst[-1]
-            #print(f'Match response:{response}')
-            #response = process_response(response)
 
             print(f'HCA Raw Response: {raw_response}')
 
@@ -251,6 +242,8 @@ def run_exp(
             }
 
             data_local["local_agent_response_list_dir"]["feedback1"] = ""
+            
+            # NOTE: need to be Agent[0.5, 0.5] format, debug use regex
             data_local["agent_dict"] = response #json.loads(response)
 
             for local_agent_row_i in range(pg_row_num):
@@ -368,9 +361,6 @@ def run_exp(
                         "feedback1"
                     ]
                     cen_response = data_dict["hca_agent_response_list"][-1]
-
-                    # print(f"LOCAL RESPONSE: {local_response}")
-                    # print(f"CEN RESPONSE: {cen_response}")
                     
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
@@ -392,18 +382,13 @@ def run_exp(
                     raw_response_judge = json.loads(raw_response_judge)
                     response_str_judge = "\n".join([f"{k}: {v}" for k, v, in raw_response_judge.items()])
                     response_judge = raw_response_judge['actions_plan']
+                    
+                    if len(response_judge) == 0:
+                        print("JUDGE NO RESPONSE: NO APPEND, HCA IS TEH LAST ONE")
+                        continue
 
                     # -----------------------------------------SYNTACTIC CHECK FOR JUDGE-----------------------------------------#
                     data_dict["token_num_count_list"].append(token_num_count)
-                    #match = re.search(r"\{.*?\}", response_judge, re.DOTALL)
-                    # match not right
-
-                    #if match:
-                    #possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
-                    #response = possible_action_lst[-1]
-                    #print(f'Match response:{response}')
-                    #response = process_response(response)
-                    #print(f'Processed response:{response}\n')
 
                     response, token_num_count_list_add = (
                         with_action_syntactic_check_func(
@@ -421,9 +406,7 @@ def run_exp(
                         data_dict["token_num_count_list"] + 
                         token_num_count_list_add
                         )
-                    #else:
-                    #    raise ValueError(f"No action format found in raw response: {raw_response}")
-                    # after syntactic checks
+                    
                     with open("conversation.txt", "a") as f:
                         messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_str_judge} \n \n"
                         f.write(messages)
@@ -433,6 +416,7 @@ def run_exp(
                 else:
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
+                
                 data_dict["dialogue_history_list"].append(dialogue_history)
 
                 data_dict["attitude_dialogue_dict"][
@@ -467,8 +451,9 @@ def run_exp(
             print(
                 "-------###-------###-------###-------EXECUTION-------###-------###-------###-------"
             )
-
-            original_response_dict = data_dict["response_total_list"][index_query_times]
+            
+            # problem here, a week of debug [index_query_time] uses outer most, always get one
+            original_response_dict = data_dict["response_total_list"][-1]
 
             with open(
                 Saving_path_result
@@ -551,7 +536,7 @@ pg_row_num = 2
 pg_column_num = 2
 iteration_num = 0
 query_time_limit = 10  # now it's iteration
-model_name = "qwen2.5:7b-instruct-q5_K_M"
+model_name = "qwen2.5:14b-instruct-q3_K_L"
 print(f"-------------------Model name: {model_name}-------------------")
 
 #'_w_all_dialogue_history', '_w_compressed_dialogue_history', '_w_only_state_action_history'

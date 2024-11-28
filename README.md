@@ -1,12 +1,13 @@
 # Role Playing Leader Hellucination System
 Using Large Language Models' ***In-context Learning*** abilities, we are developing frameworks for multi-agent collaborations using **R**ole-**P**laying **L**eader-**H**ellucinating LLM, or in short, **RPLH-LLM**. We are currently developing on minimal example and we are planning to adapt to MCTS fine-tuned LLM with VirtualHome later.
+- Judge also serve as an syntactic checker as well.
 
 ## Demo:
 Here is a demo of our RPLH performing multi-agent resasoning with the first HCA (central) agent hellucinating about future steps:
 
 <div style="width: 100%; padding: 5px; display: flex; justify-content: center;">
   <video controls autoplay style="width: 60%; height: auto;" muted>
-    <source src="img/rplh_demo1.mp4" type="video/mp4">
+    <source src="demos/img/rplh_demo1.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 </div>
@@ -26,7 +27,7 @@ Here is a demo of our RPLH performing multi-agent resasoning with the first HCA 
 
 ## Simplified Schematic
 <div align=center>
-<img src="img/rplh.png" width = "60%" alt="struct" align=center/>
+<img src="demos/img/rplh.png" width = "60%" alt="struct" align=center/>
 </div>
 
 We hope to build agent that is caplable of ***Social-reasoning and expecting what the other agent should be doing***. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to ***Level-one agent***.
