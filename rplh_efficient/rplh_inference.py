@@ -7,7 +7,7 @@ import argparse
 main_path = Path(__file__).resolve().parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
-    
+
 from rplh_efficient.LLM import *
 from rplh_efficient.memory import *
 from rplh_efficient.env import *
@@ -125,8 +125,8 @@ def run_exp(
 
             """FOR NUM_AGENT, ITERATIVELY DO"""
 
-            location = (list(data_dict["pg_dict"].keys())[a]).split('_')
-            HCA_agent_location = f'Agent[{location[0]}, {location[1]}]'
+            location = (list(data_dict["pg_dict"].keys())[a]).split("_")
+            HCA_agent_location = f"Agent[{location[0]}, {location[1]}]"
             print(f"HCA Agent {a} is [{HCA_agent_location}]")
 
             data_dict["env_step"] += 1
@@ -147,7 +147,7 @@ def run_exp(
             state_update_prompt, agent_action = state_update_func(
                 pg_row_num, pg_column_num, data_dict["pg_dict"]
             )
-            print(f'STATE UPDATE PROMPT: {state_update_prompt}')
+            print(f"STATE UPDATE PROMPT: {state_update_prompt}")
 
             user_prompt_1 = rplh_prompt_func(
                 state_update_prompt,
@@ -170,10 +170,12 @@ def run_exp(
                 [user_prompt_1], [], dialogue_history_method
             )
 
-            raw_response, token_num_count = LLaMA_response_json(messages, model_name, HCA)
+            raw_response, token_num_count = LLaMA_response_json(
+                messages, model_name, HCA
+            )
             raw_response = json.loads(raw_response)
             response_str = "\n".join([f"{k}: {v}" for k, v, in raw_response.items()])
-            response = raw_response['actions_plan']
+            response = raw_response["actions_plan"]
 
             # save user prompt
             with open(
@@ -188,7 +190,7 @@ def run_exp(
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
 
-            print(f'HCA Raw Response: {raw_response}')
+            print(f"HCA Raw Response: {raw_response}")
 
             # REDO HCA
             response, token_num_count_list_add = with_action_syntactic_check_func(
@@ -205,7 +207,7 @@ def run_exp(
                 data_dict["token_num_count_list"] + token_num_count_list_add
             )
             print(f"AGENT ACTION RESPONSE: {response}")
-            #else:
+            # else:
             #    raise ValueError(f"No action format found in raw response: {raw_response}")
             if response == "Out of tokens":
                 pass
@@ -252,9 +254,9 @@ def run_exp(
             }
 
             data_local["local_agent_response_list_dir"]["feedback1"] = ""
-            
+
             # NOTE: need to be Agent[0.5, 0.5] format, debug use regex
-            data_local["agent_dict"] = response #json.loads(response)
+            data_local["agent_dict"] = response  # json.loads(response)
 
             for local_agent_row_i in range(pg_row_num):
 
@@ -342,7 +344,7 @@ def run_exp(
                                 >= (pg_column_num + pg_row_num) // 2
                             ):
                                 break
-    
+
                         else:
                             print("I Agree")
                             # agree no judge, use HCA response diretcly, avoid error.
@@ -371,7 +373,7 @@ def run_exp(
                         "feedback1"
                     ]
                     cen_response = data_dict["hca_agent_response_list"][-1]
-                    
+
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
@@ -388,11 +390,15 @@ def run_exp(
                         [judge_prompt], [], dialogue_history_method
                     )
 
-                    raw_response_judge, token_num_count = LLaMA_response_json(messages, model_name, Judge)
+                    raw_response_judge, token_num_count = LLaMA_response_json(
+                        messages, model_name, Judge
+                    )
                     raw_response_judge = json.loads(raw_response_judge)
-                    response_str_judge = "\n".join([f"{k}: {v}" for k, v, in raw_response_judge.items()])
-                    response_judge = raw_response_judge['actions_plan']
-                    
+                    response_str_judge = "\n".join(
+                        [f"{k}: {v}" for k, v, in raw_response_judge.items()]
+                    )
+                    response_judge = raw_response_judge["actions_plan"]
+
                     if len(response_judge) == 0:
                         print("JUDGE NO RESPONSE: NO APPEND, HCA IS TEH LAST ONE")
                         continue
@@ -410,13 +416,12 @@ def run_exp(
                             dialogue_history_method,
                             partial_judge_prompt_func,
                             is_judge=True,
-                            )
                         )
+                    )
                     data_dict["token_num_count_list"] = (
-                        data_dict["token_num_count_list"] + 
-                        token_num_count_list_add
-                        )
-                    
+                        data_dict["token_num_count_list"] + token_num_count_list_add
+                    )
+
                     with open("conversation.txt", "a") as f:
                         messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_str_judge} \n \n"
                         f.write(messages)
@@ -426,7 +431,7 @@ def run_exp(
                 else:
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
-                
+
                 data_dict["dialogue_history_list"].append(dialogue_history)
 
                 data_dict["attitude_dialogue_dict"][
@@ -461,7 +466,7 @@ def run_exp(
             print(
                 "-------###-------###-------###-------EXECUTION-------###-------###-------###-------"
             )
-            
+
             # problem here, a week of debug [index_query_time] uses outer most, always get one
             original_response_dict = data_dict["response_total_list"][-1]
 
@@ -540,9 +545,9 @@ def run_exp(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run a 4-agent experiment.")
     parser.add_argument("--model_name", type=str, required=True, help="Model name.")
-    
+
     args = parser.parse_args()
-    
+
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
     Code_dir_path = os.path.join(os.getcwd())
     os.makedirs(Code_dir_path, exist_ok=True)
@@ -570,7 +575,7 @@ if __name__ == "__main__":
         pg_column_num,
         iteration_num,
         query_time_limit,
-        dialogue_history_method="_w_only_state_action_history",
+        dialogue_history_method="_w_markovian_state_action_history",
         model_name=model_name,
     )
 

@@ -1,6 +1,4 @@
-# Box moving to target without collision
-
-"""Working on changing environment to self charcterized env, also working on visualization"""
+"""BoxMove environment for multi-agent collaboration."""
 
 from rplh_efficient.memory import *
 import os
@@ -9,14 +7,12 @@ import re
 import copy
 import numpy as np
 import shutil
-import time
-from typing import Dict, List, Tuple, Union
 import random
 
 
 def surround_index_func(
     row_num: int, coloum_num: int, row_index: int, coloum_index: int
-) -> List[List[float]]:
+) -> list[list[float]]:
     """
     Calculates the indices of surrounding cells for a given cell in a grid.
 
@@ -27,7 +23,7 @@ def surround_index_func(
         col_index (int): Column index of the target cell.
 
     Returns:
-        List[List[float]]: List of coordinates for surrounding cells.
+        list[list[float]]: List of coordinates for surrounding cells.
     """
     surround_index_list = []
     for i, j in (
@@ -48,7 +44,7 @@ def surround_index_func(
 
 
 def state_update_func(
-    pg_row_num: int, pg_column_num: int, pg_dict: Dict[str, List[str]]
+    pg_row_num: int, pg_column_num: int, pg_dict: dict[str, list[str]]
 ) -> str:
     """
     Describes the environment and possible actions for the central agent.
@@ -56,7 +52,7 @@ def state_update_func(
     Args:
         pg_row_num (int): Number of rows in the playground.
         pg_column_num (int): Number of columns in the playground.
-        pg_dict (Dict[str, List[str]]): State of the playground.
+        pg_dict (dict[str, list[str]]): State of the playground.
 
     Returns:
         str: State update prompt for the central agent.
@@ -66,7 +62,7 @@ def state_update_func(
     state_update_prompt = ""
     agent_action = dict()
     for i in range(pg_row_num):
-        for j in range(pg_column_num): 
+        for j in range(pg_column_num):
             square_item_list = pg_dict_copy[str(i + 0.5) + "_" + str(j + 0.5)]
             square_item_only_box = [
                 item for item in square_item_list if item[:3] == "box"
@@ -80,10 +76,12 @@ def state_update_func(
                 if "target" + box[3:] in square_item_list:
                     action_list.append(f"move({box}, target{box[3:]})")
             if len(action_list) != 0:
-                state_update_prompt += f"I can do one of the following action: {action_list}\n"
+                state_update_prompt += (
+                    f"I can do one of the following action: {action_list}\n"
+                )
             else:
-                state_update_prompt += '\n' # I can do nothing
-            agent_action[f'Agent[{i+0.5}, {j+0.5}]'] = action_list
+                state_update_prompt += "\n"  # I can do nothing
+            agent_action[f"Agent[{i+0.5}, {j+0.5}]"] = action_list
     return state_update_prompt, agent_action
 
 
@@ -92,8 +90,8 @@ def state_update_func_local_agent(
     pg_column_num: int,
     pg_row_i: int,
     pg_column_j: int,
-    pg_dict: Dict[str, List[str]],
-) -> Tuple[str, str]:
+    pg_dict: dict[str, list[str]],
+) -> tuple[str, str]:
     """
     Describes the environment and possible actions for a specific local agent.
 
@@ -102,10 +100,10 @@ def state_update_func_local_agent(
         pg_column_num (int): Number of columns in the playground.
         pg_row_i (int): Row index of the local agent.
         pg_column_j (int): Column index of the local agent.
-        pg_dict (Dict[str, List[str]]): State of the playground.
+        pg_dict (dict[str, list[str]]): State of the playground.
 
     Returns:
-        Tuple[str, str]: Prompts describing the environment and actions for the local agent
+        tuple[str, str]: Prompts describing the environment and actions for the local agent
         and for other agents.
     """
 
@@ -149,17 +147,17 @@ def state_update_func_local_agent(
 
 
 def action_from_response(
-    pg_dict_input: Dict[str, List[str]], original_response_dict: Dict
-) -> Tuple[str, Dict[str, List[str]]]:
+    pg_dict_input: dict[str, list[str]], original_response_dict: dict
+) -> tuple[str, dict[str, list[str]]]:
     """
     Updates the environment state based on the actions in the response.
 
     Args:
-        pg_dict_input (Dict[str, List[str]]): Current state of the playground.
-        original_response_dict (Dict): Actions to be executed.
+        pg_dict_input (dict[str, list[str]]): Current state of the playground.
+        original_response_dict (dict): Actions to be executed.
 
     Returns:
-        Tuple[str, Dict[str, List[str]]]: Feedback string and updated playground state.
+        tuple[str, dict[str, list[str]]]: Feedback string and updated playground state.
     """
     system_error_feedback = ""
     pg_dict_original = copy.deepcopy(pg_dict_input)
@@ -215,8 +213,8 @@ def env_create(
     pg_column_num: int = 5,
     box_num_low_bound: int = 2,
     box_num_upper_bound: int = 2,
-    color_list: List[str] = ["blue", "red", "green", "purple", "orange"],
-) -> Dict[str, List[str]]:
+    color_list: list[str] = ["blue", "red", "green", "purple", "orange"],
+) -> dict[str, list[str]]:
     """
     Creates a randomized environment state for the playground.
 
@@ -225,10 +223,10 @@ def env_create(
         pg_column_num (int): Number of columns in the playground.
         box_num_low_bound (int): Minimum number of boxes per color.
         box_num_upper_bound (int): Maximum number of boxes per color.
-        color_list (List[str]): List of colors for boxes and targets.
+        color_list (list[str]): List of colors for boxes and targets.
 
     Returns:
-        Dict[str, List[str]]: Initial state of the playground.
+        dict[str, list[str]]: Initial state of the playground.
     """
 
     # pg_dict records the items in each square over steps, here in the initial setting, we randomly assign items into each square

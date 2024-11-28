@@ -11,6 +11,7 @@ from typing import Union, Callable
 
 CHECK_ITER = 10
 
+
 def is_valid_json(response: str) -> bool:
     """
     Checks if a response string is in valid JSON format.
