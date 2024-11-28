@@ -317,6 +317,8 @@ def dialogue_func(
 
             The other central planner's current action plan is giving as: {central_response}.
             Please be critical in thinking about this plan.
+            
+            Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents.
 
             Please evaluate the given plan.
             If you agree with it, respond 'I Agree', without any extra words.
@@ -482,6 +484,7 @@ def message_construct_func(
                 Make sure that:
                 - If no action for an agent in the next step, do not include it in JSON output. 
                 - At most one action for each agent in each step.
+                - Json format should follow something like: {{'Agent[0.5, 0.5]': 'move(box_purple, target_purple)', 'Agent[0.5, 1.5]': 'move(box_orange, target_orange)', 'Agent[1.5, 0.5]': 'move(box_orange, target_orange)', 'Agent[1.5, 1.5]': 'move(box_green, target_green)'}}
                 """,
         }
     ]
@@ -518,54 +521,3 @@ def attitude_message_construct_func(user_prompt: str) -> List[Dict[str, str]]:
     ]
     messages.append({"role": "user", "content": user_prompt})
     return messages
-
-
-# def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, str]]:
-#     """
-#     Constructs a message for validating and fixing JSON format in a response.
-
-#     Args:
-#         response (str): The response string to check and fix.
-
-#     Returns:
-#         List[Dict[str, str]]: Message sequence to fix the JSON.
-
-#     Notes:
-#         Must give example or else LLM give {"Agent0_50_5":"move(box_green, target_green)", "Agent1_50_5":"move(box_red, target_red)"}
-#     """
-
-#     EX = f""" Here are three wrong and correct json example pairs that you can learn from:
-
-#     Wrong format (missing quotation mark in the start):
-#         {{Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}
-#     Correct format:
-#         {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}
-
-#     Wrong format (missing bracket in the end)
-#         {{"Agent[1.5, 1.5]":"move(box_green, target_green])", "Agent[1.5, 1.5]":"move(box_purple, square[0.5, 0.5]"}}
-#     Correct format:
-#         {{"Agent[1.5, 1.5]":"move(box_green, target_green])", "Agent[1.5, 1.5]":"move(box_purple, square[0.5, 0.5])"}}
-
-#     Wrong format (missing multiple quotation marks):
-#         {{"Agent[0.5, 1.5]":"move(box_red, square[1.5, 1.5])", Agent[0.5, 0.5]":move(box_blue, target_blue])"}}
-#     Correct format:
-#         {{"Agent[0.5, 1.5]":"move(box_red, square[1.5, 1.5])", "Agent[0.5, 0.5]":"move(box_blue, target_blue])"}}
-
-#         """
-
-#     messages = [
-#         {
-#             "role": "system",
-#             "content": "You are a helpful assistant specialized for fixingJson format output by agents in a grid-like environment.",
-#         },
-#         {
-#             "role": "user",
-#             "content": f"""Please fix the Json message in here {user_prompt_list} and give only this JSON as output.
-#                             You should not change the content of the message that is  passed in.
-#                             When asked to give json format, specificy it strictly in JSON format. Here is some example of corerct and wrong json pairs: {EX}.
-#                             Now the fixed json format message is:""",
-#         },
-#     ]
-#     messages.append({"role": "user", "content": user_prompt_list})
-
-#     return messages

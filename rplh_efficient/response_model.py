@@ -1,8 +1,8 @@
-from typing import Dict
+from typing import Dict, List
 from pydantic import BaseModel
 
 class HCA(BaseModel):
-    attitude: str
+    attitude: List[str]
     reasoning: str
     future_step: str
     actions_plan: Dict

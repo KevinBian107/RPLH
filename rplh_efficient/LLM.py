@@ -70,7 +70,6 @@ def LLaMA_response(messages, model_name, url="http://localhost:11434/api/generat
     data = {
         "model": model_name,
         "prompt": prompt,
-        # "max_tokens": 2000,
         "temperature": 0.0,
         "top_p": 1,
         "frequency_penalty": 0,
