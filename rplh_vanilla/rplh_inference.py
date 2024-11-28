@@ -124,8 +124,8 @@ def run_exp(
 
             """FOR NUM_AGENT, ITERATIVELY DO"""
 
-            location = (list(data_dict["pg_dict"].keys())[a]).split('_')
-            HCA_agent_location = f'Agent[{location[0]}, {location[1]}]'
+            location = (list(data_dict["pg_dict"].keys())[a]).split("_")
+            HCA_agent_location = f"Agent[{location[0]}, {location[1]}]"
             print(f"HCA Agent {a} is [{HCA_agent_location}]")
 
             data_dict["env_step"] += 1
@@ -170,7 +170,7 @@ def run_exp(
 
             raw_response, token_num_count = LLaMA_response(messages, model_name)
             # print(raw_response) # empty after second round
-            
+
             # save user prompt
             with open(
                 Saving_path_result
@@ -185,7 +185,7 @@ def run_exp(
             data_dict["token_num_count_list"].append(token_num_count)
             match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
 
-            #TODO: No dictionary no run 
+            # TODO: No dictionary no run
             if match:
                 possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
                 response = possible_action_lst[-1]
@@ -372,7 +372,7 @@ def run_exp(
                         "feedback1"
                     ]
                     cen_response = data_dict["hca_agent_response_list"][-1]
-                    
+
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
@@ -467,9 +467,7 @@ def run_exp(
                 "-------###-------###-------###-------EXECUTION-------###-------###-------###-------"
             )
 
-            original_response_dict = json.loads(
-                data_dict["response_total_list"][-1]
-            )
+            original_response_dict = json.loads(data_dict["response_total_list"][-1])
 
             with open(
                 Saving_path_result
@@ -545,9 +543,9 @@ def run_exp(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run a 4-agent experiment.")
     parser.add_argument("--model_name", type=str, required=True, help="Model name.")
-    
+
     args = parser.parse_args()
-    
+
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
     Code_dir_path = os.path.join(os.getcwd())
     os.makedirs(Code_dir_path, exist_ok=True)

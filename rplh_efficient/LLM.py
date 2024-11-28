@@ -1,6 +1,5 @@
 import requests
 import tiktoken
-import time
 import instructor
 from pydantic import ValidationError
 from openai import OpenAI
@@ -8,8 +7,9 @@ from openai import OpenAI
 enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"
 
+
 def LLaMA_response_json(
-        messages, model_name, response_model, url="http://localhost:11434/v1"
+    messages, model_name, response_model, url="http://localhost:11434/v1"
 ):
     """
     LLM module to be called
@@ -32,28 +32,33 @@ def LLaMA_response_json(
         )
         while True:
             if count >= MAX_RETRY:
-                print(f'''Max retries reach. LLM failed at outputing the correct result. 
-                Input parameter response_model might have issue: {response_model.schema_json(indent=2)}''')
+                print(
+                    f"""Max retries reach. LLM failed at outputing the correct result. 
+                Input parameter response_model might have issue: {response_model.schema_json(indent=2)}"""
+                )
                 raise ValidationError
             try:
                 # Use instructor to handle the structured response
                 response = client.chat.completions.create(
-                    model=model_name, 
-                    messages=messages, 
+                    model=model_name,
+                    messages=messages,
                     response_model=response_model,  # Use the Character model to structure the response
                 )
                 # Print the structured output as JSON
                 response = response.model_dump_json()
                 token_num_count = sum(
-                len(enc.encode(msg["content"])) for msg in messages
+                    len(enc.encode(msg["content"])) for msg in messages
                 ) + len(enc.encode(response))
                 return response, token_num_count
             except ValidationError as ve:
                 count += 1
-                print(f"Validation failed during LLM output generation: {ve} for {count} times. Retrying...")
+                print(
+                    f"Validation failed during LLM output generation: {ve} for {count} times. Retrying..."
+                )
     except Exception as e:
         print(f"API call failed: {e}")
         return None, 0
+
 
 def LLaMA_response(messages, model_name, url="http://localhost:11434/api/generate"):
     """
