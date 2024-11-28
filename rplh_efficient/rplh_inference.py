@@ -12,7 +12,7 @@ from rplh_efficient.memory import *
 from rplh_efficient.env import *
 from rplh_efficient.execution_checker import *
 from rplh_efficient.response_model import *
-from rendering.render_func import *
+from rendering.render_state import *
 
 import os
 import json
@@ -123,8 +123,9 @@ def run_exp(
 
             """FOR NUM_AGENT, ITERATIVELY DO"""
 
-            HCA_agent_location = list(data_dict["pg_dict"].keys())[a]
-            print(f"HCA Agent {a} is at: [{HCA_agent_location}]")
+            location = (list(data_dict["pg_dict"].keys())[a]).split('_')
+            HCA_agent_location = f'Agent[{location[0]}, {location[1]}]'
+            print(f"HCA Agent {a} is [{HCA_agent_location}]")
 
             data_dict["env_step"] += 1
 

@@ -2,7 +2,7 @@
 
 """Working on changing environment to self charcterized env, also working on visualization"""
 
-from rplh_original.memory import *
+from rplh_vanilla.memory import *
 import os
 import json
 import re
