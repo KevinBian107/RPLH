@@ -36,6 +36,34 @@ FEEDBACK_LCOAL1 = """
             """
 
 
+def better_state_repres(pg_dict):
+    """
+    Transforms the state representation the original pg_dict envirionemnt
+
+    Args:
+        pg_dict (dict): A dictionary representing BoxNet envirionment.
+
+    Returns:
+        dict: A new dictionary with transformed state representation.
+
+    Example:
+        Input: {'0.5_0.5': ['box_blue'], 
+                '0.5_1.5': ['box_red'], 
+                '1.5_0.5': ['target_blue'], 
+                '1.5_1.5': ['target_red']},
+        Output: {'0.5, 0.5': ['box_blue'], 
+                 '0.5, 1.5': ['box_red'], 
+                 '1.5, 0.5': ['target_blue'], 
+                 '1.5, 1.5': ['target_red']},
+    """
+    new_pg_dict = {}
+
+    for key, value in pg_dict.items():
+        new_pg_dict[f'{key[:3]}, {key[-3:]}'] = value
+
+    return new_pg_dict
+
+
 def rplh_prompt_func(
     state_update_prompt: str,
     data: Dict,
@@ -93,32 +121,32 @@ def rplh_prompt_func(
         if dialogue_history_method == "_w_only_state_action_history":
             state_action_prompt = ""
             # Markovian state-action history
-            previous_state_idx = len(response_total_list) - 1
-            if previous_state_idx != -1:
-                print(previous_state_idx)
-                state_action_prompt = f"""
-            Previous State: {pg_state_list[previous_state_idx]}
-            Previous Action: {response_total_list[previous_state_idx]}\n\n
-            """
+            # previous_state_idx = len(response_total_list) - 1
+            # if previous_state_idx != -1:
+            #     print(previous_state_idx)
+            #     state_action_prompt = f"""
+            # Previous State: {better_state_repres(pg_state_list[previous_state_idx])}
+            # Previous Action: {response_total_list[previous_state_idx]}\n\n
+            # """
 
-            # for i in range(len(response_total_list) - 1, -1, -1):
-            #     state_action_prompt_next = (
-            #         f"State{i + 1}: {pg_state_list[i]}\nAction{i + 1}: {response_total_list[i]}\n\n"
-            #         + state_action_prompt
-            #     )
-            #     if (
-            #         token_num_count + len(enc.encode(state_action_prompt_next))
-            #         < input_prompt_token_limit
-            #     ):
-            #         state_action_prompt = state_action_prompt_next
-            #     else:
-            #         break
+            for i in range(len(response_total_list) - 1, -1, -1):
+                state_action_prompt_next = (
+                    f"State{i + 1}: {better_state_repres(pg_state_list[i])}\nAction{i + 1}: {response_total_list[i]}\n\n"
+                    + state_action_prompt
+                )
+                if (
+                    token_num_count + len(enc.encode(state_action_prompt_next))
+                    < input_prompt_token_limit
+                ):
+                    state_action_prompt = state_action_prompt_next
+                else:
+                    break
         elif dialogue_history_method == "_w_compressed_dialogue_history":
             state_action_prompt = ""
             for i in range(len(response_total_list) - 1, -1, -1):
                 dialogue_summary = LLM_summarize_func(dialogue_history_list[i])
                 state_action_prompt_next = (
-                    f"State{i + 1}: {pg_state_list[i]}\nSummary of Dialogues in each step{i + 1}: {dialogue_summary}\nAction{i + 1}: {response_total_list[i]}\n\n"
+                    f"State{i + 1}: {better_state_repres(pg_state_list[i])}\nSummary of Dialogues in each step{i + 1}: {dialogue_summary}\nAction{i + 1}: {response_total_list[i]}\n\n"
                     + state_action_prompt
                 )
                 if (
@@ -132,7 +160,7 @@ def rplh_prompt_func(
             state_action_prompt = ""
             for i in range(len(response_total_list) - 1, -1, -1):
                 state_action_prompt_next = (
-                    f"State{i + 1}: {pg_state_list[i]}\nDialogue{i + 1}: {dialogue_history_list[i]}\nAction{i + 1}: {response_total_list[i]}\n\n"
+                    f"State{i + 1}: {better_state_repres(pg_state_list[i])}\nDialogue{i + 1}: {dialogue_history_list[i]}\nAction{i + 1}: {response_total_list[i]}\n\n"
                     + state_action_prompt
                 )
                 if (
