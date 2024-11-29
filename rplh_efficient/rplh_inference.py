@@ -174,6 +174,7 @@ def run_exp(
                 messages, model_name, HCA
             )
             raw_response = json.loads(raw_response)
+            raw_response = process_response(raw_response)
             response_str = "\n".join([f"{k}: {v}" for k, v, in raw_response.items()])
             response = raw_response["actions_plan"]
 
@@ -377,6 +378,7 @@ def run_exp(
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
+                    print(f'judge prompt: {judge_prompt}')
 
                     # partial function
                     partial_judge_prompt_func = partial(
@@ -394,6 +396,7 @@ def run_exp(
                         messages, model_name, Judge
                     )
                     raw_response_judge = json.loads(raw_response_judge)
+                    raw_response_judge = process_response(raw_response_judge)
                     response_str_judge = "\n".join(
                         [f"{k}: {v}" for k, v, in raw_response_judge.items()]
                     )
