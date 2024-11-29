@@ -1,8 +1,8 @@
 """Synthetic checker module/execution module"""
 
-from rplh_original.memory import *
-from rplh_original.env import *
-from rplh_original.LLM import *
+from rplh_vanilla.memory import *
+from rplh_vanilla.env import *
+from rplh_vanilla.LLM import *
 import json
 import re
 import copy
@@ -10,6 +10,7 @@ import numpy as np
 from typing import Union, Callable
 
 CHECK_ITER = 10
+
 
 def is_valid_json(response: str) -> bool:
     """

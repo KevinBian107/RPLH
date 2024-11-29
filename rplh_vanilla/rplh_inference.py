@@ -2,16 +2,17 @@
 
 import sys
 from pathlib import Path
+import argparse
 
 main_path = Path(__file__).resolve().parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
 
-from rplh_original.LLM import *
-from rplh_original.memory import *
-from rplh_original.env import *
-from rplh_original.execution_checker import *
-from rendering.render_func import *
+from rplh_vanilla.LLM import *
+from rplh_vanilla.memory import *
+from rplh_vanilla.env import *
+from rplh_vanilla.execution_checker import *
+from rendering.render_state import *
 import os
 import json
 import re
@@ -28,6 +29,7 @@ def run_exp(
     iteration_num: int,
     query_time_limit: int,
     dialogue_history_method: str,
+    model_name: str,
 ) -> tuple[
     list[str],
     list[str],
@@ -47,6 +49,7 @@ def run_exp(
         iteration_num (int): Iteration number of the environment.
         query_time_limit (int): Maximum number of queries allowed.
         dialogue_history_method (str): Method to handle dialogue history.
+        model_name (str): Name of the model.
 
     Returns:
         Tuple: Contains lists of user prompts, responses, states, token counts,
@@ -121,8 +124,9 @@ def run_exp(
 
             """FOR NUM_AGENT, ITERATIVELY DO"""
 
-            HCA_agent_location = list(data_dict["pg_dict"].keys())[a]
-            print(f"HCA Agent {a} is at: [{HCA_agent_location}]")
+            location = (list(data_dict["pg_dict"].keys())[a]).split("_")
+            HCA_agent_location = f"Agent[{location[0]}, {location[1]}]"
+            print(f"HCA Agent {a} is [{HCA_agent_location}]")
 
             data_dict["env_step"] += 1
 
@@ -165,8 +169,8 @@ def run_exp(
             )
 
             raw_response, token_num_count = LLaMA_response(messages, model_name)
-            # print(raw_response) # empty after second
-            
+            # print(raw_response) # empty after second round
+
             # save user prompt
             with open(
                 Saving_path_result
@@ -181,7 +185,7 @@ def run_exp(
             data_dict["token_num_count_list"].append(token_num_count)
             match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
 
-            #TODO: No dictionary no run 
+            # TODO: No dictionary no run
             if match:
                 possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
                 response = possible_action_lst[-1]
@@ -368,7 +372,7 @@ def run_exp(
                         "feedback1"
                     ]
                     cen_response = data_dict["hca_agent_response_list"][-1]
-                    
+
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
@@ -463,9 +467,7 @@ def run_exp(
                 "-------###-------###-------###-------EXECUTION-------###-------###-------###-------"
             )
 
-            original_response_dict = json.loads(
-                data_dict["response_total_list"][-1]
-            )
+            original_response_dict = json.loads(data_dict["response_total_list"][-1])
 
             with open(
                 Saving_path_result
@@ -537,46 +539,53 @@ def run_exp(
 
 
 # -----------------------------------------RUNNING EXPERIMENT-----------------------------------------#
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-Code_dir_path = os.path.join(os.getcwd())
-os.makedirs(Code_dir_path, exist_ok=True)
-saving_path = Code_dir_path + "/multi-agent-env"
 
-# 4 agent in total
-pg_row_num = 2
-pg_column_num = 2
-iteration_num = 0
-query_time_limit = 10  # now it's iteration
-model_name = "qwen2.5:14b-instruct-q3_K_L"
-print(f"-------------------Model name: {model_name}-------------------")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run a 4-agent experiment.")
+    parser.add_argument("--model_name", type=str, required=True, help="Model name.")
 
-#'_w_all_dialogue_history', '_w_compressed_dialogue_history', '_w_only_state_action_history'
-(
-    user_prompt_list,
-    response_total_list,
-    pg_state_list,
-    success_failure,
-    index_query_times,
-    token_num_count_list,
-    Saving_path_result,
-) = run_exp(
-    saving_path,
-    pg_row_num,
-    pg_column_num,
-    iteration_num,
-    query_time_limit,
-    dialogue_history_method="_w_only_state_action_history",
-)
+    args = parser.parse_args()
 
-with open(Saving_path_result + "/token_num_count.txt", "w") as f:
-    print("SAVE TOKEN NUM \n")
-    for token_num_num_count in token_num_count_list:
-        f.write(str(token_num_num_count) + "\n")
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    Code_dir_path = os.path.join(os.getcwd())
+    os.makedirs(Code_dir_path, exist_ok=True)
+    saving_path = Code_dir_path + "/multi-agent-env"
 
-with open(Saving_path_result + "/success_failure.txt", "w") as f:
-    print("SAVE RESULT \n")
-    f.write(success_failure)
+    # 4 agent in total
+    pg_row_num = 2
+    pg_column_num = 2
+    iteration_num = 0
+    query_time_limit = 10
+    model_name = args.model_name
+    print(f"-------------------Model name: {model_name}-------------------")
 
-with open(Saving_path_result + "/env_action_times.txt", "w") as f:
-    print("SAVE ACTION TIME \n")
-    f.write(f"{index_query_times+1}")
+    (
+        user_prompt_list,
+        response_total_list,
+        pg_state_list,
+        success_failure,
+        index_query_times,
+        token_num_count_list,
+        Saving_path_result,
+    ) = run_exp(
+        saving_path,
+        pg_row_num,
+        pg_column_num,
+        iteration_num,
+        query_time_limit,
+        dialogue_history_method="_w_no_history",
+        model_name=model_name,
+    )
+
+    with open(Saving_path_result + "/token_num_count.txt", "w") as f:
+        print("SAVE TOKEN NUM \n")
+        for token_num_num_count in token_num_count_list:
+            f.write(str(token_num_num_count) + "\n")
+
+    with open(Saving_path_result + "/success_failure.txt", "w") as f:
+        print("SAVE RESULT \n")
+        f.write(success_failure)
+
+    with open(Saving_path_result + "/env_action_times.txt", "w") as f:
+        print("SAVE ACTION TIME \n")
+        f.write(f"{index_query_times+1}")

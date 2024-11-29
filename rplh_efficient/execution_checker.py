@@ -33,7 +33,7 @@ def is_valid_action(
     original_response_dict = response
     pg_dict_original = copy.deepcopy(pg_dict_input)
     transformed_dict = {}
-    
+
     for key, value in original_response_dict.items():
         coordinates = tuple(map(float, re.findall(r"\d+\.?\d*", key)))
 
@@ -82,6 +82,7 @@ def is_valid_action(
 
     return feedback
 
+
 def retake_action(
     feedback: str,
     user_prompt_list: list[str],
@@ -117,17 +118,19 @@ def retake_action(
     )
 
     print(f"Length of messages {len(messages)}")
-    
-    # choose response_model depends on 
+
+    # choose response_model depends on
     response_model = None
     if is_judge:
         response_model = Judge
     else:
         response_model = HCA
 
-    raw_response, token_num_count = LLaMA_response_json(messages, model_name, response_model)
+    raw_response, token_num_count = LLaMA_response_json(
+        messages, model_name, response_model
+    )
     response = json.loads(raw_response)
-    response = response['actions_plan']
+    response = response["actions_plan"]
     token_num_count_list_add.append(token_num_count)
 
     return response, token_num_count_list_add
@@ -182,13 +185,11 @@ def with_action_syntactic_check_func(
     # logic gate: put on DSC20 final exam please
     while iteration_num < CHECK_ITER:
         # preventing JSON checker change action
-        feedback = is_valid_action(
-            response, central_response, pg_dict_input, is_judge
-        )
-        
-        print(f'FEEDBACK IS {feedback}')
-        
-        if feedback != "": # this is fine
+        feedback = is_valid_action(response, central_response, pg_dict_input, is_judge)
+
+        print(f"FEEDBACK IS {feedback}")
+
+        if feedback != "":  # this is fine
             print("RETAKE ACTION")
             response, token_num_count_list_add = retake_action(
                 feedback,
@@ -207,7 +208,7 @@ def with_action_syntactic_check_func(
         else:
             #  no feedback
             return response, token_num_count_list_add
-        
+
         iteration_num += 1
 
     return "Syntactic Error", token_num_count_list_add

@@ -1,1 +1,3 @@
-# Why Efficient RPLH System?
+# Why Efficient-RPLH System? 🤔
+RPLH-efficient is the improved version of the original RPLH system where we prevent many of the fallbacks of RPLH-original hallucinating about many undpoable actions. We use the `instructor` package, which usese [**Fine State Machine**](https://dottxt-ai.github.io/outlines/latest/reference/generation/structured_generation_explanation/) that adjust the probability output of the language model to achieve specific format of the output.
+- Under this system, the judge also serve as an syntactic checker as well where it would change the wrong syntax that the HCA agent have given.

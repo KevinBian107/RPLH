@@ -1,8 +1,5 @@
-# Role Playing Leader Hellucination (RPLH) Multi-Commenting System
-
-Using Large Language Models' ***In-context Learning*** abilities, we are developing frameworks for multi-agent collaborations using **R**ole-**P**laying **L**eader-**H**ellucinating LLM, or in short, **RPLH-LLM**. We are currently developing on minimal example and we are planning to adapt to MCTS fine-tuned LLM with VirtualHome later.
-- Judge also serve as an syntactic checker as well.
-- As parameter increases, performance increases
+# Role Playing Leader Hellucination (RPLH) Light-Weight Multi-Collaboration System
+Using Large Language Models' ***In-context Learning*** abilities, we are developing frameworks for multi-agent collaborations/commetning system using **R**ole-**P**laying **L**eader-**H**ellucinating LLM, or in short, **RPLH**. We know that as parameter increases, performance automatically increases. However, only limited works have being down on generalizing this sort of **in-context** learning ability into samll parameter models. In our work, we try to address this issue. We try to design `light-weight` system that is runable directly on a laptop computer 💻.
 
 <div align=center>
 <img src="demos/img/rplh.png" width = "50%" alt="struct" align=center/>
@@ -21,39 +18,42 @@ Here is a demo of our RPLH performing multi-agent resasoning with the first HCA 
 </div>
 
 
-## Setting Up
-Install the dependencies by:
+## Setting Up Inference Script:
+
+First, we need to install the dependencies and create a separate conda environment:
 ```
 conda env create
 ```
 
-Download SLM from: https://ollama.com/library/qwen
-
-Instantiate SLM agent by (this need to be done in your system terminal directly, not in VScode):
+Download SLM from: https://ollama.com/library/qwen and then instantiate small large language model (14B Ollama model qwen2.5:14b-instruct-q3_K_L) agent by (this need to be done in your system terminal directly, not in VScode):
 ```
 ollama run qwen2.5:14b-instruct-q3_K_L
 ```
 
-Create local environment first by:
+Create local MoveBox environment for running (depending on the version using) by:
 ```
-python env_create.py
-```
-
-Then running original full RPLH main inference by:
-```
-python rplh_full/run_rplh.py
+python rplh_vanilla/env.py
 ```
 
-or running the efficient version
-
+Or
 ```
-python rplh_efficient/run_rplh.py
-```
-
-To visualize the reasoning process:
-```
-python rplh/vis_conversation.py
+python rplh_efficient/env.py
 ```
 
-## Adapting on:
+Then running original vanilla RPLH inferene loop by:
+```
+python rplh_vanilla/rplh_inference.py -- model_name "qwen2.5:14b-instruct-q3_K_L"
+```
+
+or running the efficient RPLH inferene loop by:
+```
+python rplh_efficient/rplh_inference.py -- model_name "qwen2.5:14b-instruct-q3_K_L"
+```
+
+To visualize the reasoning process by rendering the conversation that each of the agent said:
+```
+python rendering/render_conversation.py
+```
+
+## Environment Aaapted From:
 1. https://yongchao98.github.io/MIT-REALM-Multi-Robot/
