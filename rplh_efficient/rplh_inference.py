@@ -276,7 +276,7 @@ def run_exp(
                         f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                         in data_local["agent_dict"]
                     ):
-                        print(f'AGENT DICT LOADING:{data_local["agent_dict"]}')
+                        print(f'AGENT ACTION DICT UPDATING:{data_local["agent_dict"]}')
                         
                         # note, dict, this have space
                         data_local["prompt_list_dir"][
