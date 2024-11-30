@@ -382,7 +382,7 @@ def run_exp(
                         judge_prompt_func,
                         local_response=local_response,
                         cen_response=cen_response,
-                        pg_dict=data_dict["pg_dict"],
+                        cur_state=data_dict["pg_dict"],
                     )
 
                     messages = message_construct_func(

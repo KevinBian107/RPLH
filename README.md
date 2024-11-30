@@ -1,5 +1,5 @@
 # Role Playing Leader Hellucination (RPLH) Light-Weight Multi-Collaboration System
-Using Large Language Models' ***In-context Learning*** abilities, we are developing frameworks for multi-agent collaborations/commetning system using **R**ole-**P**laying **L**eader-**H**ellucinating LLM, or in short, **RPLH**. We know that as parameter increases, performance automatically increases. However, only limited works have being down on generalizing this sort of **in-context** learning ability into samll parameter models. In our work, we try to address this issue. We try to design `light-weight` system that is runable directly on a laptop computer 💻.
+Using Large Language Models' ***In-context Learning*** abilities, we are developing frameworks for multi-agent collaborations/commetning system using **R**ole-**P**laying **L**eader-**H**ellucinating LLM, or in short, **RPLH**. We know that as parameter increases, performance automatically increases. However, only limited works have being down on generalizing this sort of **in-context** learning ability into samll parameter models. In our work, we try to address this issue. We try to design an efficient `light-weight` system that is runable directly on a laptop computer 💻.
 
 <div align=center>
 <img src="demos/img/rplh.png" width = "50%" alt="struct" align=center/>
@@ -7,7 +7,7 @@ Using Large Language Models' ***In-context Learning*** abilities, we are develop
 
 We hope to build agent that is caplable of ***Social-reasoning and expecting what the other agent should be doing***. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to ***Level-one agent***.
 
-## Demo:
+## RPLH Demos:
 Here is a demo of our RPLH performing multi-agent resasoning with the first HCA (central) agent hellucinating about future steps:
 
 <div style="width: 100%; padding: 5px; display: flex; justify-content: center;">
@@ -35,7 +35,7 @@ Create local MoveBox environment for running (depending on the version using) by
 python rplh_vanilla/env.py
 ```
 
-Or
+Or setting up RPLH-efficient system by:
 ```
 python rplh_efficient/env.py
 ```
