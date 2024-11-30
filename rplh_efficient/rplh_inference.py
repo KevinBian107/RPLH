@@ -257,14 +257,12 @@ def run_exp(
 
             data_local["local_agent_response_list_dir"]["feedback1"] = ""
 
-            # NOTE: need to be Agent[0.5, 0.5] format, debug use regex
-            data_local["agent_dict"] = response  # json.loads(response)
-
             for local_agent_row_i in range(pg_row_num):
 
                 for local_agent_column_j in range(pg_column_num):
-
-                    # TODO: IF BAN TRIGGERED, SKIP
+                    
+                    # need to relapse response
+                    data_local["agent_dict"] = response
 
                     print(
                         f"-------###-------###-------###-------LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
@@ -278,7 +276,7 @@ def run_exp(
                         f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                         in data_local["agent_dict"]
                     ):
-                        print(f'AGENT DICT LOADING:{data_local["agent_dict"]}')
+                        print(f'AGENT ACTION DICT UPDATING:{data_local["agent_dict"]}')
                         
                         # note, dict, this have space
                         data_local["prompt_list_dir"][
@@ -381,7 +379,7 @@ def run_exp(
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
-                    print(f'judge prompt: {judge_prompt}')
+                    # print(f'judge prompt: {judge_prompt}')
 
                     # partial function
                     partial_judge_prompt_func = partial(
@@ -433,11 +431,11 @@ def run_exp(
                         f.write(messages)
 
                     print(f"JUDGE MODIFIED:\n {response}")
-
+                    
                 else:
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
-
+                
                 data_dict["dialogue_history_list"].append(dialogue_history)
 
                 data_dict["attitude_dialogue_dict"][
