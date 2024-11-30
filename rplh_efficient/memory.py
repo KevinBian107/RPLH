@@ -90,11 +90,11 @@ def rplh_prompt_func(
 
     if data["env_step"] == 0:
         attitude = None
-        success_action = f"""No previous action, here is an sample:
-        {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}"""
+        # success_action = f"""No previous action, here is an sample:
+        # {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}"""
     else:
         attitude = data["attitude_info"][-1]
-        success_action = data["response_total_list"][-1]
+        # success_action = data["response_total_list"][-1]
 
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
@@ -208,19 +208,17 @@ def rplh_prompt_func(
             After each move, agents provide updates for the next sequence of actions.
             You are the central agent and your job is to coordinate the agents optimally.
 
-            Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}.
+            Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible actions: {state_update_prompt}.
 
-            Attitude:
             {att_promt}
 
-            Future_steps:
             Think about what the future {N} actions would be if you want to achieve the goal with the reasoning.
             Remanber to wirte out for each step, what you plan for every agent to do and what would the state change be.
             
             {feedback}
 
             Action Plan:
-            Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
+            Specify your action plan in this format: {{"Agent[x, x]":"move(x, square[x, x])","Agent[x, x]": "move(x, x)"}}.
             One agent can only make one action. 
             No agent name should be given if the agent does not have a task next. 
             """
