@@ -257,12 +257,12 @@ def run_exp(
 
             data_local["local_agent_response_list_dir"]["feedback1"] = ""
 
-            # NOTE: need to be Agent[0.5, 0.5] format, debug use regex
-            data_local["agent_dict"] = response  # json.loads(response)
-
             for local_agent_row_i in range(pg_row_num):
 
                 for local_agent_column_j in range(pg_column_num):
+                    
+                    # need to relapse response
+                    data_local["agent_dict"] = response
 
                     print(
                         f"-------###-------###-------###-------LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
@@ -432,10 +432,6 @@ def run_exp(
 
                     print(f"JUDGE MODIFIED:\n {response}")
                     
-                    # store judge response, next agent should get this relaped response
-                    data_local["response_list_dir"][
-                                f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
-                            ].append(response)
                 else:
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
