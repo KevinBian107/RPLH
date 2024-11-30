@@ -544,14 +544,15 @@ def message_construct_func(
     if f"{dialogue_history_method}" in (
         "_w_all_dialogue_history",
         "_w_compressed_dialogue_history",
-        "_w_only_state_action_history",
-        "_w_markovian_state_action_history",
     ):
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
-
-        for i in range(len(response_total_list)):
-            messages.append({"role": "assistant", "content": response_total_list[i]})
+    else:
+        print('LESS PROMPT IN MESSAGE CONSTRUCT')
+        messages.append({"role": "user", "content": user_prompt_list[-1]})
+        
+    for i in range(len(response_total_list)):
+        messages.append({"role": "assistant", "content": response_total_list[i]})
 
     return messages
 
