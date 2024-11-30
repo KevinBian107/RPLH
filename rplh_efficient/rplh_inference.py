@@ -173,6 +173,7 @@ def run_exp(
             raw_response, token_num_count = LLaMA_response_json(
                 messages, model_name, HCA
             )
+            print(f'RAW: {raw_response}')
             raw_response = json.loads(raw_response)
             raw_response = process_response(raw_response)
             response_str = "\n".join([f"{k}: {v}" for k, v, in raw_response.items()])
