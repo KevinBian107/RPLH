@@ -221,7 +221,8 @@ def rplh_prompt_func(
 
             Action Plan:
             Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
-            One agent can only make one action. 
+            Try to propose actions for all four agents.
+            One agent can only make one action.
             No agent name should be given if the agent does not have a task next. 
             """
     return HCA_prompt
@@ -366,6 +367,7 @@ def dialogue_func(
             Please be critical in thinking about this plan.
             
             Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents.
+            Try to find agreement with the central ageent if you can, the goal is to resolve conversation, not adding more.
 
             Please evaluate the given plan.
             If you agree with it, respond 'I Agree', without any extra words.
