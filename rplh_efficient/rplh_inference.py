@@ -264,8 +264,6 @@ def run_exp(
 
                 for local_agent_column_j in range(pg_column_num):
 
-                    # TODO: IF BAN TRIGGERED, SKIP
-
                     print(
                         f"-------###-------###-------###-------LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
                     )
@@ -381,7 +379,7 @@ def run_exp(
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
-                    print(f'judge prompt: {judge_prompt}')
+                    # print(f'judge prompt: {judge_prompt}')
 
                     # partial function
                     partial_judge_prompt_func = partial(
@@ -437,7 +435,12 @@ def run_exp(
                 else:
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
-
+                
+                # store judge response, next agent should get this relaped response
+                data_local["response_list_dir"][
+                            f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
+                        ] = response
+                
                 data_dict["dialogue_history_list"].append(dialogue_history)
 
                 data_dict["attitude_dialogue_dict"][
