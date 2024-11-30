@@ -75,10 +75,10 @@ def is_valid_action(
             pass
         else:
             if is_judge:
-                feedback += f"""You are the judge and your assigned task for {key[0]}_{key[1]} is not in the doable action list,
+                feedback += f"""You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
                                 so choose the alternative action from the central central planner {central_response};"""
             else:
-                feedback += f"Your assigned task for {key[0]}_{key[1]} is not in the doable action list; "
+                feedback += f"Your assigned task for {key[0]}, {key[1]} is not in the doable action list; "
 
     return feedback
 
@@ -214,47 +214,55 @@ def with_action_syntactic_check_func(
     return "Syntactic Error", token_num_count_list_add
 
 
-def process_response(response: str) -> dict:
+def process_response(response: dict) -> dict:
     """
-    Processes a raw response string containing agent locations and actions,
-    extracts relevant information, and converts it into dictionary format for loading in json.
+    Processes a response dictonary that is not suitable for execution, extracts relevant information, 
+    and converts it into a format suitable for environment execution.
 
     Args:
-        raw_response (str): The string is expected to include an "EXECUTE" keyword followed by
-            JSON-like content describing agent locations and actions
-            (e.g "EXECUTE
-            {"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])")
+        response (dict): A not suitable dictonary can be in format like:
+            {"Agent[0.5_1.5]": "move(box_red, square[1.5_1.5])"}
+            {'Step_1': {'Agent[0.5, 0.5]': 'move(box_red, target_red)'}
+            {'Agent[0.5, 0.5]': {'action': 'move(box_red, target_red)', 'reasoning': ''},
 
     Returns:
-        dict: A dictionary where keys are agent identifiers (e.g., "Agent[0.5, 0.5]")
+        dict: A dictionary where keys are agent (e.g., "Agent[0.5, 0.5]")
               and values are actions (e.g., "move(box_blue, square[0.5, 1.5])").
     Note:
-        Return input response back if error in parsing the response.
+        Do nothing and return original response back if error in parsing the response.
     """
+    def find_idx(substring, dic):
+        for key in dic.keys():
+            if substring in key.lower():
+                return key
+        return False
 
-    try:
-        pattern_1 = r"agent\[(\d+\.\d+), (\d+\.\d+)\]"
-        agent_loc = re.findall(pattern_1, response, re.IGNORECASE)
+    try:            
+        transformed_dict = dict()
 
-        pattern_2 = r"move\((.*?),\s(.*?)\)"  # r'move(\(\w+, (?:square.\d+\.\d+, \d+\.\d+.|\w+)\))'
-        agent_action = re.findall(pattern_2, response, re.IGNORECASE)
+        for key, value in response.items():
+            if 'agent' in key.lower():
+                coord = tuple(map(float, re.findall(r"\d+\.?\d*", key)))
+                value_action = value
+            if isinstance(value, dict):
+                agent = find_idx('agent', value)
+                action = find_idx('action', value)
+                if agent:
+                    coord = tuple(map(float, re.findall(r"\d+\.?\d*", agent)))
+                    value_action = value[agent]
+                elif action:
+                    value_action = value[action]
+
+            # match the item and location in the value
+            match = re.match(r"move\((.*?),\s(.*?)\)", value_action)
+            if match:
+                item, location = match.groups()
+                if "square" in location:
+                    location = tuple(map(float, re.findall(r"\d+\.?\d*", location)))
+                    location = f'square[{location[0]}, {location[1]}]'
+
+                transformed_dict[f'Agent[{coord[0]}, {coord[1]}]'] = f'move({item}, {location})'
+        return transformed_dict
 
     except:
         return response
-        # raise ValueError(f'Error in parsing the response: {response}')
-
-    num_agent = len(agent_loc)
-    action = []
-    if len(agent_loc) == len(agent_action):
-        for i in range(num_agent):
-            action.append(
-                f'"Agent[{agent_loc[i][0]}, {agent_loc[i][1]}]": "move({agent_action[i][0]}, {agent_action[i][1]})"'
-            )
-
-        json_str = "{" + ", ".join(action) + "}"
-    else:
-        print(f"Agent-action pair is inconsistent: {response}")
-        return response
-        # raise ValueError(f'Agent-action pair is inconsistent: {response}')
-
-    return json_str

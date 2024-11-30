@@ -74,7 +74,12 @@ def state_update_func(
                     action_list.append(f"move({box}, square{surround_index})")
                 if "target" + box[3:] in square_item_list:
                     action_list.append(f"move({box}, target{box[3:]})")
-            state_update_prompt += f"{action_list}\n"
+            if len(action_list) != 0:
+                state_update_prompt += (
+                    f"I can do one of the following action: {action_list}\n"
+                )
+            else:
+                state_update_prompt += "\n"  # I can do nothing
     return state_update_prompt
 
 
