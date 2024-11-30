@@ -173,6 +173,7 @@ def run_exp(
             raw_response, token_num_count = LLaMA_response_json(
                 messages, model_name, HCA
             )
+            print(f'RAW: {raw_response}')
             raw_response = json.loads(raw_response)
             raw_response = process_response(raw_response)
             response_str = "\n".join([f"{k}: {v}" for k, v, in raw_response.items()])
@@ -277,6 +278,8 @@ def run_exp(
                         f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                         in data_local["agent_dict"]
                     ):
+                        print(f'AGENT DICT LOADING:{data_local["agent_dict"]}')
+                        
                         # note, dict, this have space
                         data_local["prompt_list_dir"][
                             f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"

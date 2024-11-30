@@ -158,7 +158,7 @@ def run_exp(
             partial_rplh_prompt_func = partial(
                 rplh_prompt_func,
                 state_update_prompt=state_update_prompt,
-                data_dict=data_dict,
+                data=data_dict,
                 dialogue_history_method=dialogue_history_method,
                 HCA_agent_location=HCA_agent_location,
             )
@@ -382,7 +382,7 @@ def run_exp(
                         judge_prompt_func,
                         local_response=local_response,
                         cen_response=cen_response,
-                        pg_dict=data_dict["pg_dict"],
+                        cur_state=data_dict["pg_dict"],
                     )
 
                     messages = message_construct_func(
