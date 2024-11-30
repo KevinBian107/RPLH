@@ -431,15 +431,14 @@ def run_exp(
                         f.write(messages)
 
                     print(f"JUDGE MODIFIED:\n {response}")
-
+                    
+                    # store judge response, next agent should get this relaped response
+                    data_local["response_list_dir"][
+                                f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
+                            ].append(response)
                 else:
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
-                
-                # store judge response, next agent should get this relaped response
-                data_local["response_list_dir"][
-                            f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
-                        ].append(response)
                 
                 data_dict["dialogue_history_list"].append(dialogue_history)
 
