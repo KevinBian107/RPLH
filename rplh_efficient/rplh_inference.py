@@ -542,7 +542,6 @@ def run_exp(
                 count += len(value)
                 print(f'STILL HAVE {count} LEFT')
             if count == 0:
-                render_graph_terminal_popup(data_dict["pg_dict"])
                 break
 
     # -----------------------------------------TASK SUCCESS OUT-----------------------------------------#
@@ -607,10 +606,10 @@ if __name__ == "__main__":
     #     for token_num_num_count in token_num_count_list:
     #         f.write(str(token_num_num_count) + "\n")
 
-    with open(Saving_path_result + "/success_failure.txt", "w") as f:
-        print("SAVE RESULT \n")
-        f.write(success_failure)
+    # with open(Saving_path_result + "/success_failure.txt", "w") as f:
+    #     print("SAVE RESULT \n")
+    #     f.write(success_failure)
 
-    with open(Saving_path_result + "/env_action_times.txt", "w") as f:
-        print("SAVE ACTION TIME \n")
-        f.write(f"{index_query_times+1}")
+    # with open(Saving_path_result + "/env_action_times.txt", "w") as f:
+    #     print("SAVE ACTION TIME \n")
+    #     f.write(f"{index_query_times+1}")
