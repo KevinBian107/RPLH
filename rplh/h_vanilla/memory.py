@@ -1,4 +1,4 @@
-from rplh_vanilla.LLM import *
+from rplh.llm.language_model import *
 import tiktoken
 
 enc = tiktoken.get_encoding("cl100k_base")

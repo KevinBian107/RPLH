@@ -1,8 +1,8 @@
 """Synthetic checker module/execution module"""
 
-from rplh_vanilla.memory import *
-from rplh_vanilla.env import *
-from rplh_vanilla.LLM import *
+from rplh.h_vanilla.memory import *
+from rplh.h_vanilla.env import *
+from rplh.llm.language_model import *
 import json
 import re
 import copy
@@ -168,8 +168,9 @@ def retake_action(
     """
 
     print("----------RETAKE ACTION----------")
-
-    retake_action_prompt_1 = prompt_func(feedback)
+    
+    # must specify this
+    retake_action_prompt_1 = prompt_func(feedback=feedback)
     messages = message_construct_func(
         [retake_action_prompt_1], [], dialogue_history_method
     )

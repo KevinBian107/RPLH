@@ -1,4 +1,4 @@
-from rplh_efficient.LLM import *
+from rplh.llm.language_model import *
 import tiktoken
 
 enc = tiktoken.get_encoding("cl100k_base")
@@ -7,7 +7,6 @@ enc = tiktoken.encoding_for_model("gpt-4")
 input_prompt_token_limit = 3000
 N = 5
 
-# critical, prompt is a hyperparameter
 GOAL_RULES = f"""
             You are an agent in a grid-like field to move colored boxes.
             Each agent is assigned to a 1x1 square and can only interact with objects in its area.
