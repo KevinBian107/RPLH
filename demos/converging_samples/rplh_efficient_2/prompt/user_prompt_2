@@ -1,0 +1,76 @@
+
+            You are a central planner directing agent in a grid-like field to move colored boxes.
+            You are agent at grid [Agent[1.5, 0.5]]. You need to make moves and other agents need to make moves as well.
+            
+            The goals and rules of this environment are:
+            
+            You are an agent in a grid-like field to move colored boxes.
+            Each agent is assigned to a 1x1 square and can only interact with objects in its area.
+            Agents can move a box to a neighboring square or a same-color target.
+            You can only move same color boxes to same color targets.
+            Each square can contain many targets and boxes.
+            The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
+            Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
+            When planning for action, remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop.
+            Avoid being stuck in action loops.
+            Additionally, when there is a box still in the grid (i.e. the state space contains {"0.5, 0.5": ["box_red"]}), then the agent in this grid (Agent[0.5, 0.5]) have to make an action in the next step.
+            Again, if there is a box in the grid, the corresponding agent in the grid has to make an action in this step.
+            Specify your action plan in this format where box_x and box_y are arbitrary boxes: {"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_y, target_y)"}.
+            One agent can only make one action. Include an agent only if it has a task next. 
+            No agent name should be given if the agent does not have a task next. 
+            
+            
+            Your task is to instruct each agent to match all boxes to their color-coded targets.
+            After each move, agents provide updates for the next sequence of actions.
+            You are the central agent and your job is to coordinate the agents optimally.
+
+            Hence, the current state is {'0.5_0.5': [], '0.5_1.5': [], '1.5_0.5': [], '1.5_1.5': ['target_purple', 'box_purple']}, with the possible actions: Agent[0.5, 0.5]: I am in square[0.5, 0.5], I can observe [], 
+Agent[0.5, 1.5]: I am in square[0.5, 1.5], I can observe [], 
+Agent[1.5, 0.5]: I am in square[1.5, 0.5], I can observe [], 
+Agent[1.5, 1.5]: I am in square[1.5, 1.5], I can observe ['target_purple', 'box_purple'], I can do one of the following action: ['move(box_purple, square[0.5, 1.5])', 'move(box_purple, square[1.5, 0.5])', 'move(box_purple, target_purple)']
+.
+
+            Attitude:
+            
+            Please learn from attitude in the following ways:
+
+                1. Please undrstand the attitude of each agents in this environment,
+                including yourself based on this attitude report given from another agent: 
+                
+                {Agent[0.5, 0.5]: "A Good Decision Maker", 
+ Agent[0.5, 1.5]: "Collaborative and Efficiency-Minded",
+ Agent[1.5, 0.5]: "Decisive and Goal-Oriented",
+ Agent[1.5, 1.5]: "Efficient and Goal-Oriented"}
+
+Justification:
+- **Agent[0.5, 0.5]**: The response from this agent suggests a focus on making decisions that are efficient and well-thought-out based on the current state of the environment. This indicates an attitude of being a "Good Decision Maker."
+  
+- **Agent[0.5, 1.5]**: The agent expresses a collaborative approach while emphasizing efficiency in their reasoning. They prioritize moving boxes to appropriate targets without causing delays or inefficiencies. Thus, they have an "Efficiency-Minded" and "Collaborative" attitude.
+  
+- **Agent[1.5, 0.5]**: This agent highlights the need for decisive actions and goal-oriented tasks, indicating a clear focus on making decisions quickly while also aligning with task goals. They are described as being "Decisive and Goal-Oriented."
+  
+- **Agent[1.5, 1.5]**: The response from this agent emphasizes efficiency in completing tasks and being goal-oriented, aligning well with the collaborative nature of their environment but also highlighting a focus on achieving goals efficiently. Therefore, they can be described as "Efficient and Goal-Oriented."
+
+Given these detailed justifications based on each agent's responses, we can conclude that the attitudes match the descriptions provided above..
+
+                2. Based on this charcteristics of each agent, please do two things and added them after each agent's attitude:
+                    i. Reason about the reactions each agent would have towards your command.
+                    ii. Reason about how they would give actions if they are the central agent.
+            
+            Use the following format:
+            - Attitude of agent...
+            - Reaction of agent...
+            
+
+            Future_steps:
+            Think about what the future 5 actions would be if you want to achieve the goal with the reasoning.
+            Remanber to wirte out for each step, what you plan for every agent to do and what would the state change be.
+            
+            
+
+            Action Plan:
+            Specify your action plan in this format: {"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_y, target_y)"} where box_x and box_y are arbitrary boxes.
+            Try to propose actions for all four agents.
+            One agent can only make one action.
+            No agent name should be given if the agent does not have a task next. 
+            
