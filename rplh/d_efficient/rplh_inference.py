@@ -60,6 +60,8 @@ def run_exp(
         success/failure status, query index, and saving path result.
     """
     
+    print('RUNNIN DECENTRALZIED RPLH')
+    
     num_agent = pg_row_num * pg_column_num
 
     Saving_path_result = (
