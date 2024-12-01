@@ -15,3 +15,10 @@ RPLH-efficient is the improved version of the original RPLH system where we prev
         actions_plan: Dict
     ```
 - Under this system, the judge also serve as an syntactic checker as well where it would change the wrong syntax that the HCA agent have given.
+- To remain the clearness of information flow and decision making, when needed to retake action, the LMs that is making the new decision would use teh original functions that the original HCA agent/Local agent/Judge uses with additional feedbacks giving through functional pass in with `functool.partial`.
+- To still promote some conversation going on, only output agent (HCA and judge) uses the strict output formatter on LMs, the local_agent and attitude agent outputs strings directly and is free to have more conversations.
+- We used many optimization hacks:
+    - When an local agent does not have boxes or targets in its block or when it does not have an action provided from the HCA agent, it would not be considered as a valid conversation source as its views are limited.
+    - When vote counts (consecutive agreement number) surpasses half the number of agents, the HCA action is executed directly. If not consecutive, the count is re-initiated.
+    - If the local agent agrees the HCA decision, then no judge should be involved and the HCA action would be passed on directly (relapsed) to the next round of local agent or directly get executed.
+    - Instead of letting the HCA agent figuring out attitude, we limit the prompt length that can be given by assigning an attitude agent taht judges the attitude of each agent on the field with current round information only, then only this attitude information is passed to teh next round HCA agent.
