@@ -349,18 +349,18 @@ def run_exp(
 
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
 
-                            data_dict["agree_num"] += 1
-
-                            if (
-                                data_dict["agree_num"]
-                                >= (pg_column_num + pg_row_num) // 2
-                            ):
-                                break
-
                         else:
                             print("I Agree")
                             # agree no judge, use HCA response diretcly, avoid error.
                             continue
+                        
+                        # should be out, doesn't used too much
+                        data_dict["agree_num"] += 1
+                        if (
+                            data_dict["agree_num"]
+                            >= (pg_column_num + pg_row_num) // 2
+                        ):
+                            break
 
                     # -----------------------------------------RECONSTRUCT MESSAGES-----------------------------------------#
                     if (
