@@ -1,0 +1,76 @@
+
+            You are a central planner directing agent in a grid-like field to move colored boxes.
+            You are agent at grid [Agent[0.5, 0.5]]. You need to make moves and other agents need to make moves as well.
+            
+            The goals and rules of this environment are:
+            
+            You are an agent in a grid-like field to move colored boxes.
+            Each agent is assigned to a 1x1 square and can only interact with objects in its area.
+            Agents can move a box to a neighboring square or a same-color target.
+            You can only move same color boxes to same color targets.
+            Each square can contain many targets and boxes.
+            The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
+            Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
+            When planning for action, remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop.
+            Avoid being stuck in action loops.
+            Additionally, when there is a box still in the grid (i.e. the state space contains {"0.5, 0.5": ["box_red"]}), then the agent in this grid (Agent[0.5, 0.5]) have to make an action in the next step.
+            Again, if there is a box in the grid, the corresponding agent in the grid has to make an action in this step.
+            Specify your action plan in this format where box_x and box_y are arbitrary boxes: {"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_y, target_y)"}.
+            One agent can only make one action. Include an agent only if it has a task next. 
+            No agent name should be given if the agent does not have a task next. 
+            
+            
+            Your task is to instruct each agent to match all boxes to their color-coded targets.
+            After each move, agents provide updates for the next sequence of actions.
+            You are the central agent and your job is to coordinate the agents optimally.
+
+            Hence, the current state is {'0.5_0.5': [], '0.5_1.5': [], '1.5_0.5': [], '1.5_1.5': []}, with the possible actions: Agent[0.5, 0.5]: I am in square[0.5, 0.5], I can observe [], 
+Agent[0.5, 1.5]: I am in square[0.5, 1.5], I can observe [], 
+Agent[1.5, 0.5]: I am in square[1.5, 0.5], I can observe [], 
+Agent[1.5, 1.5]: I am in square[1.5, 1.5], I can observe [], 
+.
+
+            Attitude:
+            
+            Please learn from attitude in the following ways:
+
+                1. Please undrstand the attitude of each agents in this environment,
+                including yourself based on this attitude report given from another agent: 
+                
+                {Agent[0.5, 0.5]: "A Good Decision Maker", 
+ Agent[0.5, 1.5]: "Too Aggressive",
+ Agent[1.5, 0.5]: "Strategic Planner and Efficient Coordinator",
+ Agent[1.5, 1.5]: "Efficient Coordinator and Proactive Contributor"}
+
+Justification:
+- **Agent[0.5, 0.5]**: The provided dialogue indicates that this agent is perceived as a good decision maker and efficient coordinator based on the environment's objectives. Additionally, it shows an ability to adapt actions according to environmental changes.
+  
+- **Agent[0.5, 1.5]**: This agent is labeled with "Too Aggressive" based on its described behavior where immediate action goals might be obstructed by commands from a central planning entity. It also mentions that the agent would face challenges in such scenarios.
+
+- **Agent[1.5, 0.5]**: The attitude here aligns with being a Strategic Planner and Efficient Coordinator as it demonstrates detailed strategic plans to ensure efficiency and goal achievement while considering coordination between agents.
+
+- **Agent[1.5, 1.5]**: This agent is characterized as an Efficient Coordinator and Proactive Contributor due to its proactive approach towards ensuring logical progression in actions and planning steps to move boxes and agents as per the overall plan.
+
+These attitudes are derived from analyzing each agent's descriptions of their reasoning processes, future steps, and justifications for their planned moves within the context provided..
+
+                2. Based on this charcteristics of each agent, please do two things and added them after each agent's attitude:
+                    i. Reason about the reactions each agent would have towards your command.
+                    ii. Reason about how they would give actions if they are the central agent.
+            
+            Use the following format:
+            - Attitude of agent...
+            - Reaction of agent...
+            
+
+            Future_steps:
+            Think about what the future 5 actions would be if you want to achieve the goal with the reasoning.
+            Remanber to wirte out for each step, what you plan for every agent to do and what would the state change be.
+            
+            
+
+            Action Plan:
+            Specify your action plan in this format: {"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_y, target_y)"} where box_x and box_y are arbitrary boxes.
+            Try to propose actions for all four agents.
+            One agent can only make one action.
+            No agent name should be given if the agent does not have a task next. 
+            
