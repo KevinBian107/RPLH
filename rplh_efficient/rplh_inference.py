@@ -92,7 +92,6 @@ def run_exp(
         "r",
     ) as file:
         pg_dict = json.load(file)
-        # print(pg_dict)
         data_dict["pg_dict"] = pg_dict
 
     num_agent = pg_row_num * pg_column_num
@@ -390,7 +389,6 @@ def run_exp(
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
-                    # print(f'judge prompt: {judge_prompt}')
 
                     # partial function
                     partial_judge_prompt_func = partial(
@@ -520,13 +518,11 @@ def run_exp(
                 if system_error_feedback != "":
                     print(system_error_feedback)
 
-                # print(data_dict["pg_dict"])
                 data_dict["pg_dict"] = pg_dict_returned
 
                 # render_map_terminal_popup(data_dict["pg_dict"], [original_response_dict])
                 render_graph_terminal_popup(data_dict["pg_dict"])
 
-                # print(data_dict["pg_dict"])
             except:
                 success_failure = "Hallucination of wrong plan"
                 pass

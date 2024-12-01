@@ -2,7 +2,7 @@
 Using Large Language Models' ***In-context Learning*** abilities, we are developing frameworks for multi-agent collaborations/commetning system using **R**ole-**P**laying **L**eader-**H**ellucinating LLM, or in short, **RPLH**. We know that as parameter increases, performance automatically increases. However, only limited works have being down on generalizing this sort of **in-context** learning ability into samll parameter models. In our work, we try to address this issue. We try to design an efficient `light-weight` system that is runable directly on a laptop computer 💻.
 
 <div align=center>
-<img src="demos/img/rplh.png" width = "50%" alt="struct" align=center/>
+<img src="demos/img/rplh.png" width = "60%" alt="struct" align=center/>
 </div>
 
 # Agent's Perpective
@@ -33,6 +33,9 @@ Here is a demo of our RPLH performing multi-agent resasoning with the first HCA 
     Your browser does not support the video tag.
   </video>
 </div>
+
+- Conversation demos are (here)[https://github.com/KevinBian107/RPLH/tree/master/demos/conversations]
+- Actual running data are (here)[https://github.com/KevinBian107/RPLH/tree/master/demos/converging_samples]
 
 
 ## Setting Up Inference Script:
