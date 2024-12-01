@@ -56,6 +56,8 @@ def run_exp(
         Tuple: Contains lists of user prompts, responses, states, token counts,
         success/failure status, query index, and saving path result.
     """
+    
+    print('RUNNIN EFFICIENT RPLH')
 
     Saving_path_result = (
         Saving_path
