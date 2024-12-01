@@ -1,11 +1,11 @@
 import sys
 from pathlib import Path
 
-main_path = Path(__file__).resolve().parent
+main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
     
-from render_state import *
+from rplh.rendering.render_state import *
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.io as pio

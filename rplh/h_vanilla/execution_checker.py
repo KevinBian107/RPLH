@@ -1,8 +1,8 @@
 """Synthetic checker module/execution module"""
 
-from rplh_vanilla.memory import *
-from rplh_vanilla.env import *
-from rplh_vanilla.LLM import *
+from rplh.h_vanilla.memory import *
+from rplh.h_vanilla.env import *
+from rplh.llm.language_model import *
 import json
 import re
 import copy

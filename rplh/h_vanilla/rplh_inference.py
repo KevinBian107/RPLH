@@ -4,15 +4,15 @@ import sys
 from pathlib import Path
 import argparse
 
-main_path = Path(__file__).resolve().parent.parent
+main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
 
-from rplh_vanilla.LLM import *
-from rplh_vanilla.memory import *
-from rplh_vanilla.env import *
-from rplh_vanilla.execution_checker import *
-from rendering.render_state import *
+from rplh.llm.language_model import *
+from rplh.h_vanilla.memory import *
+from rplh.h_vanilla.env import *
+from rplh.h_vanilla.execution_checker import *
+from rplh.rendering.render_state import *
 import os
 import json
 import re
@@ -350,19 +350,18 @@ def run_exp(
                             ] += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
 
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
-
-                            data_dict["agree_num"] += 1
-
-                            if (
-                                data_dict["agree_num"]
-                                >= (pg_column_num + pg_row_num) // 2
-                            ):
-                                break
-
                         else:
                             print("I Agree")
                             # agree no judge, use HCA response diretcly, avoid error.
                             continue
+                        
+                        # should be out, doesn't used too much
+                        data_dict["agree_num"] += 1
+                        if (
+                            data_dict["agree_num"]
+                            >= (pg_column_num + pg_row_num) // 2
+                        ):
+                            break
 
                     # -----------------------------------------RECONSTRUCT MESSAGES-----------------------------------------#
                     if (
