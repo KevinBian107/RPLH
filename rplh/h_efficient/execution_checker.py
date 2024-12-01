@@ -1,9 +1,9 @@
 """Synthetic checker module/execution module"""
 
-from rplh_efficient.memory import *
-from rplh_efficient.env import *
-from rplh_efficient.LLM import *
-from rplh_efficient.response_model import *
+from rplh.h_efficient.memory import *
+from rplh.h_efficient.env import *
+from rplh.llm.language_model import *
+from rplh.llm.response_model import *
 import json
 import re
 import copy

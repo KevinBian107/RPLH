@@ -1,4 +1,6 @@
-from rplh_efficient.LLM import *
+'''Specific memory for decentralzied, other gerenral function in rplh-efficient memory'''
+
+from rplh.llm.language_model import *
 import tiktoken
 
 enc = tiktoken.get_encoding("cl100k_base")
@@ -34,35 +36,7 @@ FEEDBACK_LCOAL1 = """
             Your response:
             """
 
-
-def better_state_repres(pg_dict: dict) -> dict:
-    """
-    Transforms the state representation the original pg_dict envirionemnt
-
-    Args:
-        pg_dict (dict): A dictionary representing BoxNet envirionment.
-
-    Returns:
-        dict: A new dictionary with transformed state representation.
-
-    Example:
-        Input: {'0.5_0.5': ['box_blue'], 
-                '0.5_1.5': ['box_red'], 
-                '1.5_0.5': ['target_blue'], 
-                '1.5_1.5': ['target_red']},
-        Output: {'0.5, 0.5': ['box_blue'], 
-                 '0.5, 1.5': ['box_red'], 
-                 '1.5, 0.5': ['target_blue'], 
-                 '1.5, 1.5': ['target_red']},
-    """
-    new_pg_dict = {}
-
-    for key, value in pg_dict.items():
-        new_pg_dict[f'{key[:3]}, {key[-3:]}'] = value
-
-    return new_pg_dict
-
-def dialogue_func(
+def local_agent_prompt_func(
     state_update_prompt_local_agent: str,
     state_update_prompt_other_agent: str,
     central_response: str,
@@ -198,75 +172,3 @@ def dialogue_func(
             Your response:
         """
     return local_HCA_prompt
-
-def input_reprompt_func(state_update_prompt: str) -> str:
-    """
-    Creates a re-prompt for agents to generate a new action plan based on the updated state.
-
-    Args:
-        state_update_prompt (str): Updated description of the current state.
-
-    Returns:
-        str: A re-prompt instructing agents to provide the next step in JSON format.
-    """
-
-    user_reprompt = f"""
-    Finished! The updated state is as follows(combined targets and boxes with the same color have been removed): {state_update_prompt}
-    The output should be like json format like: {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[0.5, 1.5]":"move(box_y, target_y)"}} where box_x and box_y are arbitrary boxes.
-    If no action for one agent in the next step, just do not include its action in the output.
-    Also remember at most one action for each agent in each step.
-    Next step output:
-    """
-    return user_reprompt
-
-
-def message_construct_func(
-    user_prompt_list: list[str],
-    response_total_list: list[str],
-    dialogue_history_method: str,
-) -> list[dict[str, str]]:
-    """
-    Constructs messages for the model with the appropriate dialogue context.
-    Create a specialized LLM dictrionary with prompt information, later convert back in LLM class
-
-    (with all dialogue history concats)
-
-    Args:
-        user_prompt_list (list[str]): List of user prompts.
-        response_total_list (list[str]): List of model responses.
-        dialogue_history_method (str): Method for managing dialogue history.
-
-    Returns:
-        list[dict[str, str]]: List of message dictionaries for the model.
-
-    Notes:
-        We all use this function now through out the RPLH system to maintain consistency, only other case is teh attitude agent.
-    """
-
-    messages = [
-        {
-            "role": "system",
-            "content": f"""You are a helpful assistant.
-                 
-                Make sure that:
-                - If no action for an agent in the next step, do not include it in JSON output. 
-                - At most one action for each agent in each step.
-                - Json format should follow something like: {{'Agent[0.5, 0.5]': 'move(box_purple, target_purple)', 'Agent[0.5, 1.5]': 'move(box_orange, target_orange)', 'Agent[1.5, 0.5]': 'move(box_orange, target_orange)', 'Agent[1.5, 1.5]': 'move(box_green, target_green)'}}
-                """,
-        }
-    ]
-
-    if f"{dialogue_history_method}" in (
-        "_w_all_dialogue_history",
-        "_w_compressed_dialogue_history",
-    ):
-        for i in range(len(user_prompt_list)):
-            messages.append({"role": "user", "content": user_prompt_list[i]})
-    else:
-        print('LESS PROMPT IN MESSAGE CONSTRUCT')
-        messages.append({"role": "user", "content": user_prompt_list[-1]})
-        
-    for i in range(len(response_total_list)):
-        messages.append({"role": "assistant", "content": response_total_list[i]})
-
-    return messages

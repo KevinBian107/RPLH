@@ -1,19 +1,22 @@
-"""Need good documentation"""
+"""Modified from rplh-efficient, a particular instance of the decnetralzied efficient version"""
 
 import sys
 from pathlib import Path
 import argparse
 
-main_path = Path(__file__).resolve().parent.parent
+main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
 
-from rplh_efficient.LLM import *
-from rplh_decentric.memory import *
-from rplh_efficient.env import *
-from rplh_efficient.execution_checker import *
-from rplh_decentric.response_model import *
-from rendering.render_state import *
+from rplh.llm.language_model import *
+from rplh.h_efficient.env import *
+from rplh.h_efficient.execution_checker import *
+from rplh.llm.response_model import *
+
+from rplh.h_efficient.memory import *
+from rplh.d_efficient.memory import *
+
+from rplh.rendering.render_state import *
 
 import os
 import json
@@ -188,7 +191,7 @@ def run_exp(
                         )
 
                         # take in other agent's plan and give local prompt
-                        local_reprompt = dialogue_func(
+                        local_reprompt = local_agent_prompt_func(
                             state_update_prompt_local_agent,
                             state_update_prompt_other_agent,
                             response,
@@ -200,7 +203,7 @@ def run_exp(
                         data_dict["user_prompt_list"].append(local_reprompt)
                         
                         partial_local_prompt_func = partial(
-                            dialogue_func,
+                            local_agent_prompt_func,
                             state_update_prompt_local_agent=state_update_prompt_local_agent,
                             state_update_prompt_other_agent=state_update_prompt_other_agent,
                             central_response=response,

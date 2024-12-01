@@ -1,4 +1,4 @@
-from rplh_vanilla.LLM import *
+from rplh.llm.language_model import *
 import tiktoken
 
 enc = tiktoken.get_encoding("cl100k_base")
@@ -7,32 +7,32 @@ enc = tiktoken.encoding_for_model("gpt-4")
 input_prompt_token_limit = 3000
 N = 5
 
-# critical, prompt is a hyperparameter
-GOAL_RULES = f"""You are an agentin a grid-like field to move colored boxes.
-                Each agent is assigned to a 1x1 square and can only interact with objects in its area.
-                Agents can move a box to a neighboring square or a same-color target.
-                You can only move same color boxes to same color targets.
-                Each square can contain many targets and boxes.
-                The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
-                Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
-                When planning for action, remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop.
-                Avoid being stuck in action loops.
-                Additionally, when there is a box still in the grid (i.e. the state space contains {{"0.5_0.5": ["box_red"]}}), then the agent in this grid (Agent[0.5, 0.5]) have to make an action in the next step.
-                Again, if there is a box in the grid, the corresponding agent in the grid has to make an action in this step.
-                One agent can make any numbers of action if needed (i.e. {{"Agent[1.5, 1.5]":"move(box_blue, square[0.5, 1.5])","Agent[1.5, 1.5]": "move(box_green, target_green)"}}).
-                Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
-                Include an agent only if it has a task next. No agent name should be given if the agent does not have a task next.
-                You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
-                """
+GOAL_RULES = f"""
+            You are an agent in a grid-like field to move colored boxes.
+            Each agent is assigned to a 1x1 square and can only interact with objects in its area.
+            Agents can move a box to a neighboring square or a same-color target.
+            You can only move same color boxes to same color targets.
+            Each square can contain many targets and boxes.
+            The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
+            Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
+            When planning for action, remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop.
+            Avoid being stuck in action loops.
+            Additionally, when there is a box still in the grid (i.e. the state space contains {{"0.5, 0.5": ["box_red"]}}), then the agent in this grid (Agent[0.5, 0.5]) have to make an action in the next step.
+            Again, if there is a box in the grid, the corresponding agent in the grid has to make an action in this step.
+            Specify your action plan in this format where box_x and box_y are arbitrary boxes: {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_y, target_y)"}}.
+            One agent can only make one action. Include an agent only if it has a task next. 
+            No agent name should be given if the agent does not have a task next. 
+            """
 
 FEEDBACK_LCOAL1 = """
             This is the feedback from local agents.
             If you find some errors in your previous plan, try to modify it.
             Otherwise, output the same plan as before.
-            The output should have the same json format {Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}, as above.
+            The output should have the same json format. 
             Do not explain, just directly output json directory.
             Your response:
             """
+
 
 def better_state_repres(pg_dict: dict) -> dict:
     """
@@ -61,6 +61,7 @@ def better_state_repres(pg_dict: dict) -> dict:
 
     return new_pg_dict
 
+
 def rplh_prompt_func(
     state_update_prompt: str,
     data: dict,
@@ -88,8 +89,8 @@ def rplh_prompt_func(
 
     if data["env_step"] == 0:
         attitude = None
-        success_action = f"""No previous action, here is an sample:
-        {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}"""
+        success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
+        {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
     else:
         attitude = data["attitude_info"][-1]
         success_action = data["response_total_list"][-1]
@@ -112,11 +113,20 @@ def rplh_prompt_func(
         "_w_only_state_action_history",
         "_w_compressed_dialogue_history",
         "_w_all_dialogue_history",
-        "_w_no_history",
+        "_w_markovian_state_action_history",
     ):
 
         # first iteration no summary
-        if dialogue_history_method == "_w_only_state_action_history":
+        if dialogue_history_method == "_w_markovian_state_action_history":
+            state_action_prompt = ""
+            # Markovian state-action history
+            previous_state_idx = len(response_total_list) - 1
+            if previous_state_idx != -1:
+                state_action_prompt = f"""
+            Previous State: {better_state_repres(pg_state_list[previous_state_idx])}
+            Previous Action: {response_total_list[previous_state_idx]}\n\n
+            """
+        elif dialogue_history_method == "_w_only_state_action_history":
             state_action_prompt = ""
             for i in range(len(response_total_list) - 1, -1, -1):
                 state_action_prompt_next = (
@@ -130,8 +140,6 @@ def rplh_prompt_func(
                     state_action_prompt = state_action_prompt_next
                 else:
                     break
-        elif dialogue_history_method == "_w_no_history":
-            state_action_prompt = ""
         elif dialogue_history_method == "_w_compressed_dialogue_history":
             state_action_prompt = ""
             for i in range(len(response_total_list) - 1, -1, -1):
@@ -170,22 +178,27 @@ def rplh_prompt_func(
             Please learn from attitude in the following ways:
 
                 1. Please undrstand the attitude of each agents in this environment,
-                including yourself based on this attitude report given from another agent: {attitude}.
+                including yourself based on this attitude report given from another agent: 
+                
+                {attitude}.
 
-                2. Based on this charcteristics of each agent, pelase do two things and added them after each agent's attitude:
+                2. Based on this charcteristics of each agent, please do two things and added them after each agent's attitude:
                     i. Reason about the reactions each agent would have towards your command.
                     ii. Reason about how they would give actions if they are the central agent.
             
             Use the following format:
             - Attitude of agent...
             - Reaction of agent...
-            - Commanding action of agent...
-            
             """
+        if feedback != "":
+            feedback = (
+                "There is error in preivous action plan. Here is the feedbcak: "
+                + feedback
+            )
 
         HCA_prompt = f"""
             You are a central planner directing agent in a grid-like field to move colored boxes.
-            You are agent [{HCA_agent_location}]. You need to make moves and other agents need to make moves as well.
+            You are agent at grid [{HCA_agent_location}]. You need to make moves and other agents need to make moves as well.
             
             The goals and rules of this environment are:
             {GOAL_RULES}
@@ -193,25 +206,23 @@ def rplh_prompt_func(
             Your task is to instruct each agent to match all boxes to their color-coded targets.
             After each move, agents provide updates for the next sequence of actions.
             You are the central agent and your job is to coordinate the agents optimally.
-            The previous state and action pairs at each step are: {state_action_prompt}
 
-            {att_promt}
-  
             Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}.
 
-            Think about what the future {N} actions would be if you want to achieve the goal and write this justification out.
-            Remanber to wirte out for each step, what you plan for every agent to do and what would the consequences state change be.
-            
-            Please use the following format:
-            - hallucination of future {N} steps...
+            Attitude:
+            {att_promt}
 
-            Based on this, generate the action plan for the immediate next step for each agent.
-            This is the success response of previous state: {success_action}.
-            Remanber to assign action to your self as well.
+            Future_steps:
+            Think about what the future {N} actions would be if you want to achieve the goal with the reasoning.
+            Remanber to wirte out for each step, what you plan for every agent to do and what would the state change be.
             
-             {feedback}
-            
-            Now, plan the next step:
+            {feedback}
+
+            Action Plan:
+            Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_y, target_y)"}} where box_x and box_y are arbitrary boxes.
+            Try to propose actions for all four agents.
+            One agent can only make one action.
+            No agent name should be given if the agent does not have a task next. 
             """
     return HCA_prompt
 
@@ -242,8 +253,8 @@ def dialogue_func(
 
     if data["env_step"] == 0:
         attitude = None
-        success_action = f"""No previous action, here is an sample:
-        {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}"""
+        success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
+        {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
     else:
         attitude = data["attitude_info"][-1]
         success_action = data["response_total_list"][-1]
@@ -272,9 +283,19 @@ def dialogue_func(
         "_w_only_state_action_history",
         "_w_compressed_dialogue_history",
         "_w_all_dialogue_history",
-        "_w_no_history",
+        "_w_markovian_state_action_history",
     ):
-        if dialogue_history_method == "_w_only_state_action_history":
+        # first iteration no summary
+        if dialogue_history_method == "_w_markovian_state_action_history":
+            state_action_prompt = ""
+            # Markovian state-action history
+            previous_state_idx = len(response_total_list) - 1
+            if previous_state_idx != -1:
+                state_action_prompt = f"""
+            Previous State: {better_state_repres(pg_state_list[previous_state_idx])}
+            Previous Action: {response_total_list[previous_state_idx]}\n\n
+            """
+        elif dialogue_history_method == "_w_only_state_action_history":
             state_action_prompt = ""
             for i in range(len(response_total_list) - 1, -1, -1):
                 state_action_prompt_next = (
@@ -288,8 +309,6 @@ def dialogue_func(
                     state_action_prompt = state_action_prompt_next
                 else:
                     break
-        elif dialogue_history_method == "_w_no_history":
-            state_action_prompt = ""
         elif dialogue_history_method == "_w_compressed_dialogue_history":
             state_action_prompt = ""
             for i in range(len(response_total_list) - 1, -1, -1):
@@ -344,7 +363,9 @@ def dialogue_func(
             Remanber to assign action to your self as well.
 
             The other central planner's current action plan is giving as: {central_response}.
-            Please be critical in thinking about this plan.
+            Try to find agreement with the central ageent if you can, the goal is to resolve conversation, not adding more.
+            
+            Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents.
 
             Please evaluate the given plan.
             If you agree with it, respond 'I Agree', without any extra words.
@@ -360,7 +381,12 @@ def dialogue_func(
     return local_HCA_prompt
 
 
-def judge_prompt_func(local_response: str, cen_response: str, cur_state: dict) -> str:
+def judge_prompt_func(
+    local_response: str,
+    cen_response: str,
+    cur_state: dict,
+    feedback: str = "",
+) -> str:
     """
     Constructs a prompt for the judge agent to evaluate and select the best plan.
 
@@ -389,6 +415,9 @@ def judge_prompt_func(local_response: str, cen_response: str, cur_state: dict) -
         Do not come-up with something new, only choose one of them, do not give explantion, just choose one of them.
 
         Include an agent only if it has a task next. If the agent does not have task, do not include.
+
+        {feedback}
+        
         Now, select the next step:
         """
     return judge_prompt
@@ -430,7 +459,7 @@ def attitude_agent_prompt_func(history: dict) -> str:
 
 def LLM_summarize_func(
     state_action_prompt_next_initial: str,
-    model_name: str,
+    model_name: str = "llama3.2:3b-instruct-q5_K_M",
 ) -> str:
     """
     Summarizes a lengthy prompt for more concise input to the model.
@@ -466,7 +495,7 @@ def input_reprompt_func(state_update_prompt: str) -> str:
 
     user_reprompt = f"""
     Finished! The updated state is as follows(combined targets and boxes with the same color have been removed): {state_update_prompt}
-    The output should be like json format like: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[0.5, 1.5]":"move(box_blue, target_blue)"}}.
+    The output should be like json format like: {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[0.5, 1.5]":"move(box_y, target_y)"}} where box_x and box_y are arbitrary boxes.
     If no action for one agent in the next step, just do not include its action in the output.
     Also remember at most one action for each agent in each step.
     Next step output:
@@ -500,28 +529,28 @@ def message_construct_func(
     messages = [
         {
             "role": "system",
-            "content": f"""You are a helpful assistant. 
+            "content": f"""You are a helpful assistant.
                  
-                 When asked to specifiy your action plan, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}. 
-                 
-                 Make sure that:
-                 - If no action for an agent in the next step, do not include it in JSON output. 
-                 - At most one action for each agent in each step.
-                 """,
+                Make sure that:
+                - If no action for an agent in the next step, do not include it in JSON output. 
+                - At most one action for each agent in each step.
+                - Json format should follow something like: {{'Agent[0.5, 0.5]': 'move(box_purple, target_purple)', 'Agent[0.5, 1.5]': 'move(box_orange, target_orange)', 'Agent[1.5, 0.5]': 'move(box_orange, target_orange)', 'Agent[1.5, 1.5]': 'move(box_green, target_green)'}}
+                """,
         }
     ]
 
     if f"{dialogue_history_method}" in (
         "_w_all_dialogue_history",
         "_w_compressed_dialogue_history",
-        "_w_only_state_action_history",
-        "_w_no_history",
     ):
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
-
-        for i in range(len(response_total_list)):
-            messages.append({"role": "assistant", "content": response_total_list[i]})
+    else:
+        print('LESS PROMPT IN MESSAGE CONSTRUCT')
+        messages.append({"role": "user", "content": user_prompt_list[-1]})
+        
+    for i in range(len(response_total_list)):
+        messages.append({"role": "assistant", "content": response_total_list[i]})
 
     return messages
 
@@ -544,54 +573,3 @@ def attitude_message_construct_func(user_prompt: str) -> list[dict[str, str]]:
     ]
     messages.append({"role": "user", "content": user_prompt})
     return messages
-
-
-# def json_check_message_construct_func(user_prompt_list: str) -> List[Dict[str, str]]:
-#     """
-#     Constructs a message for validating and fixing JSON format in a response.
-
-#     Args:
-#         response (str): The response string to check and fix.
-
-#     Returns:
-#         List[Dict[str, str]]: Message sequence to fix the JSON.
-
-#     Notes:
-#         Must give example or else LLM give {"Agent0_50_5":"move(box_green, target_green)", "Agent1_50_5":"move(box_red, target_red)"}
-#     """
-
-#     EX = f""" Here are three wrong and correct json example pairs that you can learn from:
-
-#     Wrong format (missing quotation mark in the start):
-#         {{Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}
-#     Correct format:
-#         {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}
-
-#     Wrong format (missing bracket in the end)
-#         {{"Agent[1.5, 1.5]":"move(box_green, target_green])", "Agent[1.5, 1.5]":"move(box_purple, square[0.5, 0.5]"}}
-#     Correct format:
-#         {{"Agent[1.5, 1.5]":"move(box_green, target_green])", "Agent[1.5, 1.5]":"move(box_purple, square[0.5, 0.5])"}}
-
-#     Wrong format (missing multiple quotation marks):
-#         {{"Agent[0.5, 1.5]":"move(box_red, square[1.5, 1.5])", Agent[0.5, 0.5]":move(box_blue, target_blue])"}}
-#     Correct format:
-#         {{"Agent[0.5, 1.5]":"move(box_red, square[1.5, 1.5])", "Agent[0.5, 0.5]":"move(box_blue, target_blue])"}}
-
-#         """
-
-#     messages = [
-#         {
-#             "role": "system",
-#             "content": "You are a helpful assistant specialized for fixingJson format output by agents in a grid-like environment.",
-#         },
-#         {
-#             "role": "user",
-#             "content": f"""Please fix the Json message in here {user_prompt_list} and give only this JSON as output.
-#                             You should not change the content of the message that is  passed in.
-#                             When asked to give json format, specificy it strictly in JSON format. Here is some example of corerct and wrong json pairs: {EX}.
-#                             Now the fixed json format message is:""",
-#         },
-#     ]
-#     messages.append({"role": "user", "content": user_prompt_list})
-
-#     return messages

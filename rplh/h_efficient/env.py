@@ -1,6 +1,13 @@
 """BoxMove environment for multi-agent collaboration."""
 
-from rplh_vanilla.memory import *
+import sys
+from pathlib import Path
+
+main_path = Path(__file__).resolve().parent.parent.parent
+if str(main_path) not in sys.path:
+    sys.path.append(str(main_path))
+    
+from rplh.h_efficient.memory import *
 import os
 import json
 import re
@@ -23,7 +30,7 @@ def surround_index_func(
         col_index (int): Column index of the target cell.
 
     Returns:
-        List[list[float]]: List of coordinates for surrounding cells.
+        list[list[float]]: List of coordinates for surrounding cells.
     """
     surround_index_list = []
     for i, j in (
@@ -60,6 +67,7 @@ def state_update_func(
 
     pg_dict_copy = copy.deepcopy(pg_dict)
     state_update_prompt = ""
+    # agent_action = dict()
     for i in range(pg_row_num):
         for j in range(pg_column_num):
             square_item_list = pg_dict_copy[str(i + 0.5) + "_" + str(j + 0.5)]
@@ -67,7 +75,7 @@ def state_update_func(
                 item for item in square_item_list if item[:3] == "box"
             ]
             surround_index_list = surround_index_func(pg_row_num, pg_column_num, i, j)
-            state_update_prompt += f"Agent[{i+0.5}, {j+0.5}]: I am in square[{i+0.5}, {j+0.5}], I can observe {square_item_list}, I can do "
+            state_update_prompt += f"Agent[{i+0.5}, {j+0.5}]: I am in square[{i+0.5}, {j+0.5}], I can observe {square_item_list}, "
             action_list = []
             for box in square_item_only_box:
                 for surround_index in surround_index_list:
@@ -80,6 +88,7 @@ def state_update_func(
                 )
             else:
                 state_update_prompt += "\n"  # I can do nothing
+            # agent_action[f"Agent[{i+0.5}, {j+0.5}]"] = action_list
     return state_update_prompt
 
 
@@ -155,7 +164,7 @@ def action_from_response(
         original_response_dict (dict): Actions to be executed.
 
     Returns:
-        tuple[str, Dict[str, list[str]]]: Feedback string and updated playground state.
+        tuple[str, dict[str, list[str]]]: Feedback string and updated playground state.
     """
     system_error_feedback = ""
     pg_dict_original = copy.deepcopy(pg_dict_input)

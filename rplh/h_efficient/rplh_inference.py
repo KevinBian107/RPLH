@@ -4,18 +4,19 @@ import sys
 from pathlib import Path
 import argparse
 
-main_path = Path(__file__).resolve().parent.parent
+main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
 
-from rplh_vanilla.LLM import *
-from rplh_vanilla.memory import *
-from rplh_vanilla.env import *
-from rplh_vanilla.execution_checker import *
-from rendering.render_state import *
+from rplh.llm.language_model import *
+from rplh.h_efficient.memory import *
+from rplh.h_efficient.env import *
+from rplh.h_efficient.execution_checker import *
+from rplh.llm.response_model import *
+from rplh.rendering.render_state import *
+
 import os
 import json
-import re
 import sys
 import os
 import pandas as pd
@@ -91,7 +92,6 @@ def run_exp(
         "r",
     ) as file:
         pg_dict = json.load(file)
-        # print(pg_dict)
         data_dict["pg_dict"] = pg_dict
 
     num_agent = pg_row_num * pg_column_num
@@ -117,6 +117,9 @@ def run_exp(
             result_df = pd.DataFrame(result).T
             print(result_df)
             print(result_df.sum(axis=0))
+            
+            if all(result_df.sum(axis=0)) == 0:
+                break
 
             print(
                 f"-------###-------###-------###-------HCA_AGENT_{a}-------###-------###-------###-------"
@@ -146,6 +149,7 @@ def run_exp(
             state_update_prompt = state_update_func(
                 pg_row_num, pg_column_num, data_dict["pg_dict"]
             )
+            print(f"STATE UPDATE PROMPT: {state_update_prompt}")
 
             user_prompt_1 = rplh_prompt_func(
                 state_update_prompt,
@@ -168,8 +172,14 @@ def run_exp(
                 [user_prompt_1], [], dialogue_history_method
             )
 
-            raw_response, token_num_count = LLaMA_response(messages, model_name)
-            # print(raw_response) # empty after second round
+            raw_response, token_num_count = LLaMA_response_json(
+                messages, model_name, HCA
+            )
+            print(f'RAW: {raw_response}')
+            raw_response = json.loads(raw_response)
+            raw_response = process_response(raw_response)
+            response_str = "\n".join([f"{k}: {v}" for k, v, in raw_response.items()])
+            response = raw_response["actions_plan"]
 
             # save user prompt
             with open(
@@ -183,53 +193,36 @@ def run_exp(
 
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
-            
-            valid = False
-            while not valid:
-                try:
-                    match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
 
-                    # TODO: No dictionary no run
-                    if match:
-                        possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
-                        response = possible_action_lst[-1]
-                        print(f"Match response:{response}")
-                        response = process_response(response)
-                        print(f"Processed response:{response}\n")
+            print(f"HCA Raw Response: {raw_response}")
 
-                        # REDO HCA
-                        response, token_num_count_list_add = with_action_syntactic_check_func(
-                            data_dict["pg_dict"],
-                            response,
-                            [user_prompt_1],
-                            [response],
-                            model_name,
-                            dialogue_history_method,
-                            partial_rplh_prompt_func,
-                            False,
-                        )
-                        data_dict["token_num_count_list"] = (
-                            data_dict["token_num_count_list"] + token_num_count_list_add
-                        )
-                        print(f"AGENT ACTION RESPONSE: {response}")
-                        valid = True
-                except:
-                    # raise ValueError(
-                    #     f"No action format found in raw response: {raw_response}"
-                    # )
-                    print('DICTIONARY ERROR, NEED TO REDO')
-                    valid = False
-                
+            # REDO HCA
+            response, token_num_count_list_add = with_action_syntactic_check_func(
+                data_dict["pg_dict"],
+                response,
+                [user_prompt_1],
+                [response],
+                model_name,
+                dialogue_history_method,
+                partial_rplh_prompt_func,
+                False,
+            )
+            data_dict["token_num_count_list"] = (
+                data_dict["token_num_count_list"] + token_num_count_list_add
+            )
+            print(f"AGENT ACTION RESPONSE: {response}")
+            # else:
+            #    raise ValueError(f"No action format found in raw response: {raw_response}")
             if response == "Out of tokens":
                 pass
             elif response == "Syntactic Error":
                 pass
 
             data_dict["hca_agent_response_list"].append(response)
-            data_dict["hca_conversation_list"].append(raw_response)
+            data_dict["hca_conversation_list"].append(response_str)
             data_dict["attitude_dialogue_dict"][
                 f"Agent[{HCA_agent_location}]"
-            ] = raw_response
+            ] = response_str
 
             with open(
                 Saving_path_result
@@ -244,7 +237,7 @@ def run_exp(
 
             # write after syntactic check
             with open("conversation.txt", "a") as f:
-                message = f"------###------###------HCA_{a}------###------###------: \n {raw_response} \n \n"
+                message = f"------###------###------HCA_{a}------###------###------: \n {response_str} \n \n"
                 sep = f"\n-------###-------###-------###--------------###-------###-------###-------\n"
                 f.write(sep)
                 length = str(len(data_dict["pg_state_list"]))
@@ -276,7 +269,8 @@ def run_exp(
                         response_local_agent = 'I Agree'
                         continue
                     
-                    data_local["agent_dict"] = json.loads(response)
+                    # need to relapse responses to each agents
+                    data_local["agent_dict"] = response
 
                     print(
                         f"-------###-------###-------###-------LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
@@ -285,11 +279,15 @@ def run_exp(
                     local_agent_location = (
                         f"{local_agent_row_i}, {local_agent_column_j}"
                     )
-
+                    
+                    print(f'CURRENT AGENT IS Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]')
+                    
                     if (
                         f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                         in data_local["agent_dict"]
                     ):
+                        print(f'AGENT ACTION DICT UPDATING:{data_local["agent_dict"]}')
+                        
                         # note, dict, this have space
                         data_local["prompt_list_dir"][
                             f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
@@ -350,6 +348,7 @@ def run_exp(
                             ] += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
 
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
+
                         else:
                             print("I Agree")
                             # agree no judge, use HCA response diretcly, avoid error.
@@ -403,46 +402,45 @@ def run_exp(
                         [judge_prompt], [], dialogue_history_method
                     )
 
-                    response_judge, token_num_count = LLaMA_response(
-                        messages, model_name
+                    raw_response_judge, token_num_count = LLaMA_response_json(
+                        messages, model_name, Judge
                     )
+                    raw_response_judge = json.loads(raw_response_judge)
+                    raw_response_judge = process_response(raw_response_judge)
+                    response_str_judge = "\n".join(
+                        [f"{k}: {v}" for k, v, in raw_response_judge.items()]
+                    )
+                    response_judge = raw_response_judge["actions_plan"]
+
+                    if len(response_judge) == 0:
+                        print("JUDGE NO RESPONSE: NO APPEND, HCA IS TEH LAST ONE")
+                        continue
 
                     # -----------------------------------------SYNTACTIC CHECK FOR JUDGE-----------------------------------------#
                     data_dict["token_num_count_list"].append(token_num_count)
-                    match = re.search(r"\{.*?\}", response_judge, re.DOTALL)
 
-                    if match:
-                        possible_action_lst = re.findall(
-                            r"\{.*?\}", raw_response, re.DOTALL
+                    response, token_num_count_list_add = (
+                        with_action_syntactic_check_func(
+                            data_dict["pg_dict"],
+                            response_judge,
+                            [judge_prompt, cen_response],
+                            [response_judge],
+                            model_name,
+                            dialogue_history_method,
+                            partial_judge_prompt_func,
+                            is_judge=True,
                         )
-                        response = possible_action_lst[-1]
-                        print(f"Match response:{response}")
-                        response = process_response(response)
-                        print(f"Processed response:{response}\n")
+                    )
+                    data_dict["token_num_count_list"] = (
+                        data_dict["token_num_count_list"] + token_num_count_list_add
+                    )
 
-                        response, token_num_count_list_add = (
-                            with_action_syntactic_check_func(
-                                data_dict["pg_dict"],
-                                response,
-                                [judge_prompt, cen_response],
-                                [response],
-                                model_name,
-                                dialogue_history_method,
-                                partial_judge_prompt_func,
-                                is_judge=True,
-                            )
-                        )
-                        data_dict["token_num_count_list"] = (
-                            data_dict["token_num_count_list"] + token_num_count_list_add
-                        )
-
-                    # after syntactic checks
                     with open("conversation.txt", "a") as f:
-                        messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_judge} \n \n"
+                        messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_str_judge} \n \n"
                         f.write(messages)
 
                     print(f"JUDGE MODIFIED:\n {response}")
-
+                    
                 else:
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
@@ -488,7 +486,8 @@ def run_exp(
                 "-------###-------###-------###-------EXECUTION-------###-------###-------###-------"
             )
 
-            original_response_dict = json.loads(data_dict["response_total_list"][-1])
+            # problem here, a week of debug [index_query_time] uses outer most, always get one
+            original_response_dict = data_dict["response_total_list"][-1]
 
             with open(
                 Saving_path_result
@@ -519,12 +518,11 @@ def run_exp(
                 if system_error_feedback != "":
                     print(system_error_feedback)
 
-                # print(data_dict["pg_dict"])
                 data_dict["pg_dict"] = pg_dict_returned
 
+                # render_map_terminal_popup(data_dict["pg_dict"], [original_response_dict])
                 render_graph_terminal_popup(data_dict["pg_dict"])
 
-                # print(data_dict["pg_dict"])
             except:
                 success_failure = "Hallucination of wrong plan"
                 pass
@@ -538,6 +536,7 @@ def run_exp(
             count = 0
             for ky, value in data_dict["pg_dict"].items():
                 count += len(value)
+                print(f'STILL HAVE {count} LEFT')
             if count == 0:
                 break
 
@@ -594,7 +593,7 @@ if __name__ == "__main__":
         pg_column_num,
         iteration_num,
         query_time_limit,
-        dialogue_history_method="_w_no_history",
+        dialogue_history_method="_w_markovian_state_action_history",
         model_name=model_name,
     )
 

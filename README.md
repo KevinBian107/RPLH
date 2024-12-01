@@ -52,27 +52,27 @@ ollama run qwen2.5:14b-instruct-q3_K_L
 
 Create local MoveBox environment for running (depending on the version using) by:
 ```
-python rplh_vanilla/env.py
+python rplh/h_vanilla/env.py
 ```
 
 Or setting up RPLH-efficient system by:
 ```
-python rplh_efficient/env.py
+python rplh/h_efficient/env.py
 ```
 
 Then running original vanilla RPLH inferene loop by:
 ```
-python rplh_vanilla/rplh_inference.py -- model_name "qwen2.5:14b-instruct-q3_K_L"
+python rplh/h_vanilla/rplh_inference.py -- model_name "qwen2.5:14b-instruct-q3_K_L"
 ```
 
 or running the efficient RPLH inferene loop by:
 ```
-python rplh_efficient/rplh_inference.py -- model_name "qwen2.5:14b-instruct-q3_K_L"
+python rplh/h_efficient/rplh_inference.py -- model_name "qwen2.5:14b-instruct-q3_K_L"
 ```
 
 To visualize the reasoning process by rendering the conversation that each of the agent said:
 ```
-python rendering/render_conversation.py
+python rplh/rendering/render_conversation.py
 ```
 
 ## Environment Aaapted From:

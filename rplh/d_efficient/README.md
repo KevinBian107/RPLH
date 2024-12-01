@@ -1,0 +1,2 @@
+# Decentralized RPLH Instance
+Only execute action when there are more than half of the agent that is doing stuff (have box in it's grid and have action plan given by other agents) says "I Agree", else, the conversatoon continuses.
