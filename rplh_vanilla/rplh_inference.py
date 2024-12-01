@@ -184,36 +184,41 @@ def run_exp(
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
             
-            try:
-                match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
+            valid = False
+            while not valid:
+                try:
+                    match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
 
-                # TODO: No dictionary no run
-                if match:
-                    possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
-                    response = possible_action_lst[-1]
-                    print(f"Match response:{response}")
-                    response = process_response(response)
-                    print(f"Processed response:{response}\n")
+                    # TODO: No dictionary no run
+                    if match:
+                        possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
+                        response = possible_action_lst[-1]
+                        print(f"Match response:{response}")
+                        response = process_response(response)
+                        print(f"Processed response:{response}\n")
 
-                    # REDO HCA
-                    response, token_num_count_list_add = with_action_syntactic_check_func(
-                        data_dict["pg_dict"],
-                        response,
-                        [user_prompt_1],
-                        [response],
-                        model_name,
-                        dialogue_history_method,
-                        partial_rplh_prompt_func,
-                        False,
-                    )
-                    data_dict["token_num_count_list"] = (
-                        data_dict["token_num_count_list"] + token_num_count_list_add
-                    )
-                    print(f"AGENT ACTION RESPONSE: {response}")
-            except:
-                raise ValueError(
-                    f"No action format found in raw response: {raw_response}"
-                )
+                        # REDO HCA
+                        response, token_num_count_list_add = with_action_syntactic_check_func(
+                            data_dict["pg_dict"],
+                            response,
+                            [user_prompt_1],
+                            [response],
+                            model_name,
+                            dialogue_history_method,
+                            partial_rplh_prompt_func,
+                            False,
+                        )
+                        data_dict["token_num_count_list"] = (
+                            data_dict["token_num_count_list"] + token_num_count_list_add
+                        )
+                        print(f"AGENT ACTION RESPONSE: {response}")
+                        valid = True
+                except:
+                    # raise ValueError(
+                    #     f"No action format found in raw response: {raw_response}"
+                    # )
+                    print('DICTIONARY ERROR, NEED TO REDO')
+                    valid = False
                 
             if response == "Out of tokens":
                 pass
