@@ -16,3 +16,5 @@ We have also performed a set of carefully designed engineering procedures to adj
      - Markovian History or No History (prevent oerwhelming information and enviornmental disturbance)
         - At each round the agent is either completely fresh-agent or one-step Markovian agent.
      - Careful Instruction
+
+Thus, though also can be used with smaller LLMs with really careful prompting and instruction, the vanilla RPLH version is more suitable for larger parametrized models such as GPT-4, which is the model that researcher usually use under these type of vanilla setting.

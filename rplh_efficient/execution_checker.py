@@ -36,17 +36,27 @@ def is_valid_action(
 
     for key, value in original_response_dict.items():
         coordinates = tuple(map(float, re.findall(r"\d+\.?\d*", key)))
-
+        
         # match the item and location in the value
-        match = re.match(r"move\((.*?),\s(.*?)\)", value)
-        if match:
-            item, location = match.groups()
+        try:
+            match = re.match(r"move\((.*?),\s(.*?)\)", value)
+            if match:
+                item, location = match.groups()
 
-            if "square" in location:
-                location = tuple(map(float, re.findall(r"\d+\.?\d*", location)))
+                if "square" in location:
+                    location = tuple(map(float, re.findall(r"\d+\.?\d*", location)))
 
-            transformed_dict[coordinates] = [item, location]
-
+                transformed_dict[coordinates] = [item, location]
+        except:
+            print(f'NO MATCHING: SYNTAX ERROR, NEED TO RETAKE ACTION')
+            if is_judge:
+                feedback = f"""You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
+                                so choose the alternative action from the central central planner {central_response};"""
+            else:
+                feedback = f"Your assigned task for {key[0]}, {key[1]} is not in the doable action list; "
+            
+            return feedback
+            
     feedback = ""
     for key, value in transformed_dict.items():
         if (

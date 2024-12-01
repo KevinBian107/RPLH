@@ -118,6 +118,9 @@ def run_exp(
             result_df = pd.DataFrame(result).T
             print(result_df)
             print(result_df.sum(axis=0))
+            
+            if all(result_df.sum(axis=0)) == 0:
+                break
 
             print(
                 f"-------###-------###-------###-------HCA_AGENT_{a}-------###-------###-------###-------"
@@ -173,6 +176,7 @@ def run_exp(
             raw_response, token_num_count = LLaMA_response_json(
                 messages, model_name, HCA
             )
+            print(f'RAW: {raw_response}')
             raw_response = json.loads(raw_response)
             raw_response = process_response(raw_response)
             response_str = "\n".join([f"{k}: {v}" for k, v, in raw_response.items()])
@@ -256,14 +260,18 @@ def run_exp(
 
             data_local["local_agent_response_list_dir"]["feedback1"] = ""
 
-            # NOTE: need to be Agent[0.5, 0.5] format, debug use regex
-            data_local["agent_dict"] = response  # json.loads(response)
-
             for local_agent_row_i in range(pg_row_num):
 
                 for local_agent_column_j in range(pg_column_num):
-
-                    # TODO: IF BAN TRIGGERED, SKIP
+                    
+                    region_key = f"{local_agent_row_i+0.5}_{local_agent_column_j+0.5}"
+                    if len(data_dict["pg_dict"][region_key]) == 0:
+                        print(f"SKIPPING Agent[{local_agent_row_i+0.5},{local_agent_column_j+0.5}] as no blocks are present in its region.")
+                        response_local_agent = 'I Agree'
+                        continue
+                    
+                    # need to relapse response
+                    data_local["agent_dict"] = response
 
                     print(
                         f"-------###-------###-------###-------LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
@@ -272,11 +280,15 @@ def run_exp(
                     local_agent_location = (
                         f"{local_agent_row_i}, {local_agent_column_j}"
                     )
-
+                    
+                    print(f'CURRENT AGENT IS Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]')
+                    
                     if (
                         f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                         in data_local["agent_dict"]
                     ):
+                        print(f'AGENT ACTION DICT UPDATING:{data_local["agent_dict"]}')
+                        
                         # note, dict, this have space
                         data_local["prompt_list_dir"][
                             f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
@@ -378,7 +390,7 @@ def run_exp(
                     judge_prompt = judge_prompt_func(
                         local_response, cen_response, data_dict["pg_dict"]
                     )
-                    print(f'judge prompt: {judge_prompt}')
+                    # print(f'judge prompt: {judge_prompt}')
 
                     # partial function
                     partial_judge_prompt_func = partial(
@@ -430,16 +442,22 @@ def run_exp(
                         f.write(messages)
 
                     print(f"JUDGE MODIFIED:\n {response}")
-
+                    
                 else:
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
-
+                
                 data_dict["dialogue_history_list"].append(dialogue_history)
-
-                data_dict["attitude_dialogue_dict"][
-                    f"Agent[{local_agent_location}]"
-                ] = response_local_agent
+                
+                # not acting agent does not communicate, resolve missing variable issue
+                if (
+                    f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
+                    in data_local["agent_dict"]
+                    ):
+                
+                    data_dict["attitude_dialogue_dict"][
+                        f"Agent[{local_agent_location}]"
+                    ] = response_local_agent
 
             data_dict["response_total_list"].append(
                 response
@@ -522,6 +540,7 @@ def run_exp(
             count = 0
             for ky, value in data_dict["pg_dict"].items():
                 count += len(value)
+                print(f'STILL HAVE {count} LEFT')
             if count == 0:
                 break
 
@@ -582,15 +601,15 @@ if __name__ == "__main__":
         model_name=model_name,
     )
 
-    with open(Saving_path_result + "/token_num_count.txt", "w") as f:
-        print("SAVE TOKEN NUM \n")
-        for token_num_num_count in token_num_count_list:
-            f.write(str(token_num_num_count) + "\n")
+    # with open(Saving_path_result + "/token_num_count.txt", "w") as f:
+    #     print("SAVE TOKEN NUM \n")
+    #     for token_num_num_count in token_num_count_list:
+    #         f.write(str(token_num_num_count) + "\n")
 
-    with open(Saving_path_result + "/success_failure.txt", "w") as f:
-        print("SAVE RESULT \n")
-        f.write(success_failure)
+    # with open(Saving_path_result + "/success_failure.txt", "w") as f:
+    #     print("SAVE RESULT \n")
+    #     f.write(success_failure)
 
-    with open(Saving_path_result + "/env_action_times.txt", "w") as f:
-        print("SAVE ACTION TIME \n")
-        f.write(f"{index_query_times+1}")
+    # with open(Saving_path_result + "/env_action_times.txt", "w") as f:
+    #     print("SAVE ACTION TIME \n")
+    #     f.write(f"{index_query_times+1}")

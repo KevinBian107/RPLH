@@ -20,7 +20,7 @@ GOAL_RULES = f"""
             Avoid being stuck in action loops.
             Additionally, when there is a box still in the grid (i.e. the state space contains {{"0.5, 0.5": ["box_red"]}}), then the agent in this grid (Agent[0.5, 0.5]) have to make an action in the next step.
             Again, if there is a box in the grid, the corresponding agent in the grid has to make an action in this step.
-            Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
+            Specify your action plan in this format where box_x and box_y are arbitrary boxes: {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_y, target_y)"}}.
             One agent can only make one action. Include an agent only if it has a task next. 
             No agent name should be given if the agent does not have a task next. 
             """
@@ -90,8 +90,8 @@ def rplh_prompt_func(
 
     if data["env_step"] == 0:
         attitude = None
-        # success_action = f"""No previous action, here is an sample:
-        # {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}"""
+        success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
+        {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
     else:
         attitude = data["attitude_info"][-1]
         # success_action = data["response_total_list"][-1]
@@ -218,8 +218,9 @@ def rplh_prompt_func(
             {feedback}
 
             Action Plan:
-            Specify your action plan in this format: {{"Agent[x, x]":"move(x, square[x, x])","Agent[x, x]": "move(x, x)"}}.
-            One agent can only make one action. 
+            Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_y, target_y)"}} where box_x and box_y are arbitrary boxes.
+            Try to propose actions for all four agents.
+            One agent can only make one action.
             No agent name should be given if the agent does not have a task next. 
             """
     return HCA_prompt
@@ -251,8 +252,8 @@ def dialogue_func(
 
     if data["env_step"] == 0:
         attitude = None
-        success_action = f"""No previous action, here is an sample:
-        {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}"""
+        success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
+        {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
     else:
         attitude = data["attitude_info"][-1]
         success_action = data["response_total_list"][-1]
@@ -361,7 +362,7 @@ def dialogue_func(
             Remanber to assign action to your self as well.
 
             The other central planner's current action plan is giving as: {central_response}.
-            Please be critical in thinking about this plan.
+            Try to find agreement with the central ageent if you can, the goal is to resolve conversation, not adding more.
             
             Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents.
 
@@ -493,7 +494,7 @@ def input_reprompt_func(state_update_prompt: str) -> str:
 
     user_reprompt = f"""
     Finished! The updated state is as follows(combined targets and boxes with the same color have been removed): {state_update_prompt}
-    The output should be like json format like: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[0.5, 1.5]":"move(box_blue, target_blue)"}}.
+    The output should be like json format like: {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[0.5, 1.5]":"move(box_y, target_y)"}} where box_x and box_y are arbitrary boxes.
     If no action for one agent in the next step, just do not include its action in the output.
     Also remember at most one action for each agent in each step.
     Next step output:
@@ -540,14 +541,15 @@ def message_construct_func(
     if f"{dialogue_history_method}" in (
         "_w_all_dialogue_history",
         "_w_compressed_dialogue_history",
-        "_w_only_state_action_history",
-        "_w_markovian_state_action_history",
     ):
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
-
-        for i in range(len(response_total_list)):
-            messages.append({"role": "assistant", "content": response_total_list[i]})
+    else:
+        print('LESS PROMPT IN MESSAGE CONSTRUCT')
+        messages.append({"role": "user", "content": user_prompt_list[-1]})
+        
+    for i in range(len(response_total_list)):
+        messages.append({"role": "assistant", "content": response_total_list[i]})
 
     return messages
 
