@@ -269,7 +269,7 @@ def run_exp(
                         response_local_agent = 'I Agree'
                         continue
                     
-                    # need to relapse response
+                    # need to relapse responses to each agents
                     data_local["agent_dict"] = response
 
                     print(
