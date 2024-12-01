@@ -118,6 +118,9 @@ def run_exp(
             result_df = pd.DataFrame(result).T
             print(result_df)
             print(result_df.sum(axis=0))
+            
+            if all(result_df.sum(axis=0)) == 0:
+                break
 
             print(
                 f"-------###-------###-------###-------HCA_AGENT_{a}-------###-------###-------###-------"
@@ -261,9 +264,10 @@ def run_exp(
 
                 for local_agent_column_j in range(pg_column_num):
                     
-                    region_key = f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
+                    region_key = f"{local_agent_row_i+0.5}_{local_agent_column_j+0.5}"
                     if len(data_dict["pg_dict"][region_key]) == 0:
-                        print(f"SKIPPING Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}] as no blocks are present in its region.")
+                        print(f"SKIPPING Agent[{local_agent_row_i+0.5},{local_agent_column_j+0.5}] as no blocks are present in its region.")
+                        response_local_agent = 'I Agree'
                         continue
                     
                     # need to relapse response
@@ -276,7 +280,9 @@ def run_exp(
                     local_agent_location = (
                         f"{local_agent_row_i}, {local_agent_column_j}"
                     )
-
+                    
+                    print(f'CURRENT AGENT IS Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]')
+                    
                     if (
                         f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                         in data_local["agent_dict"]
@@ -442,10 +448,16 @@ def run_exp(
                     pass
                 
                 data_dict["dialogue_history_list"].append(dialogue_history)
-
-                data_dict["attitude_dialogue_dict"][
-                    f"Agent[{local_agent_location}]"
-                ] = response_local_agent
+                
+                # not acting agent does not communicate, resolve missing variable issue
+                if (
+                    f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
+                    in data_local["agent_dict"]
+                    ):
+                
+                    data_dict["attitude_dialogue_dict"][
+                        f"Agent[{local_agent_location}]"
+                    ] = response_local_agent
 
             data_dict["response_total_list"].append(
                 response
@@ -528,7 +540,9 @@ def run_exp(
             count = 0
             for ky, value in data_dict["pg_dict"].items():
                 count += len(value)
+                print(f'STILL HAVE {count} LEFT')
             if count == 0:
+                render_graph_terminal_popup(data_dict["pg_dict"])
                 break
 
     # -----------------------------------------TASK SUCCESS OUT-----------------------------------------#
@@ -560,7 +574,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
     Code_dir_path = os.path.join(os.getcwd())
     os.makedirs(Code_dir_path, exist_ok=True)
-    saving_path = Code_dir_path + "/multi-agent-env"
+    saving_path = Code_dir_path + "/multi-agent-env-2"
 
     # 4 agent in total
     pg_row_num = 2
@@ -588,10 +602,10 @@ if __name__ == "__main__":
         model_name=model_name,
     )
 
-    with open(Saving_path_result + "/token_num_count.txt", "w") as f:
-        print("SAVE TOKEN NUM \n")
-        for token_num_num_count in token_num_count_list:
-            f.write(str(token_num_num_count) + "\n")
+    # with open(Saving_path_result + "/token_num_count.txt", "w") as f:
+    #     print("SAVE TOKEN NUM \n")
+    #     for token_num_num_count in token_num_count_list:
+    #         f.write(str(token_num_num_count) + "\n")
 
     with open(Saving_path_result + "/success_failure.txt", "w") as f:
         print("SAVE RESULT \n")
