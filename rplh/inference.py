@@ -24,8 +24,10 @@ def main():
     # Dynamically import the specified module
     try:
         # Append ".rplh_inference" to the module name
-        module = args.module_name + ".rplh_inference"
-        inference_module = importlib.import_module(module)
+        inference_loop = args.module_name + ".rplh_inference"
+        env_create = args.module_name + ".env"
+        inference_module = importlib.import_module(inference_loop)
+        env_module = importlib.import_module(env_create)
     except ModuleNotFoundError:
         print(f"Error: Module '{args.module_name}' not found.")
         sys.exit(1)
@@ -35,18 +37,30 @@ def main():
         print(f"Error: Module '{args.module_name}' does not contain a 'run_exp' function.")
         sys.exit(1)
     
-    # Set up paths and parameters
-    Code_dir_path = os.getcwd()
-    saving_path = os.path.join(Code_dir_path, "multi-agent-env")
-    os.makedirs(saving_path, exist_ok=True)
+    # Get the parent directory of the current script (assumes RPLH is one level above)
+    Code_dir_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+    # Set up paths and parameters
+    path = "multi-agent-env"
+    saving_path = os.path.join(Code_dir_path, path)
+    os.makedirs(saving_path, exist_ok=True)
+    
+    print(f"-------------------CREATING ENVIRONMENT IN {args.module_name}-------------------")
+    
+    env_module.create_env1(saving_path, repeat_num=1)
+    
+    print(f"-------------------Module: {args.module_name} | Model name: {args.model_name}-------------------")
+    
+    if (args.module_name == "h_efficient") or (args.module_name == "d_efficient"):
+        dialogue_history_method = "_w_markovian_state_action_history"
+    else:
+        dialogue_history_method = "_w_no_history"
+     
     # Experiment parameters
     pg_row_num = 2
     pg_column_num = 2
     iteration_num = 0
     query_time_limit = 10
-
-    print(f"-------------------Module: {args.module_name} | Model name: {args.model_name}-------------------")
 
     # Call the run_exp function from the specified module
     result = inference_module.run_exp(
@@ -55,7 +69,7 @@ def main():
         pg_column_num,
         iteration_num,
         query_time_limit,
-        dialogue_history_method="_w_markovian_state_action_history",
+        dialogue_history_method=dialogue_history_method,
         model_name=args.model_name,
     )
     

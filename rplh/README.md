@@ -2,27 +2,28 @@
 **We hope to setup an systematic and modularzied way of doing multi-agent communication for less parametrized language models**. We have implemented multiple instances of the RPLH system dpending on `vanilla` or `efficient` version. Here is the main breakdown of the code:
 
 ```bash
-- d_efficient
-    - memory.py
-    - rplh_inference.py
-- h_efficient
-    - env.py
-    - execution_checker.py
-    - memory.py
-    - rplh_inference.py
-- h_vanilla
-    - env.py
-    - execution_checker.py
-    - memory.py
-    - rplh_inference.py
-- llm
-    - language_model.py
-    - response_model.py
-- rendering
-    - render_conversation.py
-    - render_states.py
-    - animations.py
-- inference.py
+rplh/
+├── d_efficient/
+│   ├── memory.py
+│   ├── rplh_inference.py
+├── h_efficient/
+│   ├── env.py
+│   ├── execution_checker.py
+│   ├── memory.py
+│   ├── rplh_inference.py
+├── h_vanilla/
+│   ├── env.py
+│   ├── execution_checker.py
+│   ├── memory.py
+│   ├── rplh_inference.py
+├── llm/
+│   ├── language_model.py
+│   ├── response_model.py
+├── rendering/
+│   ├── render_conversation.py
+│   ├── render_states.py
+│   ├── animations.py
+└── inference.py
 ```
 Note the following:
 1. There are many shared features across all different type of communication system, which we ahve modularized into the `llm` folder for both using it in the vanilla and efficient models. In addition, because of implementation differences, files such as `env.py`, `execution_checker.py`, `memory.py`, and the main inference loop `rplh_inference.py` may be different, which is why each system has its own unique implementation.
