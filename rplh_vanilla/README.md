@@ -6,7 +6,8 @@ RPLH-original is the full representation of our construct where no limits has be
     - More reasoning about what other agents may be doing and thinking (attitude)
 - More computation resources needed as prompt is longer and history is longer.
 - Easier for LM to hallucinate and give unrealistic outputs (syntactic error).
-    - Currently only problem is where no {} is given.
+    -  One iconic problem is where no {} is given.
+    - There need to be more while loops for re-responding for the same condiion to get a better response, hence increasing teh compuatation loads.
 - Easier for LM to be effected by environmental checking prompt, resulting in some unexecutable iterations.
     - Slower convergence rate because of hallucination issue of the agent.
 

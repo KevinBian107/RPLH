@@ -168,8 +168,9 @@ def retake_action(
     """
 
     print("----------RETAKE ACTION----------")
-
-    retake_action_prompt_1 = prompt_func(feedback)
+    
+    # must specify this
+    retake_action_prompt_1 = prompt_func(feedback=feedback)
     messages = message_construct_func(
         [retake_action_prompt_1], [], dialogue_history_method
     )
