@@ -7,7 +7,7 @@ Using Large Language Models' ***In-context Learning*** abilities, we are develop
 
 # Agent's Perpective
 Importantly, non of the agents actually see the full states of teh environmnet (where all the boxes are at and where all the targets are at), so they must communicate about **what they can see** and **what they can do** to better collaborate with each other and do the actions. This is the purpose of designing an HCA agent, an hellucinating central agent that tells what all other what it sees and what the plan should be from that agent's perspective.
-- Notice, when an local agent does not have boxes in its block or when it does not have an action provided from the HCA agent, it would not be considered as a valid conversation source as its views are limited.
+- Notice, when an local agent does not have boxes or targets in its block or when it does not have an action provided from the HCA agent, it would not be considered as a valid conversation source as its views are limited.
 
 We hope to build agent that is caplable of ***Social-reasoning and expecting what the other agent should be doing***. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to ***Level-one agent***.
 
