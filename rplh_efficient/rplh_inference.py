@@ -573,7 +573,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
     Code_dir_path = os.path.join(os.getcwd())
     os.makedirs(Code_dir_path, exist_ok=True)
-    saving_path = Code_dir_path + "/multi-agent-env-2"
+    saving_path = Code_dir_path + "/multi-agent-env"
 
     # 4 agent in total
     pg_row_num = 2
