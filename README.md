@@ -5,6 +5,8 @@ Using Large Language Models' ***In-context Learning*** abilities, we are develop
 <img src="demos/img/rplh.png" width = "50%" alt="struct" align=center/>
 </div>
 
+Importantly, non of the agents actually see the full states of teh environmnet (where all the boxes are at and where all the targets are at), so they must communicate about **what they can see** and **what they can do** to better collaborate with each other and do the actions.
+
 We hope to build agent that is caplable of ***Social-reasoning and expecting what the other agent should be doing***. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to ***Level-one agent***.
 
 ## RPLH Demos:

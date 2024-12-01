@@ -261,6 +261,11 @@ def run_exp(
 
                 for local_agent_column_j in range(pg_column_num):
                     
+                    region_key = f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
+                    if len(data_dict["pg_dict"][region_key]) == 0:
+                        print(f"SKIPPING Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}] as no blocks are present in its region.")
+                        continue
+                    
                     # need to relapse response
                     data_local["agent_dict"] = response
 

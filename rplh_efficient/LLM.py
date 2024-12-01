@@ -50,10 +50,10 @@ def LLaMA_response_json(
                     len(enc.encode(msg["content"])) for msg in messages
                 ) + len(enc.encode(response))
                 return response, token_num_count
-            except ValidationError as ve:
+            except Exception as e:
                 count += 1
                 print(
-                    f"Validation failed during LLM output generation: {ve} for {count} times. Retrying..."
+                    f"Validation failed during LLM output generation: {e} for {count} times. Retrying..."
                 )
     except Exception as e:
         print(f"API call failed: {e}")
