@@ -75,7 +75,11 @@ def state_update_func(
                 item for item in square_item_list if item[:3] == "box"
             ]
             surround_index_list = surround_index_func(pg_row_num, pg_column_num, i, j)
-            state_update_prompt += f"Agent[{i+0.5}, {j+0.5}]: I am in square[{i+0.5}, {j+0.5}], I can observe {square_item_list}, "
+            state_update_prompt += f"Agent[{i+0.5}, {j+0.5}]: I am in square[{i+0.5}, {j+0.5}]"
+            if len(square_item_list) == 0:
+                continue
+            else:
+                state_update_prompt = f", I can observe {square_item_list}, "
             action_list = []
             for box in square_item_only_box:
                 for surround_index in surround_index_list:
