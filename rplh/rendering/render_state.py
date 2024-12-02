@@ -7,6 +7,8 @@ import plotly.io as pio
 pio.renderers.default = "plotly_mimetype"
 from PIL import Image
 
+from pathlib import Path
+import sys
 
 
 def render_graph_terminal_popup(box_map):
@@ -257,7 +259,7 @@ def render_graph(box_map):
             hoverinfo="text",
         )
     )
-    robot = Image.open("C:/Users/huang/Multi-Agency/RPLH/rplh/img/robot.png")
+    robot = Image.open("robot.png")
 
     # Add rectangles and robot images for the "boxes"
     for center in box_map.keys():
