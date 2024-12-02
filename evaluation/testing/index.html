@@ -83,6 +83,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#numerical-evaluation" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -545,6 +550,17 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Testing
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -554,6 +570,41 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#numerical-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Numerical Evaluation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#naturalistic-reasoning-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Naturalistic Reasoning Evaluation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -585,6 +636,32 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#numerical-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Numerical Evaluation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#naturalistic-reasoning-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Naturalistic Reasoning Evaluation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -603,7 +680,20 @@
 
   <h1>Testing</h1>
 
-<p>Still developing ways of evaluating the models</p>
+<h2 id="numerical-evaluation">Numerical Evaluation<a class="headerlink" href="#numerical-evaluation" title="Permanent link">&para;</a></h2>
+<p>Comparing performances of different communication system through a numerical comparison:</p>
+<ol>
+<li>Test Success Rate (does the system converge before max number of stesp reached).</li>
+<li>Convergence speed (number of execution steps needed for convergence (solve the given problem)).</li>
+<li>Number of API calls.</li>
+</ol>
+<h2 id="naturalistic-reasoning-evaluation">Naturalistic Reasoning Evaluation<a class="headerlink" href="#naturalistic-reasoning-evaluation" title="Permanent link">&para;</a></h2>
+<p>Evaluate whether the system outputs reasonable/optimal response at each steps.</p>
+<ol>
+<li>Given the same <code>seed</code> (same environment setup), how many boxes are removed at each step and whether this step is efficient (human-annotate).</li>
+<li>Does output reasoning (tokens) makes sense.</li>
+<li>Does action decision make snese.</li>
+</ol>
 
 
 
