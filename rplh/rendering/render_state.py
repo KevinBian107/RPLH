@@ -4,6 +4,9 @@ import re
 import copy
 import plotly.graph_objects as go
 import plotly.io as pio
+pio.renderers.default = "plotly_mimetype"
+from PIL import Image
+
 
 
 def render_graph_terminal_popup(box_map):
@@ -104,15 +107,18 @@ def map_df(states):
         # Separate targets and boxes
         targets = [item for item in items if item[0] == "target"]
         boxes = [item for item in items if item[0] == "box"]
+        count = 1
 
         # Distribute targets at the top within the box
         for i, item in enumerate(targets):
             item_type, color = item
-            x_offset = (i - len(targets) / 2) * offset_factor
-            x_offset = max(
-                -max_offset, min(x_offset, max_offset)
-            )  # Clamp within box bounds
-            y_offset = 0.25  # Fixed offset to place targets above the center
+            position_factor  = min(5, len(targets)) 
+            if count <= 5 :
+                x_offset = (i - int(position_factor / 2)) * offset_factor
+                y_offset = 0.35  # Fixed offset to place targets above the center
+            else:
+                x_offset = (i - 5 - int(position_factor / 2)) * offset_factor
+                y_offset = 0.15  # Fixed offset to place targets above the center
             data.append(
                 {
                     "x": cx + x_offset,
@@ -121,15 +127,19 @@ def map_df(states):
                     "color": color,
                 }
             )
-
+            count += 1
+        
+        count = 1
         # Distribute boxes at the bottom within the box
         for i, item in enumerate(boxes):
             item_type, color = item
-            x_offset = (i - len(boxes) / 2) * offset_factor
-            x_offset = max(
-                -max_offset, min(x_offset, max_offset)
-            )  # Clamp within box bounds
-            y_offset = -0.25  # Fixed offset to place boxes below the center
+            position_factor = min(5, len(boxes))
+            if count <= 5:
+                x_offset = (i - int(position_factor / 2)) * offset_factor
+                y_offset = -0.35  # Fixed offset to place boxes below the center
+            else:
+                x_offset = (i - 5 - int(position_factor / 2)) * offset_factor
+                y_offset = -0.15  # Fixed offset to place boxes below the center
             data.append(
                 {
                     "x": cx + x_offset,
@@ -138,6 +148,7 @@ def map_df(states):
                     "color": color,
                 }
             )
+            count += 1
 
     df = pd.DataFrame(data)
     return df
@@ -213,6 +224,91 @@ def apply_action(box_map, actions):
 # ------------- plot single map ---------------
 
 
+
+def render_graph(box_map):
+    # Prepare the data
+    if len(box_map) == 0:
+        # Initialize the Plotly figure
+        fig = go.Figure()
+        
+        return 
+    df = map_df(box_map)
+    df["hover_text"] = df.apply(
+        lambda row: f"Type: {row['type']}<br>Color: {row['color']}", axis=1
+    )
+
+    # Initialize the Plotly figure
+    fig = go.Figure()
+
+    # Add scatter trace for the points
+    fig.add_trace(
+        go.Scatter(
+            x=df["x"],
+            y=df["y"],
+            mode="markers",
+            marker=dict(
+                symbol=[
+                    "diamond-open" if t == "target" else "square" for t in df["type"]
+                ],
+                size=20,
+                color=df["color"],  # Marker colors from 'color' column
+            ),
+            text=df["hover_text"],  # Hover information
+            hoverinfo="text",
+        )
+    )
+    robot = Image.open("C:/Users/huang/Multi-Agency/RPLH/rplh/img/robot.png")
+
+    # Add rectangles and robot images for the "boxes"
+    for center in box_map.keys():
+        cx, cy = center
+        # Add a rectangle representing the box
+        fig.add_shape(
+            type="rect",
+            x0=cx - 0.5,
+            y0=cy - 0.5,
+            x1=cx + 0.5,
+            y1=cy + 0.5,
+            line=dict(color="black", width=2),
+        )
+        # Add a robot image in the center of the box
+        fig.add_layout_image(
+            dict(
+                source=robot,  # Path or URL to the robot image
+                x=cx,
+                y=cy,
+                xref="x",
+                yref="y",
+                sizex=0.3,  # Robot image size
+                sizey=0.3,
+                xanchor="center",
+                yanchor="middle",
+                layer="above",  # Layer position
+            )
+        )
+
+    # Update the layout for better visual appearance
+    fig.update_layout(
+        title=dict(
+            text="Moving Box to The Right Target",
+            x=0.5,
+            xanchor="center",
+            yanchor="top",
+            font=dict(size=18),
+        ),
+        xaxis=dict(range=[0, 2], showgrid=False, zeroline=False, title="X Coordinate"),
+        yaxis=dict(range=[0, 2], showgrid=False, zeroline=False, title="Y Coordinate"),
+        plot_bgcolor="white",
+        width=600,
+        height=600,
+    )
+
+    return fig
+
+
+        
+
+
 def render_map(initial_map, action_list):
     """
     Visualize the process of moving boxes step-by-step based on an initial map and a list of actions.
@@ -259,6 +355,9 @@ def render_map(initial_map, action_list):
                 hoverinfo="text",
             )
         )
+        
+
+
 
         # Add rectangles for visualizing the "boxes"
         for center in current_state.keys():
@@ -276,9 +375,9 @@ def render_map(initial_map, action_list):
         fig.update_layout(
             title=dict(
                 text=(
-                    f"Box Item Plot with current state"
+                    f"Box Item Plot with state {iteration}"
                     if iteration < 1
-                    else f"Box Item Plot with state after <br>action {iteration} {action}"
+                    else f"Box Item Plot with state {iteration}<br>action {action}"
                 ),  # Use the formatted title
                 x=0.5,  # Center the title horizontally
                 xanchor="center",
@@ -296,73 +395,10 @@ def render_map(initial_map, action_list):
             height=600,
         )
 
+        
         # Show the plot
         fig.show()
         iteration += 1
 
     return df, fig
 
-
-def render_graph(box_map):
-    df = map_df(box_map)
-    df["hover_text"] = df.apply(
-        lambda row: f"""
-                                    Type: {row['type']}<br>
-                                     Color: {row['color']}<br>
-                                     X: {row['x']}<br>
-                                     Y: {row['y']}
-                                    """,
-        axis=1,
-    )
-
-    # Initialize the figure
-    fig = go.Figure()
-
-    # Add scatter trace
-    fig.add_trace(
-        go.Scatter(
-            x=df["x"],
-            y=df["y"],
-            mode="markers",
-            marker=dict(
-                symbol=[
-                    "diamond-open" if t == "target" else "square" for t in df["type"]
-                ],  # Use square symbols
-                size=20,  # Set the size of the squares
-                color=df["color"],  # Use the 'color' column for marker colors
-            ),
-            text=df["hover_text"],  # Display 'type' on hover
-            hoverinfo="text",
-        )
-    )
-
-    # Add rectangles for visualizing the "boxes"
-    for center in box_map.keys():
-        cx, cy = center
-        fig.add_shape(
-            type="rect",
-            x0=cx - 0.5,
-            y0=cy - 0.5,
-            x1=cx + 0.5,
-            y1=cy + 0.5,
-            line=dict(color="black", width=2),
-        )
-
-    # Update layout to match the desired visual appearance
-    fig.update_layout(
-        title=dict(
-            text=f"Box Item Plot",  # Use the formatted title
-            x=0.5,  # Center the title horizontally
-            xanchor="center",
-            yanchor="top",
-            font=dict(size=18),  # Adjust font size if needed
-        ),
-        xaxis=dict(range=[0, 2], showgrid=False, zeroline=False, title="X Coordinate"),
-        yaxis=dict(range=[0, 2], showgrid=False, zeroline=False, title="Y Coordinate"),
-        plot_bgcolor="white",
-        width=600,
-        height=600,
-    )
-
-    # Show the plot
-    return fig
