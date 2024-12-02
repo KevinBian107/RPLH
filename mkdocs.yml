@@ -1,4 +1,4 @@
-site_name: track-mjx documentation
+site_name: RPLH Documentation
 site_url: https://kbian.org/RPLH/
 repo_url: https://github.com/KevinBian107/RPLH
 
@@ -12,14 +12,14 @@ theme:
   palette:
     # Palette toggle for dark mode
     - scheme: slate
-      primary: deep purple
+      primary: deep blue
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
 
     # Palette toggle for light mode
     - scheme: default
-      primary: deep purple
+      primary: deep blue
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
@@ -52,14 +52,14 @@ plugins:
   # - privacy  # Caching dynamic badges
   - mkdocs-jupyter
   - mike
-  - autorefs
+  # - autorefs
   # - gen-files:
       # scripts:
         # - scripts/gen_ref_pages.py
         # - scripts/gen_changelog.py
-  - literate-nav:
-      nav_file: SUMMARY.md
-  - section-index
+  # - literate-nav:
+  #     nav_file: SUMMARY.md
+  # - section-index
   - mkdocstrings:
       default_handler: python
       handlers:
@@ -149,7 +149,11 @@ copyright: >
   <a href="#__consent">Change cookie settings</a>
 
 nav:
-  - Run System: index.md
+  - Why RPLH?: index.md
+  - API Calls: api.md
+  - Vanilla: h_vanilla.md
+  - Efficient: h_efficient.md
+  - Decentralize: d_efficient.md
   # - Examples: examples.md
   # - Changelog: changelog.md
   # - Releases: https://github.com/talmolab/sleap-io/releases

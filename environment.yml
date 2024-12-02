@@ -31,4 +31,5 @@ dependencies:
       - black
       - plotly
       - instructor
+      - mkdocs
 
