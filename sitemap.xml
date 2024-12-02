@@ -9,15 +9,19 @@
          <lastmod>2024-12-02</lastmod>
     </url>
     <url>
-         <loc>https://kbian.org/RPLH/d_efficient/</loc>
+         <loc>https://kbian.org/RPLH/evaluation/testing/</loc>
          <lastmod>2024-12-02</lastmod>
     </url>
     <url>
-         <loc>https://kbian.org/RPLH/h_efficient/</loc>
+         <loc>https://kbian.org/RPLH/system/d_efficient/</loc>
          <lastmod>2024-12-02</lastmod>
     </url>
     <url>
-         <loc>https://kbian.org/RPLH/h_vanilla/</loc>
+         <loc>https://kbian.org/RPLH/system/h_efficient/</loc>
+         <lastmod>2024-12-02</lastmod>
+    </url>
+    <url>
+         <loc>https://kbian.org/RPLH/system/h_vanilla/</loc>
          <lastmod>2024-12-02</lastmod>
     </url>
 </urlset>
