@@ -1,6 +1,0 @@
-*__pycache__
-multi-agent-env/
-multi-agent-env-2/
-*.ipynb_checkpoints
-*.DS_Store
-conversation.txt
