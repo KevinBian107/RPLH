@@ -273,7 +273,7 @@
         
   
   <span class="md-ellipsis">
-    Run System
+    Why RPLH?
   </span>
   
 
@@ -409,7 +409,27 @@
 
 
 <h1 id="decentralized-rplh-instance">Decentralized RPLH Instance<a class="headerlink" href="#decentralized-rplh-instance" title="Permanent link">&para;</a></h1>
-<p>Only execute action when there are more than half of the agent that is doing stuff (have box in it's grid and have action plan given by other agents) says "I Agree", else, the conversatoon continuses.</p>
+<p>The decentralized RPLH instant, or <code>d_efficient</code>, is used for comparsion and validating with our Hallucinated version of RPLH system (<code>h_efficient</code> and <code>h_vanilla</code>). The decentralized system follows the general design of RPLH system with a few key implmentation details differences:</p>
+<ol>
+<li>
+<p>There is no central HCA agent nor is there a judge.</p>
+</li>
+<li>
+<p>Attitude agent still exist.</p>
+</li>
+<li>
+<p>To settle disagreement in all the loca agent, action is only executed when there are more than half of the agent that is operating in the environment (have box in it's grid and have action plan given by other agents) says "I Agree", else, the conversatoon continuses.</p>
+</li>
+</ol>
+<p>To compare to the Hallucination RPLH system, please refer to the following:</p>
+<ul>
+<li>
+<p><a href="https://github.com/KevinBian107/RPLH/tree/master/rplh/h_efficient"><code>h_efficient</code></a></p>
+</li>
+<li>
+<p><a href="https://github.com/KevinBian107/RPLH/tree/master/rplh/h_vanilla"><code>h_vanilla</code></a></p>
+</li>
+</ul>
 
 
 
