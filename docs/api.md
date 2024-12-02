@@ -1,10 +1,9 @@
-Our environment is adapted from [here](https://yongchao98.github.io/MIT-REALM-Multi-Robot/)
-
 ## Setting Up Inference Loop
 First, we need to install the dependencies and create a separate conda environment:
 ```
 conda env create
 ```
+Our environment is adapted from [here](https://yongchao98.github.io/MIT-REALM-Multi-Robot/)
 
 Download SLM from [here](https://ollama.com/library/qwen) and then instantiate small large language model (14B parameters qwen model) agent by:
 ```
@@ -12,7 +11,7 @@ ollama run qwen2.5:14b-instruct-q3_K_L
 ```
 This need to be done in your system terminal directly, not in VScode.
 
-## Running All Together
+## Running Whole Pipeline Together
 We can diretcly use the central running parser file to cerate the environment and tehn run the main inference loop by:
 ```
 python rplh/inference.py --module_name "h_efficient" --model_name "qwen2.5:14b-instruct-q3_K_L"
