@@ -524,8 +524,8 @@ def run_exp(
 
                 data_dict["pg_dict"] = pg_dict_returned
 
-                # render_map_terminal_popup(data_dict["pg_dict"], [original_response_dict])
-                render_graph_terminal_popup(data_dict["pg_dict"])
+                # render_graph_terminal_popup(data_dict["pg_dict"])
+                render_animate_terminal_popup(data_dict["pg_dict"], [original_response_dict])
 
             except:
                 success_failure = "Hallucination of wrong plan"

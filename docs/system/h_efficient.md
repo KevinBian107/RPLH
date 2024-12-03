@@ -28,3 +28,6 @@ We used many optimization hacks:
 2. When vote counts (consecutive agreement number) surpasses half the number of agents, the HCA action is executed directly. If not consecutive, the count is re-initiated.
 3. If the local agent agrees the HCA decision, then no judge should be involved and the HCA action would be passed on directly (relapsed) to the next round of local agent or directly get executed.
 4. Instead of letting the HCA agent figuring out attitude, we limit the prompt length that can be given by assigning an attitude agent taht judges the attitude of each agent on the field with current round information only, then only this attitude information is passed to teh next round HCA agent.
+
+## Agent Characteristics
+With less boxes and targets presented in the environment, it becomes a bigger challenge for the agents to come up with reasonable action plans and may take more trys before achieving sensible actions.

@@ -25,13 +25,21 @@ import shutil
 import random
 
 
+def render_animate_terminal_popup(box_map, action_list):
+    box_map, action_list = trans_data(box_map, action_list)
+    fig = render_animate(box_map, action_list[0])
+    
+    pio.renderers.default = "browser"
+    fig.show()
+    
+    print("Graph displayed in a browser pop-up window.")
+
 def render_graph_terminal_popup(box_map):
     fig = render_graph(box_map=trans_info_box(box_map))
 
     pio.renderers.default = "browser"
     fig.show()
     print("Graph displayed in a browser pop-up window.")
-
 
 def render_map_terminal_popup(box_map, action_list):
     box_map, action_list = trans_data(box_map, action_list)

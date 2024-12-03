@@ -531,7 +531,7 @@ def message_construct_func(
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
     else:
-        # print('LESS PROMPT IN MESSAGE CONSTRUCT')
+        print('LESS PROMPT IN MESSAGE CONSTRUCT')
         messages.append({"role": "user", "content": user_prompt_list[-1]})
         
     for i in range(len(response_total_list)):
