@@ -75,7 +75,7 @@ def main():
         print(f"-------------------Trial {trial} | Module: {args.module_name} | Model name: {args.model_name}-------------------")
 
         if (args.module_name == "h_efficient") or (args.module_name == "d_efficient"):
-            dialogue_history_method = "_w_markovian_state_action_history"
+            dialogue_history_method = "_w_no_history" #"_w_markovian_state_action_history"
         else:
             dialogue_history_method = "_w_only_state_action_history"
 

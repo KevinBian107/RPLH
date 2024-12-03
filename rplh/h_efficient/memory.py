@@ -89,11 +89,11 @@ def rplh_prompt_func(
 
     if data["env_step"] == 0:
         attitude = None
-        # success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
-        # {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
+        success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
+        {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
     else:
         attitude = data["attitude_info"][-1]
-        # success_action = data["response_total_list"][-1]
+        success_action = data["response_total_list"][-1]
 
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
@@ -114,6 +114,7 @@ def rplh_prompt_func(
         "_w_compressed_dialogue_history",
         "_w_all_dialogue_history",
         "_w_markovian_state_action_history",
+        "_w_no_history",
     ):
 
         # first iteration no summary
@@ -126,6 +127,8 @@ def rplh_prompt_func(
             Previous State: {better_state_repres(pg_state_list[previous_state_idx])}
             Previous Action: {response_total_list[previous_state_idx]}\n\n
             """
+        elif dialogue_history_method == "_w_no_history":
+            state_action_prompt = ""
         elif dialogue_history_method == "_w_only_state_action_history":
             state_action_prompt = ""
             for i in range(len(response_total_list) - 1, -1, -1):
@@ -209,6 +212,8 @@ def rplh_prompt_func(
             
             The previous state and action pairs at each step are: {state_action_prompt}
             
+            This is the success response of previous state: {success_action}
+            
             Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible actions: {state_update_prompt}.
 
             {att_promt}
@@ -284,6 +289,7 @@ def dialogue_func(
         "_w_compressed_dialogue_history",
         "_w_all_dialogue_history",
         "_w_markovian_state_action_history",
+        "_w_no_history"
     ):
         # first iteration no summary
         if dialogue_history_method == "_w_markovian_state_action_history":
@@ -295,6 +301,8 @@ def dialogue_func(
             Previous State: {better_state_repres(pg_state_list[previous_state_idx])}
             Previous Action: {response_total_list[previous_state_idx]}\n\n
             """
+        elif dialogue_history_method == "_w_no_history":
+            state_action_prompt = ""
         elif dialogue_history_method == "_w_only_state_action_history":
             state_action_prompt = ""
             for i in range(len(response_total_list) - 1, -1, -1):
