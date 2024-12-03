@@ -20,7 +20,7 @@
     
     
       
-        <title>Testing - RPLH Documentation</title>
+        <title>Numerical Evaluation - RPLH Documentation</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#numerical-evaluation" class="md-skip">
+        <a href="#human-annotation" class="md-skip">
           Skip to content
         </a>
       
@@ -121,7 +121,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Testing
+              Numerical Evaluation
             
           </span>
         </div>
@@ -554,7 +554,7 @@
           
   
   <span class="md-ellipsis">
-    Testing
+    Numerical Evaluation
   </span>
   
 
@@ -565,7 +565,7 @@
         
   
   <span class="md-ellipsis">
-    Testing
+    Numerical Evaluation
   </span>
   
 
@@ -585,18 +585,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#numerical-evaluation" class="md-nav__link">
+  <a href="#human-annotation" class="md-nav__link">
     <span class="md-ellipsis">
-      Numerical Evaluation
+      Human Annotation
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#naturalistic-reasoning-evaluation" class="md-nav__link">
+  <a href="#computation-system-metrics" class="md-nav__link">
     <span class="md-ellipsis">
-      Naturalistic Reasoning Evaluation
+      Computation System Metrics
     </span>
   </a>
   
@@ -643,18 +643,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#numerical-evaluation" class="md-nav__link">
+  <a href="#human-annotation" class="md-nav__link">
     <span class="md-ellipsis">
-      Numerical Evaluation
+      Human Annotation
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#naturalistic-reasoning-evaluation" class="md-nav__link">
+  <a href="#computation-system-metrics" class="md-nav__link">
     <span class="md-ellipsis">
-      Naturalistic Reasoning Evaluation
+      Computation System Metrics
     </span>
   </a>
   
@@ -678,21 +678,24 @@
   
 
 
-  <h1>Testing</h1>
+  <h1>Numerical Evaluation</h1>
 
-<h2 id="numerical-evaluation">Numerical Evaluation<a class="headerlink" href="#numerical-evaluation" title="Permanent link">&para;</a></h2>
-<p>Comparing performances of different communication system through a numerical comparison:</p>
-<ol>
-<li>Test Success Rate (does the system converge before max number of stesp reached).</li>
-<li>Convergence speed (number of execution steps needed for convergence (solve the given problem)).</li>
-<li>Number of API calls.</li>
-</ol>
-<h2 id="naturalistic-reasoning-evaluation">Naturalistic Reasoning Evaluation<a class="headerlink" href="#naturalistic-reasoning-evaluation" title="Permanent link">&para;</a></h2>
+<p>Comparing performances of different communication system through a numerical comparison (given the same <code>seed</code>, running on smaller scaled environment, 2x2 grid with max 5 boxes/targets in total (optimality depends on seed)):</p>
+<h2 id="human-annotation">Human Annotation<a class="headerlink" href="#human-annotation" title="Permanent link">&para;</a></h2>
 <p>Evaluate whether the system outputs reasonable/optimal response at each steps.</p>
 <ol>
+<li>Manually reason what is the optimal number of steps given the environment.</li>
 <li>Given the same <code>seed</code> (same environment setup), how many boxes are removed at each step and whether this step is efficient (human-annotate).</li>
 <li>Does output reasoning (tokens) makes sense.</li>
 <li>Does action decision make snese.</li>
+</ol>
+<h2 id="computation-system-metrics">Computation System Metrics<a class="headerlink" href="#computation-system-metrics" title="Permanent link">&para;</a></h2>
+<p>Run 10 trials:</p>
+<ol>
+<li>Test Success Rate (does the system converge before max number of stesp reached).</li>
+<li>Differences with optimla human plans</li>
+<li>Convergence speed (number of execution steps needed for convergence (solve the given problem)).</li>
+<li>Number of API calls.</li>
 </ol>
 
 
