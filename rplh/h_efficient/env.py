@@ -79,7 +79,8 @@ def state_update_func(
             if len(square_item_list) == 0:
                 continue
             else:
-                state_update_prompt = f", I can observe {square_item_list}, "
+                # Thanks Giving Change (when pushed "I can observe"), previously HCA agent can't see other agent's action
+                state_update_prompt += f", I can observe {square_item_list}, "
             action_list = []
             for box in square_item_only_box:
                 for surround_index in surround_index_list:
