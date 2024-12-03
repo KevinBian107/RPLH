@@ -7,8 +7,19 @@ import plotly.io as pio
 pio.renderers.default = "plotly_mimetype"
 from PIL import Image
 
-from pathlib import Path
 import sys
+from pathlib import Path
+
+main_path = Path(__file__).resolve().parent.parent.parent
+if str(main_path) not in sys.path:
+    sys.path.append(str(main_path))
+    
+# from rplh.h_vanilla.memory import *
+import os
+import json
+import numpy as np
+import shutil
+import random
 
 
 def render_graph_terminal_popup(box_map):
@@ -30,10 +41,8 @@ def render_map_terminal_popup(box_map, action_list):
 def position_int(position):
     return tuple([float(pos) for pos in position.split("_")])
 
-
 def split_info(info_list):
-    return [info.split("_") for info in info_list]
-
+    return [info.split("_") + [i] for i, info in enumerate(info_list)]
 
 # ---------------- Transforming Box_map ---------------
 def trans_info_box(pg_state):
