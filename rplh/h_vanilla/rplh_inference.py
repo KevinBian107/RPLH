@@ -119,6 +119,8 @@ def run_exp(
             result_df = pd.DataFrame(result).T
             print(result_df)
             print(result_df.sum(axis=0))
+            if all(result_df.sum(axis=0)) == 0:
+                break
 
             print(
                 f"-------###-------###-------###-------HCA_AGENT_{a}-------###-------###-------###-------"

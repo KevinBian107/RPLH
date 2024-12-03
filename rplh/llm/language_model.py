@@ -73,7 +73,7 @@ def GPT_response(messages, model_name):
         result = client.chat.completions.create(
             model=model_name,
             messages=messages,
-            temperature=0.0,
+            temperature=0.2,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0
@@ -85,7 +85,7 @@ def GPT_response(messages, model_name):
             result = client.chat.completions.create(
             model=model_name,
             messages=messages,
-            temperature=0.0,
+            temperature=0.2,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0
@@ -97,7 +97,7 @@ def GPT_response(messages, model_name):
                 result = client.chat.completions.create(
                     model=model_name,
                     messages=messages,
-                    temperature = 0.0,
+                    temperature = 0.2,
                     top_p=1,
                     frequency_penalty=0,
                     presence_penalty=0
