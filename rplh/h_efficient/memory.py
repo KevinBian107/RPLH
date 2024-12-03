@@ -212,9 +212,9 @@ def rplh_prompt_func(
             
             The previous state and action pairs at each step are: {state_action_prompt}
             
-            This is the success response of previous state: {success_action}
+            Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible that each agent can take: {state_update_prompt}.
             
-            Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible actions: {state_update_prompt}.
+            Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
 
             {att_promt}
 
@@ -359,6 +359,9 @@ def dialogue_func(
             
             The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
             The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
+            
+            Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
+            
             The previous state and action pairs at each step are: {state_action_prompt}
             Please learn from previous steps in a few steps:
                 
