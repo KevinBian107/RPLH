@@ -248,7 +248,7 @@ def dialogue_func(
         local_agent_location (str): Location of the local agent in the grid.
 
     Returns:
-        str: Dialogue prompt for the local agent.
+        str: Dialogue prompt for the local agent. 
     """
 
     if data["env_step"] == 0:
@@ -363,7 +363,7 @@ def dialogue_func(
             Remanber to assign action to your self as well.
 
             The other central planner's current action plan is giving as: {central_response}.
-            Try to find agreement with the central ageent if you can, the goal is to resolve conversation, not adding more.
+            Try to find agreement with the central ageent if you can, the goal is to resolve conversation.
             
             Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents.
 

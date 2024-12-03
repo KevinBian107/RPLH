@@ -30,6 +30,12 @@ def main():
         required=True, 
         help="Upper bound for the number of boxes."
     )
+    parser.add_argument(
+        "--seed", 
+        type=int, 
+        required=True, 
+        help="Random seed to create environment."
+    )
 
     args = parser.parse_args()
 
@@ -64,14 +70,14 @@ def main():
 
         print(f"Trial {trial}: Saving results in {trial_path}")
 
-        env_module.create_env1(trial_path, repeat_num=1, box_num_upper_bound=args.box_num_upper_bound, box_num_low_bound=1)
+        env_module.create_env1(trial_path, repeat_num=1, box_num_upper_bound=args.box_num_upper_bound, box_num_low_bound=1, seed=args.seed)
 
         print(f"-------------------Trial {trial} | Module: {args.module_name} | Model name: {args.model_name}-------------------")
 
         if (args.module_name == "h_efficient") or (args.module_name == "d_efficient"):
             dialogue_history_method = "_w_markovian_state_action_history"
         else:
-            dialogue_history_method = "_w_no_history"
+            dialogue_history_method = "_w_only_state_action_history"
 
         # Experiment parameters
         pg_row_num = 2
