@@ -206,7 +206,9 @@ def rplh_prompt_func(
             Your task is to instruct each agent to match all boxes to their color-coded targets.
             After each move, agents provide updates for the next sequence of actions.
             You are the central agent and your job is to coordinate the agents optimally.
-
+            
+            The previous state and action pairs at each step are: {state_action_prompt}
+            
             Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible actions: {state_update_prompt}.
 
             {att_promt}
