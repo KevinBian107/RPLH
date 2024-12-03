@@ -122,7 +122,7 @@ def map_df(states):
 
         # Distribute targets at the top within the box
         for i, item in enumerate(targets):
-            item_type, color = item
+            item_type, color, id = item
             position_factor  = min(5, len(targets)) 
             if count <= 5 :
                 x_offset = (i - int(position_factor / 2)) * offset_factor
@@ -134,7 +134,7 @@ def map_df(states):
                 {
                     "x": cx + x_offset,
                     "y": cy + y_offset,
-                    "type": "target",
+                    "type": item_type,
                     "color": color,
                 }
             )
@@ -143,7 +143,7 @@ def map_df(states):
         count = 1
         # Distribute boxes at the bottom within the box
         for i, item in enumerate(boxes):
-            item_type, color = item
+            item_type, color, id = item
             position_factor = min(5, len(boxes))
             if count <= 5:
                 x_offset = (i - int(position_factor / 2)) * offset_factor
@@ -155,8 +155,9 @@ def map_df(states):
                 {
                     "x": cx + x_offset,
                     "y": cy + y_offset,
-                    "type": "box",
+                    "type": item_type,
                     "color": color,
+                    'id': id
                 }
             )
             count += 1
