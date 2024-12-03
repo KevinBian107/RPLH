@@ -4,7 +4,7 @@ Using Language Models' **In-context Learning** abilities, we are developing fram
 ## Agent's Perpective
 Importantly, non of the agents actually see the full states of teh environmnet (where all the boxes are at and where all the targets are at), so they must communicate about **what they can see** and **what they can do** to better collaborate with each other and do the actions. The purpose of designing an HCA agent is to make an hellucinating central agent that have a little bit mroe information compare to other agents and tells what all other what it sees and what the plan should be from that agent's perspective.
 
-Here is an example of such partial information
+Here is an example of such partial information of describing what an specific local agent can see and do.
 
 ```bash
 - Agent[0.5, 0.5]:

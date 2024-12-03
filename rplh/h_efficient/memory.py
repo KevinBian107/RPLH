@@ -89,8 +89,8 @@ def rplh_prompt_func(
 
     if data["env_step"] == 0:
         attitude = None
-        success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
-        {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
+        # success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
+        # {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
     else:
         attitude = data["attitude_info"][-1]
         # success_action = data["response_total_list"][-1]
@@ -206,7 +206,9 @@ def rplh_prompt_func(
             Your task is to instruct each agent to match all boxes to their color-coded targets.
             After each move, agents provide updates for the next sequence of actions.
             You are the central agent and your job is to coordinate the agents optimally.
-
+            
+            The previous state and action pairs at each step are: {state_action_prompt}
+            
             Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible actions: {state_update_prompt}.
 
             {att_promt}
