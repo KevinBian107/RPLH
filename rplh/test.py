@@ -69,8 +69,10 @@ def main():
         os.makedirs(trial_path, exist_ok=True)
 
         print(f"Trial {trial}: Saving results in {trial_path}")
+        
+        seed = trial
 
-        env_module.create_env1(trial_path, repeat_num=1, box_num_upper_bound=args.box_num_upper_bound, box_num_low_bound=1, seed=args.seed)
+        env_module.create_env1(trial_path, repeat_num=1, box_num_upper_bound=args.box_num_upper_bound, box_num_low_bound=1, seed=seed)
 
         print(f"-------------------Trial {trial} | Module: {args.module_name} | Model name: {args.model_name}-------------------")
 

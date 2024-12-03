@@ -326,4 +326,4 @@ Code_dir_path = "multi-agent-env/"
 # The first time to create the environment, after that you can comment it
 
 # Here we only create 1 instance of the random environment
-create_env1(Code_dir_path, repeat_num=1, box_num_upper_bound=3, box_num_low_bound = 1)
+create_env1(Code_dir_path, repeat_num=1, box_num_upper_bound=3, box_num_low_bound=1, seed=1)
