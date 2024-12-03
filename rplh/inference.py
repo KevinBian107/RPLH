@@ -47,7 +47,7 @@ def main():
     
     print(f"-------------------CREATING ENVIRONMENT IN {args.module_name}-------------------")
     
-    env_module.create_env1(saving_path, repeat_num=1)
+    env_module.create_env1(saving_path, repeat_num=1, box_num_upper_bound=1, box_num_low_bound = 1)
     
     print(f"-------------------Module: {args.module_name} | Model name: {args.model_name}-------------------")
     
