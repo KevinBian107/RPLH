@@ -394,9 +394,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#agents-perpective" class="md-nav__link">
+  <a href="#social-reasoning-agents-perpective" class="md-nav__link">
     <span class="md-ellipsis">
-      Agent's Perpective
+      Social Reasoning Agent's Perpective
     </span>
   </a>
   
@@ -662,9 +662,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#agents-perpective" class="md-nav__link">
+  <a href="#social-reasoning-agents-perpective" class="md-nav__link">
     <span class="md-ellipsis">
-      Agent's Perpective
+      Social Reasoning Agent's Perpective
     </span>
   </a>
   
@@ -717,21 +717,22 @@
 
 <h1 id="a-light-weight-multi-collaboration-system">A Light-Weight Multi-Collaboration System<a class="headerlink" href="#a-light-weight-multi-collaboration-system" title="Permanent link">&para;</a></h1>
 <p>Using Language Models' <strong>In-context Learning</strong> abilities, we are developing frameworks for multi-agent collaborations system using Role-Playing Leader-Hellucinating system, or in short, RPLH. We know that as parameter increases, performance automatically increases. However, only limited works have being down on generalizing this sort of in-context learning ability into samll parameter models. In our work, we try to address this issue. We try to design an efficient <code>light-weight</code> system that is runable directly on a laptop computer 💻.</p>
-<h2 id="agents-perpective">Agent's Perpective<a class="headerlink" href="#agents-perpective" title="Permanent link">&para;</a></h2>
+<h2 id="social-reasoning-agents-perpective">Social Reasoning Agent's Perpective<a class="headerlink" href="#social-reasoning-agents-perpective" title="Permanent link">&para;</a></h2>
 <p>Importantly, non of the agents actually see the full states of teh environmnet (where all the boxes are at and where all the targets are at), so they must communicate about <strong>what they can see</strong> and <strong>what they can do</strong> to better collaborate with each other and do the actions. The purpose of designing an HCA agent is to make an hellucinating central agent that have a little bit mroe information compare to other agents and tells what all other what it sees and what the plan should be from that agent's perspective.</p>
 <p>Here is an example of such partial information of describing what an specific local agent can see and do.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>-<span class="w"> </span>Agent<span class="o">[</span><span class="m">0</span>.5,<span class="w"> </span><span class="m">0</span>.5<span class="o">]</span>:
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>-<span class="w"> </span>I<span class="w"> </span>am<span class="w"> </span><span class="k">in</span><span class="w"> </span>square<span class="o">[</span><span class="m">0</span>.5,<span class="w"> </span><span class="m">0</span>.5<span class="o">]</span>,
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>-<span class="w"> </span>I<span class="w"> </span>can<span class="w"> </span>observe<span class="w"> </span><span class="o">[</span><span class="s1">&#39;box_green&#39;</span>,<span class="w"> </span><span class="s1">&#39;target_orange&#39;</span><span class="o">]</span>,
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span>-<span class="w"> </span>I<span class="w"> </span>can<span class="w"> </span><span class="k">do</span><span class="w"> </span>one<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>following<span class="w"> </span>action:<span class="w"> </span><span class="o">[</span><span class="s1">&#39;move(box_green, square[1.5, 0.5])&#39;</span>,<span class="w"> </span><span class="s1">&#39;move(box_green, square[0.5, 1.5])&#39;</span><span class="o">]</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>-<span class="w"> </span>Agent<span class="o">[</span><span class="m">0</span>.5,<span class="w"> </span><span class="m">1</span>.5<span class="o">]</span>:
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span>-<span class="w"> </span>I<span class="w"> </span>am<span class="w"> </span><span class="k">in</span><span class="w"> </span>square<span class="o">[</span><span class="m">0</span>.5,<span class="w"> </span><span class="m">1</span>.5<span class="o">]</span>,
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span>-<span class="w"> </span>I<span class="w"> </span>can<span class="w"> </span>observe<span class="w"> </span><span class="o">[</span><span class="s1">&#39;target_red&#39;</span>,<span class="w"> </span><span class="s1">&#39;box_green&#39;</span>,<span class="w"> </span><span class="s1">&#39;target_green&#39;</span>,<span class="w"> </span><span class="s1">&#39;target_green&#39;</span>,<span class="w"> </span><span class="s1">&#39;target_purple&#39;</span>,<span class="w"> </span><span class="s1">&#39;target_purple&#39;</span><span class="o">]</span>,
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span>-<span class="w"> </span>I<span class="w"> </span>can<span class="w"> </span><span class="k">do</span><span class="w"> </span>one<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>following<span class="w"> </span>action:<span class="w"> </span><span class="o">[</span><span class="s1">&#39;move(box_green, square[1.5, 1.5])&#39;</span>,<span class="w"> </span><span class="s1">&#39;move(box_green, square[0.5, 0.5])&#39;</span>,<span class="w"> </span><span class="s1">&#39;move(box_green, target_green)&#39;</span><span class="o">]</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>-<span class="w"> </span>Agent<span class="o">[</span><span class="m">0</span>.5,<span class="w"> </span><span class="m">1</span>.5<span class="o">]</span>:
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span>-<span class="w"> </span>I<span class="w"> </span>am<span class="w"> </span><span class="k">in</span><span class="w"> </span>square<span class="o">[</span><span class="m">0</span>.5,<span class="w"> </span><span class="m">1</span>.5<span class="o">]</span>,
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span>-<span class="w"> </span>I<span class="w"> </span>can<span class="w"> </span>observe<span class="w"> </span><span class="o">[</span><span class="s1">&#39;target_red&#39;</span>,<span class="w"> </span><span class="s1">&#39;box_green&#39;</span>,<span class="w"> </span><span class="s1">&#39;target_green&#39;</span>,<span class="w"> </span><span class="s1">&#39;target_green&#39;</span>,<span class="w"> </span><span class="s1">&#39;target_purple&#39;</span>,<span class="w"> </span><span class="s1">&#39;target_purple&#39;</span><span class="o">]</span>,
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span>-<span class="w"> </span>I<span class="w"> </span>can<span class="w"> </span><span class="k">do</span><span class="w"> </span>one<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>following<span class="w"> </span>action:<span class="w"> </span><span class="o">[</span><span class="s1">&#39;move(box_green, square[1.5, 1.5])&#39;</span>,<span class="w"> </span><span class="s1">&#39;move(box_green, square[0.5, 0.5])&#39;</span>,<span class="w"> </span><span class="s1">&#39;move(box_green, target_green)&#39;</span><span class="o">]</span>
 </code></pre></div>
-<p>We hope to build agent that is caplable of <strong><em>Social-reasoning and expecting what the other agent should be doing</em></strong>. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to <strong><em>Level-one agent</em></strong>.</p>
+<p>We hope to build agent that is caplable of <strong>Social-reasoning</strong> and expecting what the other agent should be doing. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to <strong>Level-one agent</strong>.</p>
 <h2 id="rplh-systems">RPLH Systems<a class="headerlink" href="#rplh-systems" title="Permanent link">&para;</a></h2>
-<p><strong>We hope to setup an systematic and modularzied way of doing multi-agent communication for less parametrized language models</strong>. We have implemented multiple instances of the RPLH system dpending on <code>vanilla</code> or <code>efficient</code> version. Here is the main breakdown of the code:</p>
+<p>We hope to setup an <strong>systematic</strong> and <strong>modularzied</strong> way of doing multi-agent communication for <strong>less parametrized</strong> language models. We have implemented multiple instances of the RPLH system dpending on <code>vanilla</code> or <code>efficient</code> version. Here is the main breakdown of the code:</p>
 <p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>rplh/
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├──<span class="w"> </span>d_efficient/
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│<span class="w">   </span>├──<span class="w"> </span>memory.py
