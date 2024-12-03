@@ -4,8 +4,8 @@ repo_url: https://github.com/KevinBian107/RPLH
 
 theme:
   name: material
-  # logo: assets/logo.png
-  # favicon: assets/favicon.ico
+  logo: assets/logo.png
+  favicon: assets/logo.png
   icon:
     repo: fontawesome/brands/github
 
@@ -26,11 +26,11 @@ theme:
 
 
   features:
-    - navigation.tracking
+    - navigation.sections
     # - toc.integrate
     - toc.follow
     # Tabs
-    # - navigation.tabs
+    - navigation.tabs
     # - navigation.tabs.sticky  # stays visible at the top
     - navigation.sections
     - navigation.top
@@ -137,9 +137,7 @@ extra:
 
   social:
     - icon: fontawesome/brands/github 
-      link: https://github.com/talmolab
-    - icon: fontawesome/brands/x-twitter
-      link: https://twitter.com/talmop
+      link: https://github.com/KevinBian107
 
 # extra_css:
 #   - css/mkdocstrings.css
@@ -151,9 +149,12 @@ copyright: >
 nav:
   - Why RPLH?: index.md
   - API Calls: api.md
-  - Vanilla: h_vanilla.md
-  - Efficient: h_efficient.md
-  - Decentralize: d_efficient.md
+  - System:
+    - Vanilla: system/h_vanilla.md
+    - Efficient: system/h_efficient.md
+    - Decentralize: system/d_efficient.md
+  - Evaluation:
+    - Numerical Evaluation: evaluation/testing.md
   # - Examples: examples.md
   # - Changelog: changelog.md
   # - Releases: https://github.com/talmolab/sleap-io/releases

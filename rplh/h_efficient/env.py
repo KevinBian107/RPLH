@@ -262,7 +262,7 @@ def env_create(
     return pg_dict
 
 
-def create_env1(Saving_path, repeat_num=10):
+def create_env1(Saving_path, repeat_num=10, box_num_upper_bound=3, box_num_low_bound = 1):
     """
     multi-agent-env/
     └── env_pg_state_2_2/
@@ -295,8 +295,6 @@ def create_env1(Saving_path, repeat_num=10):
             # Define the total row and column numbers of the whole playground, and the item number of each colored target and box
             pg_row_num = i
             pg_column_num = j
-            box_num_low_bound = 1
-            box_num_upper_bound = 3
             # Define the used colors
             color_list = ["blue", "red", "green", "purple", "orange"]
             pg_dict = env_create(
@@ -322,4 +320,4 @@ Code_dir_path = "multi-agent-env/"
 # The first time to create the environment, after that you can comment it
 
 # Here we only create 1 instance of the random environment
-create_env1(Code_dir_path, repeat_num=1)
+create_env1(Code_dir_path, repeat_num=1, box_num_upper_bound=3, box_num_low_bound = 1)
