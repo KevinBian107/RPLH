@@ -77,7 +77,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="light-blue" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-blue" data-md-color-accent="indigo">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -136,7 +136,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="light-blue" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-blue" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
     
       <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -146,7 +146,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="light-blue" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-blue" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
     
       <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -456,6 +456,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#testing-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Systems
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -711,6 +720,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#testing-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Systems
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -732,36 +750,40 @@
   <h1>API Calls</h1>
 
 <h2 id="setting-up-inference-loop">Setting Up Inference Loop<a class="headerlink" href="#setting-up-inference-loop" title="Permanent link">&para;</a></h2>
-<p>First, we need to install the dependencies and create a separate conda environment:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>conda env create
+<p>First, we need to install the dependencies and create a separate conda environment:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span>
 </code></pre></div>
-Our environment is adapted from <a href="https://yongchao98.github.io/MIT-REALM-Multi-Robot/">here</a></p>
-<p>Download SLM from <a href="https://ollama.com/library/qwen">here</a> and then instantiate small large language model (14B parameters qwen model) agent by:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ollama run qwen2.5:14b-instruct-q3_K_L
+<p>Our environment is adapted from <a href="https://yongchao98.github.io/MIT-REALM-Multi-Robot/">here</a></p>
+<p>Download SLM from <a href="https://ollama.com/library/qwen">here</a> and then instantiate small large language model (14B parameters qwen model) agent by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">ollama</span> <span class="n">run</span> <span class="n">qwen2</span><span class="mf">.5</span><span class="p">:</span><span class="mi">14</span><span class="n">b</span><span class="o">-</span><span class="n">instruct</span><span class="o">-</span><span class="n">q3_K_L</span>
 </code></pre></div>
-This need to be done in your system terminal directly, not in VScode.</p>
+<p>This need to be done in your system terminal directly, not in VScode.</p>
 <h2 id="running-whole-pipeline-together">Running Whole Pipeline Together<a class="headerlink" href="#running-whole-pipeline-together" title="Permanent link">&para;</a></h2>
-<p>We can diretcly use the central running parser file to cerate the environment and tehn run the main inference loop by:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python rplh/inference.py --module_name &quot;h_efficient&quot; --model_name &quot;qwen2.5:14b-instruct-q3_K_L&quot;
-</code></pre></div></p>
+<p>We can diretcly use the central running parser file to cerate the environment and tehn run the main inference loop by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">module_name</span> <span class="s2">&quot;h_efficient&quot;</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
+</code></pre></div>
 <h2 id="create-environment-seperately">Create Environment Seperately<a class="headerlink" href="#create-environment-seperately" title="Permanent link">&para;</a></h2>
-<p>Create local MoveBox environment for running (depending on the version using) by:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python rplh/h_vanilla/env.py
-</code></pre></div></p>
-<p>Or setting up RPLH-efficient system by:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python rplh/h_efficient/env.py
-</code></pre></div></p>
+<p>Create local MoveBox environment for running (depending on the version using) by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_vanilla</span><span class="o">/</span><span class="n">env</span><span class="o">.</span><span class="n">py</span>
+</code></pre></div>
+<p>Or setting up RPLH-efficient system by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_efficient</span><span class="o">/</span><span class="n">env</span><span class="o">.</span><span class="n">py</span>
+</code></pre></div>
 <h2 id="inference-loops-seperately">Inference Loops Seperately<a class="headerlink" href="#inference-loops-seperately" title="Permanent link">&para;</a></h2>
-<p>We also descigned scripts to deirectly run each seperate system. We can run original vanilla RPLH inferene loop by:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python rplh/h_vanilla/rplh_inference.py -- model_name &quot;qwen2.5:14b-instruct-q3_K_L&quot;
-</code></pre></div></p>
-<p>or running the efficient RPLH inferene loop by:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python rplh/h_efficient/rplh_inference.py -- model_name &quot;qwen2.5:14b-instruct-q3_K_L&quot;
-</code></pre></div></p>
+<p>We also descigned scripts to deirectly run each seperate system. We can run original vanilla RPLH inferene loop by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_vanilla</span><span class="o">/</span><span class="n">rplh_inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
+</code></pre></div>
+<p>or running the efficient RPLH inferene loop by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_efficient</span><span class="o">/</span><span class="n">rplh_inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
+</code></pre></div>
 <h2 id="visualize-solutions">Visualize Solutions<a class="headerlink" href="#visualize-solutions" title="Permanent link">&para;</a></h2>
-<p>To visualize the reasoning process by rendering the conversation that each of the agent said:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python rplh/rendering/render_conversation.py
-</code></pre></div></p>
+<p>To visualize the reasoning process by rendering the conversation that each of the agent said:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">rendering</span><span class="o">/</span><span class="n">render_conversation</span><span class="o">.</span><span class="n">py</span>
+</code></pre></div>
+<h2 id="testing-systems">Testing Systems<a class="headerlink" href="#testing-systems" title="Permanent link">&para;</a></h2>
+<p>Conduct evaluation using our system by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">test</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">module_name</span> <span class="s2">&quot;h_efficient&quot;</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span> <span class="o">--</span><span class="n">num_trials</span> <span class="mi">5</span> <span class="o">--</span><span class="n">box_num_upper_bound</span> <span class="mi">1</span>
+</code></pre></div>
 
 
 
