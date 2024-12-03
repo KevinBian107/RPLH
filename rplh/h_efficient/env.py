@@ -79,7 +79,7 @@ def state_update_func(
             if len(square_item_list) == 0:
                 continue
             else:
-                state_update_prompt = f", I can observe {square_item_list}, "
+                state_update_prompt += f", I can observe {square_item_list}, "
             action_list = []
             for box in square_item_only_box:
                 for surround_index in surround_index_list:
@@ -225,6 +225,7 @@ def env_create(
     box_num_low_bound: int = 2,
     box_num_upper_bound: int = 2,
     color_list: list[str] = ["blue", "red", "green", "purple", "orange"],
+    seed: int = -1
 ) -> dict[str, list[str]]:
     """
     Creates a randomized environment state for the playground.
@@ -239,6 +240,9 @@ def env_create(
     Returns:
         dict[str, list[str]]: Initial state of the playground.
     """
+    # set seed
+    if seed != -1:
+        random.seed(seed)
 
     # pg_dict records the items in each square over steps, here in the initial setting, we randomly assign items into each square
     pg_dict = {}
@@ -262,7 +266,7 @@ def env_create(
     return pg_dict
 
 
-def create_env1(Saving_path, repeat_num=10, box_num_upper_bound=3, box_num_low_bound = 1):
+def create_env1(Saving_path, repeat_num=10, box_num_upper_bound=3, box_num_low_bound = 1, seed=-1):
     """
     multi-agent-env/
     └── env_pg_state_2_2/
@@ -303,6 +307,7 @@ def create_env1(Saving_path, repeat_num=10, box_num_upper_bound=3, box_num_low_b
                 box_num_low_bound,
                 box_num_upper_bound,
                 color_list,
+                seed
             )
             os.makedirs(
                 Saving_path + f"/env_pg_state_{i}_{j}/pg_state{iteration_num}",
