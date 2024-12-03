@@ -28,7 +28,7 @@ For communication system, we can choose `module_name` between `h_efficient`, `d_
 Conduct evaluation using our system by:
 
 ```python
-python rplh/test.py --module_name "h_efficient" --model_name "qwen2.5:14b-instruct-q3_K_L" --num_trials 5 --box_num_upper_bound 1 --seed 0
+python rplh/test.py --module_name "h_efficient" --model_name "qwen2.5:14b-instruct-q3_K_L" --num_trials 5 --box_num_upper_bound 1 --start_iter 1
 ```
 
 ## Visualize Solutions

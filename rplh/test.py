@@ -31,10 +31,10 @@ def main():
         help="Upper bound for the number of boxes."
     )
     parser.add_argument(
-        "--seed", 
+        "--start_iter", 
         type=int, 
         required=True, 
-        help="Random seed to create environment."
+        help="Start iterations in testing."
     )
 
     args = parser.parse_args()
@@ -64,13 +64,14 @@ def main():
 
     print(f"-------------------CREATING ENVIRONMENT IN {args.module_name}-------------------")
 
-    for trial in range(1, args.num_trials + 1):
+    for trial in range(args.start_iter, args.num_trials + 1):
+        # start with iter, should be 1 to run full thing
         trial_path = os.path.join(base_path, f"trial_{trial}")
         os.makedirs(trial_path, exist_ok=True)
 
         print(f"Trial {trial}: Saving results in {trial_path}")
         
-        seed = trial
+        seed = trial # seed from trial
 
         env_module.create_env1(trial_path, repeat_num=1, box_num_upper_bound=args.box_num_upper_bound, box_num_low_bound=1, seed=seed)
 
