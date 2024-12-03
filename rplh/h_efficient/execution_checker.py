@@ -49,11 +49,7 @@ def is_valid_action(
                 transformed_dict[coordinates] = [item, location]
         except:
             print(f'NO MATCHING: SYNTAX ERROR, NEED TO RETAKE ACTION')
-            if is_judge:
-                feedback = f"""You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
-                                so choose the alternative action from the central central planner {central_response};"""
-            else:
-                feedback = f"Your assigned task for {key[0]}, {key[1]} is not in the doable action list; "
+            feedback = "Agent name should be in the form like Agent[0.5, 0.5], you give the wrong format."
             
             return feedback
             
