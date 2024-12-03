@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#setting-up-inference-loop" class="md-skip">
+        <a href="#setting-up" class="md-skip">
           Skip to content
         </a>
       
@@ -412,36 +412,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#setting-up-inference-loop" class="md-nav__link">
+  <a href="#setting-up" class="md-nav__link">
     <span class="md-ellipsis">
-      Setting Up Inference Loop
+      Setting Up
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-whole-pipeline-together" class="md-nav__link">
+  <a href="#inference-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
-      Running Whole Pipeline Together
+      Inference Pipeline
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#create-environment-seperately" class="md-nav__link">
+  <a href="#testing-systems" class="md-nav__link">
     <span class="md-ellipsis">
-      Create Environment Seperately
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#inference-loops-seperately" class="md-nav__link">
-    <span class="md-ellipsis">
-      Inference Loops Seperately
+      Testing Systems
     </span>
   </a>
   
@@ -457,9 +448,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#testing-systems" class="md-nav__link">
+  <a href="#customize-by-runing-seperately" class="md-nav__link">
     <span class="md-ellipsis">
-      Testing Systems
+      Customize By Runing Seperately
     </span>
   </a>
   
@@ -676,36 +667,27 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#setting-up-inference-loop" class="md-nav__link">
+  <a href="#setting-up" class="md-nav__link">
     <span class="md-ellipsis">
-      Setting Up Inference Loop
+      Setting Up
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-whole-pipeline-together" class="md-nav__link">
+  <a href="#inference-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
-      Running Whole Pipeline Together
+      Inference Pipeline
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#create-environment-seperately" class="md-nav__link">
+  <a href="#testing-systems" class="md-nav__link">
     <span class="md-ellipsis">
-      Create Environment Seperately
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#inference-loops-seperately" class="md-nav__link">
-    <span class="md-ellipsis">
-      Inference Loops Seperately
+      Testing Systems
     </span>
   </a>
   
@@ -721,9 +703,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#testing-systems" class="md-nav__link">
+  <a href="#customize-by-runing-seperately" class="md-nav__link">
     <span class="md-ellipsis">
-      Testing Systems
+      Customize By Runing Seperately
     </span>
   </a>
   
@@ -749,7 +731,7 @@
 
   <h1>API Calls</h1>
 
-<h2 id="setting-up-inference-loop">Setting Up Inference Loop<a class="headerlink" href="#setting-up-inference-loop" title="Permanent link">&para;</a></h2>
+<h2 id="setting-up">Setting Up<a class="headerlink" href="#setting-up" title="Permanent link">&para;</a></h2>
 <p>First, we need to install the dependencies and create a separate conda environment:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span>
 </code></pre></div>
@@ -758,31 +740,33 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">ollama</span> <span class="n">run</span> <span class="n">qwen2</span><span class="mf">.5</span><span class="p">:</span><span class="mi">14</span><span class="n">b</span><span class="o">-</span><span class="n">instruct</span><span class="o">-</span><span class="n">q3_K_L</span>
 </code></pre></div>
 <p>This need to be done in your system terminal directly, not in VScode.</p>
-<h2 id="running-whole-pipeline-together">Running Whole Pipeline Together<a class="headerlink" href="#running-whole-pipeline-together" title="Permanent link">&para;</a></h2>
+<h2 id="inference-pipeline">Inference Pipeline<a class="headerlink" href="#inference-pipeline" title="Permanent link">&para;</a></h2>
 <p>We can diretcly use the central running parser file to cerate the environment and tehn run the main inference loop by:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">module_name</span> <span class="s2">&quot;h_efficient&quot;</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
 </code></pre></div>
-<h2 id="create-environment-seperately">Create Environment Seperately<a class="headerlink" href="#create-environment-seperately" title="Permanent link">&para;</a></h2>
-<p>Create local MoveBox environment for running (depending on the version using) by:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_vanilla</span><span class="o">/</span><span class="n">env</span><span class="o">.</span><span class="n">py</span>
-</code></pre></div>
-<p>Or setting up RPLH-efficient system by:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_efficient</span><span class="o">/</span><span class="n">env</span><span class="o">.</span><span class="n">py</span>
-</code></pre></div>
-<h2 id="inference-loops-seperately">Inference Loops Seperately<a class="headerlink" href="#inference-loops-seperately" title="Permanent link">&para;</a></h2>
-<p>We also descigned scripts to deirectly run each seperate system. We can run original vanilla RPLH inferene loop by:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_vanilla</span><span class="o">/</span><span class="n">rplh_inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
-</code></pre></div>
-<p>or running the efficient RPLH inferene loop by:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_efficient</span><span class="o">/</span><span class="n">rplh_inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
+<p>For communication system, we can choose between <code>h_efficient</code>, <code>d_efficient</code>, or <code>h_vanilla</code>. Notice that for <code>h_vanilla</code>, we are connecting to GPT-4o-mini's backend, but switching to ollama like other systems is doable as well.</p>
+<h2 id="testing-systems">Testing Systems<a class="headerlink" href="#testing-systems" title="Permanent link">&para;</a></h2>
+<p>Conduct evaluation using our system by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">test</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">module_name</span> <span class="s2">&quot;h_efficient&quot;</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span> <span class="o">--</span><span class="n">num_trials</span> <span class="mi">5</span> <span class="o">--</span><span class="n">box_num_upper_bound</span> <span class="mi">1</span> <span class="o">--</span><span class="n">seed</span> <span class="mi">0</span>
 </code></pre></div>
 <h2 id="visualize-solutions">Visualize Solutions<a class="headerlink" href="#visualize-solutions" title="Permanent link">&para;</a></h2>
 <p>To visualize the reasoning process by rendering the conversation that each of the agent said:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">rendering</span><span class="o">/</span><span class="n">render_conversation</span><span class="o">.</span><span class="n">py</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">rendering</span><span class="o">/</span><span class="n">render_conversation</span><span class="o">.</span><span class="n">py</span>
 </code></pre></div>
-<h2 id="testing-systems">Testing Systems<a class="headerlink" href="#testing-systems" title="Permanent link">&para;</a></h2>
-<p>Conduct evaluation using our system by:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">test</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">module_name</span> <span class="s2">&quot;h_efficient&quot;</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span> <span class="o">--</span><span class="n">num_trials</span> <span class="mi">5</span> <span class="o">--</span><span class="n">box_num_upper_bound</span> <span class="mi">1</span>
+<h2 id="customize-by-runing-seperately">Customize By Runing Seperately<a class="headerlink" href="#customize-by-runing-seperately" title="Permanent link">&para;</a></h2>
+<h3 id="create-individual-environment">Create Individual Environment<a class="headerlink" href="#create-individual-environment" title="Permanent link">&para;</a></h3>
+<p>Create local MoveBox environment for running (depending on the version using) by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_vanilla</span><span class="o">/</span><span class="n">env</span><span class="o">.</span><span class="n">py</span>
+</code></pre></div>
+<p>Or setting up RPLH-efficient system by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_efficient</span><span class="o">/</span><span class="n">env</span><span class="o">.</span><span class="n">py</span>
+</code></pre></div>
+<h3 id="individual-inference-loops">Individual Inference Loops<a class="headerlink" href="#individual-inference-loops" title="Permanent link">&para;</a></h3>
+<p>We also descigned scripts to deirectly run each seperate system. We can run original vanilla RPLH inferene loop by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_vanilla</span><span class="o">/</span><span class="n">rplh_inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
+</code></pre></div>
+<p>or running the efficient RPLH inferene loop by:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_efficient</span><span class="o">/</span><span class="n">rplh_inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
 </code></pre></div>
 
 
