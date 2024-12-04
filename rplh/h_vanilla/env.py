@@ -74,7 +74,11 @@ def state_update_func(
                 item for item in square_item_list if item[:3] == "box"
             ]
             surround_index_list = surround_index_func(pg_row_num, pg_column_num, i, j)
-            state_update_prompt += f"Agent[{i+0.5}, {j+0.5}]: I am in square[{i+0.5}, {j+0.5}], I can observe {square_item_list}, I can do "
+            state_update_prompt += f"Agent[{i+0.5}, {j+0.5}]: I am in square[{i+0.5}, {j+0.5}]"
+            if len(square_item_list) == 0:
+                continue
+            else:
+                state_update_prompt += f", I can observe {square_item_list}, "
             action_list = []
             for box in square_item_only_box:
                 for surround_index in surround_index_list:
@@ -219,6 +223,7 @@ def env_create(
     box_num_low_bound: int = 2,
     box_num_upper_bound: int = 2,
     color_list: list[str] = ["blue", "red", "green", "purple", "orange"],
+    seed: int = -1
 ) -> dict[str, list[str]]:
     """
     Creates a randomized environment state for the playground.
@@ -233,6 +238,9 @@ def env_create(
     Returns:
         dict[str, list[str]]: Initial state of the playground.
     """
+    # set the same environment setup
+    if seed != -1:
+        random.seed(seed)
 
     # pg_dict records the items in each square over steps, here in the initial setting, we randomly assign items into each square
     pg_dict = {}
@@ -256,7 +264,7 @@ def env_create(
     return pg_dict
 
 
-def create_env1(Saving_path, repeat_num=10):
+def create_env1(Saving_path, repeat_num=10, box_num_upper_bound=3, box_num_low_bound = 1, seed=-1):
     """
     multi-agent-env/
     └── env_pg_state_2_2/
@@ -267,7 +275,6 @@ def create_env1(Saving_path, repeat_num=10):
     ...
 
     Each is unique configuration of the environment
-
 
     """
     if not os.path.exists(Saving_path):
@@ -289,8 +296,6 @@ def create_env1(Saving_path, repeat_num=10):
             # Define the total row and column numbers of the whole playground, and the item number of each colored target and box
             pg_row_num = i
             pg_column_num = j
-            box_num_low_bound = 1
-            box_num_upper_bound = 3
             # Define the used colors
             color_list = ["blue", "red", "green", "purple", "orange"]
             pg_dict = env_create(
@@ -299,6 +304,7 @@ def create_env1(Saving_path, repeat_num=10):
                 box_num_low_bound,
                 box_num_upper_bound,
                 color_list,
+                seed
             )
             os.makedirs(
                 Saving_path + f"/env_pg_state_{i}_{j}/pg_state{iteration_num}",
@@ -316,4 +322,4 @@ Code_dir_path = "multi-agent-env/"
 # The first time to create the environment, after that you can comment it
 
 # Here we only create 1 instance of the random environment
-create_env1(Code_dir_path, repeat_num=1)
+create_env1(Code_dir_path, repeat_num=1, box_num_upper_bound=3, box_num_low_bound = 1, seed=-1)

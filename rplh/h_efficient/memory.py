@@ -93,7 +93,7 @@ def rplh_prompt_func(
         {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
     else:
         attitude = data["attitude_info"][-1]
-        # success_action = data["response_total_list"][-1]
+        success_action = data["response_total_list"][-1]
 
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
@@ -114,6 +114,7 @@ def rplh_prompt_func(
         "_w_compressed_dialogue_history",
         "_w_all_dialogue_history",
         "_w_markovian_state_action_history",
+        "_w_no_history",
     ):
 
         # first iteration no summary
@@ -126,6 +127,8 @@ def rplh_prompt_func(
             Previous State: {better_state_repres(pg_state_list[previous_state_idx])}
             Previous Action: {response_total_list[previous_state_idx]}\n\n
             """
+        elif dialogue_history_method == "_w_no_history":
+            state_action_prompt = ""
         elif dialogue_history_method == "_w_only_state_action_history":
             state_action_prompt = ""
             for i in range(len(response_total_list) - 1, -1, -1):
@@ -206,8 +209,12 @@ def rplh_prompt_func(
             Your task is to instruct each agent to match all boxes to their color-coded targets.
             After each move, agents provide updates for the next sequence of actions.
             You are the central agent and your job is to coordinate the agents optimally.
-
-            Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible actions: {state_update_prompt}.
+            
+            The previous state and action pairs at each step are: {state_action_prompt}
+            
+            Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible that each agent can take: {state_update_prompt}.
+            
+            Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
 
             {att_promt}
 
@@ -246,7 +253,7 @@ def dialogue_func(
         local_agent_location (str): Location of the local agent in the grid.
 
     Returns:
-        str: Dialogue prompt for the local agent.
+        str: Dialogue prompt for the local agent. 
     """
 
     if data["env_step"] == 0:
@@ -282,6 +289,7 @@ def dialogue_func(
         "_w_compressed_dialogue_history",
         "_w_all_dialogue_history",
         "_w_markovian_state_action_history",
+        "_w_no_history"
     ):
         # first iteration no summary
         if dialogue_history_method == "_w_markovian_state_action_history":
@@ -293,6 +301,8 @@ def dialogue_func(
             Previous State: {better_state_repres(pg_state_list[previous_state_idx])}
             Previous Action: {response_total_list[previous_state_idx]}\n\n
             """
+        elif dialogue_history_method == "_w_no_history":
+            state_action_prompt = ""
         elif dialogue_history_method == "_w_only_state_action_history":
             state_action_prompt = ""
             for i in range(len(response_total_list) - 1, -1, -1):
@@ -349,6 +359,9 @@ def dialogue_func(
             
             The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
             The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
+            
+            Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
+            
             The previous state and action pairs at each step are: {state_action_prompt}
             Please learn from previous steps in a few steps:
                 
@@ -361,7 +374,7 @@ def dialogue_func(
             Remanber to assign action to your self as well.
 
             The other central planner's current action plan is giving as: {central_response}.
-            Try to find agreement with the central ageent if you can, the goal is to resolve conversation, not adding more.
+            Try to find agreement with the central ageent if you can, the goal is to resolve conversation.
             
             Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents.
 

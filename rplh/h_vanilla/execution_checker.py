@@ -55,15 +55,25 @@ def is_valid_action(
         coordinates = tuple(map(float, re.findall(r"\d+\.?\d*", key)))
 
         # match the item and location in the value
-        match = re.match(r"move\((.*?),\s(.*?)\)", value)
-        if match:
-            item, location = match.groups()
+        try:
+            match = re.match(r"move\((.*?),\s(.*?)\)", value)
+            if match:
+                item, location = match.groups()
 
-            if "square" in location:
-                location = tuple(map(float, re.findall(r"\d+\.?\d*", location)))
+                if "square" in location:
+                    location = tuple(map(float, re.findall(r"\d+\.?\d*", location)))
 
-            transformed_dict[coordinates] = [item, location]
-
+                transformed_dict[coordinates] = [item, location]
+        except:
+            print(f'NO MATCHING: SYNTAX ERROR, NEED TO RETAKE ACTION')
+            if is_judge:
+                feedback = f"""You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
+                                so choose the alternative action from the central central planner {central_response};"""
+            else:
+                feedback = f"Your assigned task for {key[0]}, {key[1]} is not in the doable action list; "
+            
+            return feedback
+    print(f'Transformed_dict: {transformed_dict}')
     feedback = ""
     for key, value in transformed_dict.items():
         if (
@@ -92,10 +102,10 @@ def is_valid_action(
             pass
         else:
             if is_judge:
-                feedback += f"""You are the judge and your assigned task for {key[0]}_{key[1]} is not in the doable action list,
-                                so choose the alternative action from the central central planner {central_response};"""
+                feedback += f"""You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list, 
+so choose the alternative action from the central central planner {central_response};"""
             else:
-                feedback += f"Your assigned task for {key[0]}_{key[1]} is not in the doable action list; "
+                feedback += f"Your assigned task for {key[0]}, {key[1]} is not in the doable action list; "
 
     return feedback
 
@@ -126,7 +136,7 @@ def reformat_json(
         print(f"----------JSON CHECKER PERFORMING {count} NUMBER OF TIMES----------")
         check_prompt_1 = prompt_func(feedback)
         messages = message_construct_func([check_prompt_1], [], dialogue_history_method)
-        raw_response, token_num_count = LLaMA_response(messages, model_name)
+        raw_response, token_num_count = GPT_response(messages, model_name)
 
         match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
         if match:
@@ -177,11 +187,11 @@ def retake_action(
 
     print(f"Length of messages {len(messages)}")
 
-    raw_response, token_num_count = LLaMA_response(messages, model_name)
+    raw_response, token_num_count = GPT_response(messages, model_name)
 
     match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
     if match:
-        possible_action_lst = re.findall(r"\{.*?\}", response, re.DOTALL)
+        possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
         response = possible_action_lst[-1]
         response = process_response(response)
         token_num_count_list_add.append(token_num_count)
@@ -279,13 +289,14 @@ def with_action_syntactic_check_func(
                     prompt_func,
                 )
                 print(f"ACTION RETAKEN: {response}")
+                print(f'FEEDBACK: {feedback}')
                 response_total_list.append(response)
 
                 if response == "Out of tokens":
                     return response, token_num_count_list_add
 
             # for action validity check, it must be in json format
-            # feedback = is_valid_action(response, central_response, pg_dict_input, is_judge)
+            feedback = is_valid_action(response, central_response, pg_dict_input, is_judge)
 
         else:
             # no feedback

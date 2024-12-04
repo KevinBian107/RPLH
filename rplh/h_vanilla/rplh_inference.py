@@ -148,6 +148,7 @@ def run_exp(
             state_update_prompt = state_update_func(
                 pg_row_num, pg_column_num, data_dict["pg_dict"]
             )
+            print(f'STATE UPDATE PROMPT: {state_update_prompt}')
 
             user_prompt_1 = rplh_prompt_func(
                 state_update_prompt,
@@ -170,7 +171,7 @@ def run_exp(
                 [user_prompt_1], [], dialogue_history_method
             )
 
-            raw_response, token_num_count = LLaMA_response(messages, model_name)
+            raw_response, token_num_count = GPT_response(messages, model_name)
             # print(raw_response) # empty after second round
 
             # save user prompt
@@ -186,8 +187,9 @@ def run_exp(
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
             
-            valid = False
-            while not valid:
+            #valid = False
+            # max 10 retries
+            for _ in range(10):
                 try:
                     match = re.search(r"\{.*?\}", raw_response, re.DOTALL)
 
@@ -214,14 +216,15 @@ def run_exp(
                             data_dict["token_num_count_list"] + token_num_count_list_add
                         )
                         print(f"AGENT ACTION RESPONSE: {response}")
-                        valid = True
+                        #valid = True
+                        break
                 except:
                     # raise ValueError(
                     #     f"No action format found in raw response: {raw_response}"
                     # )
                     print('DICTIONARY ERROR, NEED TO REDO')
-                    valid = False
-                
+                    # valid = False
+
             if response == "Out of tokens":
                 pass
             elif response == "Syntactic Error":
@@ -337,7 +340,7 @@ def run_exp(
                         )
 
                         # given to other LLM, no synthetic check needed
-                        response_local_agent, token_num_count = LLaMA_response(
+                        response_local_agent, token_num_count = GPT_response(
                             messages, model_name
                         )
                         data_dict["token_num_count_list"].append(token_num_count)
@@ -405,7 +408,7 @@ def run_exp(
                         [judge_prompt], [], dialogue_history_method
                     )
 
-                    response_judge, token_num_count = LLaMA_response(
+                    response_judge, token_num_count = GPT_response(
                         messages, model_name
                     )
 
@@ -415,7 +418,7 @@ def run_exp(
 
                     if match:
                         possible_action_lst = re.findall(
-                            r"\{.*?\}", raw_response, re.DOTALL
+                            r"\{.*?\}", response_judge, re.DOTALL
                         )
                         response = possible_action_lst[-1]
                         print(f"Match response:{response}")
@@ -474,7 +477,7 @@ def run_exp(
                 data_dict["attitude_dialogue_dict"]
             )
             attitude_message = attitude_message_construct_func(attitude_prompt)
-            attitude_info, token_num_count = LLaMA_response(
+            attitude_info, token_num_count = GPT_response(
                 attitude_message, model_name
             )
             data_dict["token_num_count_list"].append(token_num_count)

@@ -8,29 +8,29 @@ input_prompt_token_limit = 3000
 N = 5
 
 # critical, prompt is a hyperparameter
-GOAL_RULES = f"""You are an agentin a grid-like field to move colored boxes.
-                Each agent is assigned to a 1x1 square and can only interact with objects in its area.
-                Agents can move a box to a neighboring square or a same-color target.
-                You can only move same color boxes to same color targets.
-                Each square can contain many targets and boxes.
-                The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
-                Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
-                When planning for action, remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop.
-                Avoid being stuck in action loops.
-                Additionally, when there is a box still in the grid (i.e. the state space contains {{"0.5_0.5": ["box_red"]}}), then the agent in this grid (Agent[0.5, 0.5]) have to make an action in the next step.
-                Again, if there is a box in the grid, the corresponding agent in the grid has to make an action in this step.
-                One agent can make any numbers of action if needed (i.e. {{"Agent[1.5, 1.5]":"move(box_blue, square[0.5, 1.5])","Agent[1.5, 1.5]": "move(box_green, target_green)"}}).
-                Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
-                Include an agent only if it has a task next. No agent name should be given if the agent does not have a task next.
-                You do not need to say json format, just use it directly in the format of {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[0.5, 1.5]": "move(box_blue, target_blue)"}}.
-                """
+GOAL_RULES = f"""
+            You are an agentin a grid-like field to move colored boxes.
+            Each agent is assigned to a 1x1 square and can only interact with objects in its area.
+            Agents can move a box to a neighboring square or a same-color target.
+            You can only move same color boxes to same color targets.
+            Each square can contain many targets and boxes.
+            The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
+            Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
+            When planning for action, remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop.
+            Avoid being stuck in action loops.
+            Additionally, when there is a box still in the grid (i.e. the state space contains {{"0.5_0.5": ["box_red"]}}), then the agent in this grid (Agent[0.5, 0.5]) have to make an action in the next step.
+            Again, if there is a box in the grid, the corresponding agent in the grid has to make an action in this step.
+            Specify your action plan in this format where box_x and box_y are arbitrary boxes: {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_y, target_y)"}}.
+            One agent can only make one action. Include an agent only if it has a task next. 
+            No agent name should be given if the agent does not have a task next.
+            """
 
 FEEDBACK_LCOAL1 = """
             This is the feedback from local agents.
             If you find some errors in your previous plan, try to modify it.
             Otherwise, output the same plan as before.
-            The output should have the same json format {Agent[0.5, 0.5]:move(box_blue, square[0.5, 1.5]), Agent[1.5, 0.5]:move...}, as above.
-            Do not explain, just directly output json directory.
+            The output should have the same format. 
+            Do not explain, just directly output the action plan.
             Your response:
             """
 
@@ -88,11 +88,11 @@ def rplh_prompt_func(
 
     if data["env_step"] == 0:
         attitude = None
-        success_action = f"""No previous action, here is an sample:
-        {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}"""
+        # success_action = f"""No previous action, here is an sample:
+        # {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}"""
     else:
         attitude = data["attitude_info"][-1]
-        success_action = data["response_total_list"][-1]
+        # success_action = data["response_total_list"][-1]
 
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
@@ -170,7 +170,9 @@ def rplh_prompt_func(
             Please learn from attitude in the following ways:
 
                 1. Please undrstand the attitude of each agents in this environment,
-                including yourself based on this attitude report given from another agent: {attitude}.
+                including yourself based on this attitude report given from another agent: 
+                
+                {attitude}.
 
                 2. Based on this charcteristics of each agent, pelase do two things and added them after each agent's attitude:
                     i. Reason about the reactions each agent would have towards your command.
@@ -179,9 +181,14 @@ def rplh_prompt_func(
             Use the following format:
             - Attitude of agent...
             - Reaction of agent...
-            - Commanding action of agent...
-            
             """
+
+        if feedback != "":
+            feedback = (
+                "There is error in preivous action plan. Here is the feedbcak: "
+                + feedback
+            )
+
 
         HCA_prompt = f"""
             You are a central planner directing agent in a grid-like field to move colored boxes.
@@ -193,11 +200,10 @@ def rplh_prompt_func(
             Your task is to instruct each agent to match all boxes to their color-coded targets.
             After each move, agents provide updates for the next sequence of actions.
             You are the central agent and your job is to coordinate the agents optimally.
-            The previous state and action pairs at each step are: {state_action_prompt}
+  
+            Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible actions: {state_update_prompt}.
 
             {att_promt}
-  
-            Hence, the current state is {pg_state_list[-1]}, with the possible actions: {state_update_prompt}.
 
             Think about what the future {N} actions would be if you want to achieve the goal and write this justification out.
             Remanber to wirte out for each step, what you plan for every agent to do and what would the consequences state change be.
@@ -206,10 +212,9 @@ def rplh_prompt_func(
             - hallucination of future {N} steps...
 
             Based on this, generate the action plan for the immediate next step for each agent.
-            This is the success response of previous state: {success_action}.
             Remanber to assign action to your self as well.
             
-             {feedback}
+            {feedback}
             
             Now, plan the next step:
             """
@@ -344,7 +349,8 @@ def dialogue_func(
             Remanber to assign action to your self as well.
 
             The other central planner's current action plan is giving as: {central_response}.
-            Please be critical in thinking about this plan.
+            Try to find agreement with the central ageent if you can, the goal is to resolve conversation and modify inappropriate action plan.
+            Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents.
 
             Please evaluate the given plan.
             If you agree with it, respond 'I Agree', without any extra words.
@@ -360,7 +366,12 @@ def dialogue_func(
     return local_HCA_prompt
 
 
-def judge_prompt_func(local_response: str, cen_response: str, cur_state: dict) -> str:
+def judge_prompt_func(
+        local_response: str, 
+        cen_response: str, 
+        cur_state: dict, 
+        feedback: str = ""
+    ) -> str:
     """
     Constructs a prompt for the judge agent to evaluate and select the best plan.
 
@@ -389,6 +400,9 @@ def judge_prompt_func(local_response: str, cen_response: str, cur_state: dict) -
         Do not come-up with something new, only choose one of them, do not give explantion, just choose one of them.
 
         Include an agent only if it has a task next. If the agent does not have task, do not include.
+
+        {feedback}
+
         Now, select the next step:
         """
     return judge_prompt
@@ -448,7 +462,7 @@ def LLM_summarize_func(
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": prompt1},
     ]
-    response = LLaMA_response(messages, model_name)
+    response = GPT_response(messages, model_name)
     print("SUMMARIZING")
     return response
 
@@ -502,7 +516,7 @@ def message_construct_func(
             "role": "system",
             "content": f"""You are a helpful assistant. 
                  
-                 When asked to specifiy your action plan, specificy it strictly in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}. 
+                 When asked to specifiy your action plan, specificy it in JSON format: {{"Agent[0.5, 0.5]":"move(box_blue, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_blue, target_blue])"}}. 
                  
                  Make sure that:
                  - If no action for an agent in the next step, do not include it in JSON output. 
@@ -510,18 +524,18 @@ def message_construct_func(
                  """,
         }
     ]
-
     if f"{dialogue_history_method}" in (
         "_w_all_dialogue_history",
         "_w_compressed_dialogue_history",
-        "_w_only_state_action_history",
-        "_w_no_history",
     ):
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
-
-        for i in range(len(response_total_list)):
-            messages.append({"role": "assistant", "content": response_total_list[i]})
+    else:
+        print('LESS PROMPT IN MESSAGE CONSTRUCT')
+        messages.append({"role": "user", "content": user_prompt_list[-1]})
+        
+    for i in range(len(response_total_list)):
+        messages.append({"role": "assistant", "content": response_total_list[i]})
 
     return messages
 

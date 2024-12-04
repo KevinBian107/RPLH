@@ -5,6 +5,7 @@ import copy
 import plotly.graph_objects as go
 import plotly.io as pio
 import plotly.express as px
+import plotly.express as px
 pio.renderers.default = "plotly_mimetype"
 from PIL import Image
 
@@ -18,12 +19,23 @@ if str(main_path) not in sys.path:
 # from rplh.h_vanilla.memory import *
 import os
 import json
-import numpy as np    
+import numpy as np        
+
+
 
 
 import shutil
 import random
 
+
+def render_animate_terminal_popup(box_map, action_list):
+    box_map, action_list = trans_data(box_map, action_list)
+    fig = render_animate(box_map, action_list[0])
+    
+    pio.renderers.default = "browser"
+    fig.show()
+    
+    print("Graph displayed in a browser pop-up window.")
 
 def render_graph_terminal_popup(box_map):
     fig = render_graph(box_map=trans_info_box(box_map))
@@ -33,9 +45,9 @@ def render_graph_terminal_popup(box_map):
     print("Graph displayed in a browser pop-up window.")
 
 
-def render_map_terminal_popup(box_map, action_list):
+def render_animate_terminal_popup(box_map, action_list):
     box_map, action_list = trans_data(box_map, action_list)
-    # render_map(box_map, action_list)
+    render_animate(box_map, action_list[0])
     print("Graph displayed in a browser pop-up window.")
 
 
@@ -113,6 +125,17 @@ def trans_data(box_map, action_list):
 
 # ------------ transform box_map to a data Frame ----------------
 def map_df(states):
+    if sum([len(state) for state in states.values()]) == 0:
+        return pd.DataFrame({
+            "x": [None],
+            "y": [None],
+            "center": [None],
+            "type": [None],
+            "color": [None],
+            "id": [None]
+        })
+
+    
 
     # Prepare data for plotting
     data = []
@@ -264,7 +287,61 @@ def render_graph(box_map):
     )
 
     # Initialize the Plotly figure
+def render_graph(box_map): 
     fig = go.Figure()
+    robot = Image.open("robot.png")
+
+    # Add rectangles and robot images for the "boxes"
+    for center in box_map.keys():
+        cx, cy = center
+        # Add a rectangle representing the box
+        fig.add_shape(
+            type="rect",
+            x0=cx - 0.5,
+            y0=cy - 0.5,
+            x1=cx + 0.5,
+            y1=cy + 0.5,
+            line=dict(color="black", width=2),
+        )
+        # Add a robot image in the center of the box
+        fig.add_layout_image(
+            dict(
+                source=robot,  # Path or URL to the robot image
+                x=cx,
+                y=cy,
+                xref="x",
+                yref="y",
+                sizex=0.3,  # Robot image size
+                sizey=0.3,
+                xanchor="center",
+                yanchor="middle",
+                layer="above",  # Layer position
+            )
+        )
+
+    # Update the layout for better visual appearance
+    fig.update_layout(
+        title=dict(
+            text="Moving Box to The Right Target",
+            x=0.5,
+            xanchor="center",
+            yanchor="top",
+            font=dict(size=18),
+        ),
+        xaxis=dict(range=[0, 2], showgrid=False, zeroline=False, title="X Coordinate"),
+        yaxis=dict(range=[0, 2], showgrid=False, zeroline=False, title="Y Coordinate"),
+        plot_bgcolor="white",
+        width=600,
+        height=600,
+    )
+
+    if sum([len(i) for i in box_map.values()]) == 0:
+        return fig 
+
+    df = map_df(box_map)
+    df["hover_text"] = df.apply(
+        lambda row: f"Type: {row['type']}<br>Color: {row['color']}", axis=1
+    )
 
     # Add scatter trace for the points
     fig.add_trace(
@@ -283,135 +360,97 @@ def render_graph(box_map):
             hoverinfo="text",
         )
     )
-    robot = Image.open("robot.png")
-
-    # Add rectangles and robot images for the "boxes"
-    for center in box_map.keys():
-        cx, cy = center
-        # Add a rectangle representing the box
-        fig.add_shape(
-            type="rect",
-            x0=cx - 0.5,
-            y0=cy - 0.5,
-            x1=cx + 0.5,
-            y1=cy + 0.5,
-            line=dict(color="black", width=2),
-        )
-        # Add a robot image in the center of the box
-        fig.add_layout_image(
-            dict(
-                source=robot,  # Path or URL to the robot image
-                x=cx,
-                y=cy,
-                xref="x",
-                yref="y",
-                sizex=0.3,  # Robot image size
-                sizey=0.3,
-                xanchor="center",
-                yanchor="middle",
-                layer="above",  # Layer position
-            )
-        )
-
-    # Update the layout for better visual appearance
-    fig.update_layout(
-        title=dict(
-            text="Moving Box to The Right Target",
-            x=0.5,
-            xanchor="center",
-            yanchor="top",
-            font=dict(size=18),
-        ),
-        xaxis=dict(range=[0, 2], showgrid=False, zeroline=False, title="X Coordinate"),
-        yaxis=dict(range=[0, 2], showgrid=False, zeroline=False, title="Y Coordinate"),
-        plot_bgcolor="white",
-        width=600,
-        height=600,
-    )
 
     return fig
 
 
+def construct_plotting_df(box_map, actions, num_frames):
+    interpolated_frames = []
+    box_map = copy.deepcopy(box_map)
+    df_init = map_df(box_map)
+    frame_counter = 0  # Keep track of the global frame number
+
+    # Loop through each action
+    for action in actions:
+        # Apply the action
+        _, remove_item, box_map_after = apply_action(box_map, action)
+        df_after = map_df(box_map_after)
+
+        # Generate interpolated frames between df_init and df_after
+        for frame in range(num_frames + 1):  # Include final frame
+            alpha = frame / num_frames
+            interpolated_frame = df_init.copy()
+            for id_num in interpolated_frame['id'].unique():
+                # Select the rows corresponding to the current ID
+                init_row = df_init.query(f'id == {id_num}')
+                after_row = df_after.query(f'id == {id_num}')
+                if not after_row.empty:
+                    # Interpolate x and y values for the current ID
+                    x_after = after_row['x'].values[0]
+                    y_after = after_row['y'].values[0]
+                else:
+                    for pair in remove_item:
+                        if id_num in pair[0] or id_num in pair[1] or df_after.shape[0] == 0:
+                            x_after = df_init.query(f'id == {pair[1][2]}')['center'].values[0][0]
+                            y_after = df_init.query(f'id == {pair[1][2]}')['center'].values[0][1]
+
+                # Perform interpolation
+                interpolated_frame.loc[interpolated_frame['id'] == id_num, 'x'] = (1 - alpha) * init_row['x'].values[0] + alpha * x_after
+                interpolated_frame.loc[interpolated_frame['id'] == id_num, 'y'] = (1 - alpha) * init_row['y'].values[0] + alpha * y_after
         
+            # Add metadata for the current frame
+            interpolated_frame["frame"] = frame_counter
+            interpolated_frame["size"] = 10  # Fixed size for uniform markers
+
+            interpolated_frame = interpolated_frame.drop_duplicates(subset='id')
 
 
-def render_animate(box_map, action, num_frames=2):
+            # Append the current frame to the list
+            interpolated_frames.append(interpolated_frame)
+            frame_counter += 1  # Increment global frame counter
+
+
+        # Update df_init and box_map for the next action
+        df_init = df_after
+        box_map = box_map_after
+        
+        if pd.isna(df_after.iloc[0]['x']):
+            break
+
+    # Combine all frames into one DataFrame
+    df_combined = pd.concat(interpolated_frames, ignore_index=True)
+    df_combined["hover_info"] = df_combined["color"] + " | " + df_combined["type"] + ' | ' + df_combined["id"].apply(str)
+    return df_combined
+
+
+def render_animate(box_map, actions, num_frames=2):
     """
-    Create an animated scatter plot showing smooth transitions between points.
+    Create an animated scatter plot showing smooth transitions between points for a sequence of actions.
 
     Args:
-        df_init (DataFrame): Initial positions with columns ['id', 'x', 'y', 'color', 'type'].
-        df_after (DataFrame): Final positions with the same structure as df_init.
-        num_frames (int): Number of frames for smooth transition.
+        box_map (dict): Initial box map.
+        actions (list): List of actions to apply.
+        num_frames (int): Number of frames for smooth transition between each action.
 
     Returns:
         plotly.express.scatter object with animation.
     """
-    # Generate interpolated frames
-    interpolated_frames = []
-    
-    df_init = map_df(box_map)
-    _, remove_item, box_map_after = apply_action(box_map, action)
-    df_after = map_df(box_map_after)
-    for frame in range(num_frames + 1):  # Include final frame
-        alpha = frame / num_frames
-        interpolated_frame = df_init.copy()
-        for id_num in interpolated_frame['id'].unique():
-            # Select the rows corresponding to the current ID
-            init_row = df_init.query(f'id == {id_num}')
-            after_row = df_after.query(f'id == {id_num}')
-            if not after_row.empty:
-                # Interpolate x and y values for the current ID
-                x_after = after_row['x'].values[0]
-                y_after = after_row['y'].values[0]
-            else:
-                # Fake after_row by using initial positions or default values
-                for pair in remove_item:
-                    if id_num in pair[0] or id_num in pair[1]:
-                        # x_after = df_init.query(f'id == {pair[1][2]}')['x'].values[0]  # Keep the same position
-                        # y_after = df_init.query(f'id == {pair[1][2]}')['y'].values[0]
-                        x_after = df_init.query(f'id == {pair[1][2]}')['center'].values[0][0]
-                        y_after = df_init.query(f'id == {pair[1][2]}')['center'].values[0][1]
-                    # else:
-                    #     x_after = init_row['x'].values[0]
-                    #     y_after = init_row['y'].values[0]
-                
-                
-
-            
-            # Interpolate x and y values for the current ID
-            interpolated_frame.loc[interpolated_frame['id'] == id_num, 'x'] = (1 - alpha) * init_row['x'].values[0] + alpha * x_after
-            interpolated_frame.loc[interpolated_frame['id'] == id_num, 'y'] = (1 - alpha) * init_row['y'].values[0] + alpha * y_after
-        
-        # Add metadata for the current frame
-        interpolated_frame["frame"] = frame
-        interpolated_frame["size"] = 10  # Fixed size for uniform markers
-        
-        # Append the current frame to the list
-        interpolated_frames.append(interpolated_frame)
-    
-    # Combine all frames into one DataFrame
-    df_combined = pd.concat(interpolated_frames, ignore_index=True)
-    #df_combined["symbol"] = df_combined["type"].map(symbol_map)
-    df_combined["hover_info"] = df_combined["color"] + " | " + df_combined["type"]
-    #return df_combined
-    
-    
+    # Initialize variables
+    df_combined = construct_plotting_df(box_map, actions, num_frames)
     # Create animation using plotly express
     fig = px.scatter(
         df_combined,
         x="x",
         y="y",
-        animation_frame="frame",
+        animation_frame = "frame",
         animation_group="id",
         color="color",
-        symbol= 'type',  # Map symbol column to scatter shapes
-        hover_name = "hover_info",  # Use the new combined column for hover info
+        symbol='type',  # Map symbol column to scatter shapes
+        hover_name="hover_info",  # Use the new combined column for hover info
         size="size",  # Ensure the size column is applied
-        range_x=[df_combined["x"].min() - 1, df_combined["x"].max() + 1],
-        range_y=[df_combined["y"].min() - 1, df_combined["y"].max() + 1],
+        range_x=[0, 2],
+        range_y=[0, 2],
     )
-
 
     robot = Image.open("robot.png")
 
@@ -443,12 +482,11 @@ def render_animate(box_map, action, num_frames=2):
             )
         )
 
-
     # Update the layout for better visual appearance
     fig.update_layout(
         showlegend=False,
         title=dict(
-            text="Moving Box to The Right Target",
+            text="Moving Boxes Through a Sequence of Actions",
             x=0.5,
             xanchor="center",
             yanchor="top",
@@ -460,4 +498,5 @@ def render_animate(box_map, action, num_frames=2):
         width=600,
         height=600,
     )
-    return fig
+    return fig, df_combined
+

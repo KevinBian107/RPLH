@@ -9,10 +9,12 @@ if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
 
 from rplh.llm.language_model import *
+from rplh.llm.response_model import *
+
 from rplh.h_efficient.memory import *
 from rplh.h_efficient.env import *
 from rplh.h_efficient.execution_checker import *
-from rplh.llm.response_model import *
+
 from rplh.rendering.render_state import *
 
 import os
@@ -522,8 +524,8 @@ def run_exp(
 
                 data_dict["pg_dict"] = pg_dict_returned
 
-                # render_map_terminal_popup(data_dict["pg_dict"], [original_response_dict])
                 render_graph_terminal_popup(data_dict["pg_dict"])
+                # render_animate_terminal_popup(data_dict["pg_dict"], [original_response_dict])
 
             except:
                 success_failure = "Hallucination of wrong plan"
