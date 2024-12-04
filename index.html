@@ -403,6 +403,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#rplh-demos" class="md-nav__link">
+    <span class="md-ellipsis">
+      RPLH Demos:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#rplh-systems" class="md-nav__link">
     <span class="md-ellipsis">
       RPLH Systems
@@ -415,15 +424,6 @@
   <a href="#rplh-schematic" class="md-nav__link">
     <span class="md-ellipsis">
       RPLH Schematic:
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#rplh-demos" class="md-nav__link">
-    <span class="md-ellipsis">
-      RPLH Demos:
     </span>
   </a>
   
@@ -671,6 +671,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#rplh-demos" class="md-nav__link">
+    <span class="md-ellipsis">
+      RPLH Demos:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#rplh-systems" class="md-nav__link">
     <span class="md-ellipsis">
       RPLH Systems
@@ -683,15 +692,6 @@
   <a href="#rplh-schematic" class="md-nav__link">
     <span class="md-ellipsis">
       RPLH Schematic:
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#rplh-demos" class="md-nav__link">
-    <span class="md-ellipsis">
-      RPLH Demos:
     </span>
   </a>
   
@@ -731,6 +731,16 @@
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span>-<span class="w"> </span>I<span class="w"> </span>can<span class="w"> </span><span class="k">do</span><span class="w"> </span>one<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>following<span class="w"> </span>action:<span class="w"> </span><span class="o">[</span><span class="s1">&#39;move(box_green, square[1.5, 1.5])&#39;</span>,<span class="w"> </span><span class="s1">&#39;move(box_green, square[0.5, 0.5])&#39;</span>,<span class="w"> </span><span class="s1">&#39;move(box_green, target_green)&#39;</span><span class="o">]</span>
 </code></pre></div>
 <p>We hope to build agent that is caplable of <strong>Social-reasoning</strong> and expecting what the other agent should be doing. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to <strong>Level-one agent</strong>.</p>
+<h2 id="rplh-demos">RPLH Demos:<a class="headerlink" href="#rplh-demos" title="Permanent link">&para;</a></h2>
+<p>Here is a demo of our RPLH performing multi-agent resasoning with the first HCA (central) agent hellucinating about future steps:</p>
+<ul>
+<li>Conversation demos are <a href="https://github.com/KevinBian107/RPLH/tree/master/demos/conversations">here</a></li>
+<li>Actual running data are <a href="https://github.com/KevinBian107/RPLH/tree/master/demos/converging_samples">here</a></li>
+</ul>
+<div style="border: 1px solid #ccc; padding: 10px;">
+    <iframe src="assets/rendering.html" width="800" height="600" style="border:none;"></iframe>
+</div>
+
 <h2 id="rplh-systems">RPLH Systems<a class="headerlink" href="#rplh-systems" title="Permanent link">&para;</a></h2>
 <p>We hope to setup an <strong>systematic</strong> and <strong>modularzied</strong> way of doing multi-agent communication for <strong>less parametrized</strong> language models. We have implemented multiple instances of the RPLH system dpending on <code>vanilla</code> or <code>efficient</code> version. Here is the main breakdown of the code:</p>
 <p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>rplh/
@@ -771,12 +781,6 @@ Note the following:</p>
 <h2 id="rplh-schematic">RPLH Schematic:<a class="headerlink" href="#rplh-schematic" title="Permanent link">&para;</a></h2>
 <p>The below is a graphical overview of our system:</p>
 <p><img alt="rplh" src="assets/rplh.png" /></p>
-<h2 id="rplh-demos">RPLH Demos:<a class="headerlink" href="#rplh-demos" title="Permanent link">&para;</a></h2>
-<p>Here is a demo of our RPLH performing multi-agent resasoning with the first HCA (central) agent hellucinating about future steps:</p>
-<ul>
-<li>Conversation demos are <a href="https://github.com/KevinBian107/RPLH/tree/master/demos/conversations">here</a></li>
-<li>Actual running data are <a href="https://github.com/KevinBian107/RPLH/tree/master/demos/converging_samples">here</a></li>
-</ul>
 
 
 
