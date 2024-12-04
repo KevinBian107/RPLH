@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class HCA(BaseModel):
     attitude: List[str]
+    environment_belief: List[str]
     future_step: List[str]
     reasoning: str
     actions_plan: Dict

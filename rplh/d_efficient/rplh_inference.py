@@ -13,7 +13,7 @@ from rplh.h_efficient.env import *
 from rplh.h_efficient.execution_checker import *
 from rplh.llm.response_model import *
 
-from rplh.h_efficient.memory import *
+from rplh.h_efficient.memory.memory import *
 from rplh.d_efficient.memory import *
 
 from rplh.rendering.render_state import *

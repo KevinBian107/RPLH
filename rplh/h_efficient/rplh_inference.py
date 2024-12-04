@@ -11,7 +11,8 @@ if str(main_path) not in sys.path:
 from rplh.llm.language_model import *
 from rplh.llm.response_model import *
 
-from rplh.h_efficient.memory import *
+from rplh.h_efficient.memory.memory import *
+from rplh.h_efficient.memory.memory_partial import rplh_prompt_partial_func, dialogue_partial_func
 from rplh.h_efficient.env import *
 from rplh.h_efficient.execution_checker import *
 
@@ -155,7 +156,7 @@ def run_exp(
             )
             print(f"STATE UPDATE PROMPT: {state_update_prompt}")
 
-            user_prompt_1 = rplh_prompt_func(
+            user_prompt_1 = rplh_prompt_partial_func(
                 state_update_prompt,
                 data_dict,
                 dialogue_history_method,
@@ -164,7 +165,7 @@ def run_exp(
 
             # partial function
             partial_rplh_prompt_func = partial(
-                rplh_prompt_func,
+                rplh_prompt_partial_func,
                 state_update_prompt=state_update_prompt,
                 data=data_dict,
                 dialogue_history_method=dialogue_history_method,
@@ -312,7 +313,7 @@ def run_exp(
                         )
 
                         # take in original HCA plan and give local prompt
-                        local_reprompt = dialogue_func(
+                        local_reprompt = dialogue_partial_func(
                             state_update_prompt_local_agent,
                             state_update_prompt_other_agent,
                             response,
