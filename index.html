@@ -411,15 +411,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#rplh-schematic" class="md-nav__link">
-    <span class="md-ellipsis">
-      RPLH Schematic:
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -691,15 +682,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#rplh-schematic" class="md-nav__link">
-    <span class="md-ellipsis">
-      RPLH Schematic:
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -719,9 +701,9 @@
 
 
 <h1 id="a-light-weight-multi-collaboration-system">A Light-Weight Multi-Collaboration System<a class="headerlink" href="#a-light-weight-multi-collaboration-system" title="Permanent link">&para;</a></h1>
-<p>Using Language Models' <strong>In-context Learning</strong> abilities, we are developing frameworks for multi-agent collaborations system using Role-Playing Leader-Hellucinating system, or in short, RPLH. We know that as parameter increases, performance automatically increases. However, only limited works have being down on generalizing this sort of in-context learning ability into samll parameter models. In our work, we try to address this issue. We try to design an efficient <code>light-weight</code> system that is runable directly on a laptop computer 💻.</p>
+<p>Using Language Models' <strong>In-context Learning</strong> abilities, we are developing frameworks for multi-agent collaborations system using Role-Playing Leader-Hallucinations system, or in short, RPLH. We know that as parameter increases, performance automatically increases. However, only limited works have being down on generalizing this sort of in-context learning ability into samll parameter models. In our work, we try to address this issue. We try to design an efficient <code>light-weight</code> system that is runable directly on a laptop computer 💻.</p>
 <h2 id="social-reasoning-agents-perpective">Social Reasoning Agent's Perpective<a class="headerlink" href="#social-reasoning-agents-perpective" title="Permanent link">&para;</a></h2>
-<p>Importantly, non of the agents actually see the full states of teh environmnet (where all the boxes are at and where all the targets are at), so they must communicate about <strong>what they can see</strong> and <strong>what they can do</strong> to better collaborate with each other and do the actions. The purpose of designing an HCA agent is to make an hellucinating central agent that have a little bit mroe information compare to other agents and tells what all other what it sees and what the plan should be from that agent's perspective.</p>
+<p>Importantly, non of the agents actually see the full states of the environmnet (where all the boxes are at and where all the targets are at), so they must communicate about <strong>what they can see</strong> and <strong>what they can do</strong> to better collaborate with each other and do the actions. The purpose of designing an HCA agent is to make an hallucinating central agent that have a little bit mroe information compare to other agents and tells what all other what it sees and what the plan should be from that agent's perspective.</p>
 <p>Here is an example of such partial information of describing what an specific local agent can see and do.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>-<span class="w"> </span>Agent<span class="o">[</span><span class="m">0</span>.5,<span class="w"> </span><span class="m">0</span>.5<span class="o">]</span>:
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>-<span class="w"> </span>I<span class="w"> </span>am<span class="w"> </span><span class="k">in</span><span class="w"> </span>square<span class="o">[</span><span class="m">0</span>.5,<span class="w"> </span><span class="m">0</span>.5<span class="o">]</span>,
@@ -735,7 +717,7 @@
 </code></pre></div>
 <p>We hope to build agent that is caplable of <strong>Social-reasoning</strong> and expecting what the other agent should be doing. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to <strong>Level-one agent</strong>.</p>
 <h2 id="rplh-demos">RPLH Demos:<a class="headerlink" href="#rplh-demos" title="Permanent link">&para;</a></h2>
-<p>Here is a demo of our RPLH performing multi-agent resasoning with the first HCA (central) agent hellucinating about future steps:</p>
+<p>Here is a demo of our RPLH performing multi-agent resasoning with the first HCA (central) agent hallucinations about future steps:</p>
 <ul>
 <li>Conversation demos are <a href="https://github.com/KevinBian107/RPLH/tree/master/demos/conversations">here</a></li>
 <li>Actual running data are <a href="https://github.com/KevinBian107/RPLH/tree/master/demos/converging_samples">here</a></li>
@@ -743,10 +725,6 @@
 <div style="border: 1px solid #ccc; padding: 10px;">
     <iframe src="assets/rendering.html" width="800" height="600" style="border:none;"></iframe>
 </div>
-
-<h2 id="rplh-schematic">RPLH Schematic:<a class="headerlink" href="#rplh-schematic" title="Permanent link">&para;</a></h2>
-<p>The below is a graphical overview of our system:</p>
-<p><img alt="rplh" src="assets/rplh.png" /></p>
 
 
 

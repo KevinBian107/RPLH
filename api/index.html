@@ -421,6 +421,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#rplh-schematic" class="md-nav__link">
+    <span class="md-ellipsis">
+      RPLH Schematic:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#setting-up" class="md-nav__link">
     <span class="md-ellipsis">
       Setting Up
@@ -706,6 +715,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#rplh-schematic" class="md-nav__link">
+    <span class="md-ellipsis">
+      RPLH Schematic:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#setting-up" class="md-nav__link">
     <span class="md-ellipsis">
       Setting Up
@@ -809,6 +827,9 @@ Note the following:</p>
 </li>
 <li>We have created inference functions in each of the system to be called seperately, or an direct interface can be called by specifying args on the root folder level of rplh (<code>inference.py</code>).</li>
 </ol>
+<h2 id="rplh-schematic">RPLH Schematic:<a class="headerlink" href="#rplh-schematic" title="Permanent link">&para;</a></h2>
+<p>The below is a graphical overview of our system:</p>
+<p><img alt="rplh" src="../assets/rplh.png" /></p>
 <h2 id="setting-up">Setting Up<a class="headerlink" href="#setting-up" title="Permanent link">&para;</a></h2>
 <p>First, we need to install the dependencies and create a separate conda environment:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span>
@@ -819,7 +840,7 @@ Note the following:</p>
 </code></pre></div>
 <p>This need to be done in your system terminal directly, not in VScode.</p>
 <h2 id="inference-pipeline">Inference Pipeline<a class="headerlink" href="#inference-pipeline" title="Permanent link">&para;</a></h2>
-<p>We can diretcly use the central running parser file to cerate the environment and tehn run the main inference loop by:</p>
+<p>We can diretcly use the central running parser file to cerate the environment and then run the main inference loop by:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">module_name</span> <span class="s2">&quot;h_efficient&quot;</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
 </code></pre></div>
 <p>For communication system, we can choose <code>module_name</code> between <code>h_efficient</code>, <code>d_efficient</code>, or <code>h_vanilla</code>. Notice that for <code>h_vanilla</code>, we are connecting to GPT-4o-mini's backend, but switching to ollama like other systems is doable as well. For <code>model_name</code>, for demonstartion we use <code>qwen2.5:14b-instruct-q3_K_L</code> or <code>gpt-4o-mini</code>.</p>
