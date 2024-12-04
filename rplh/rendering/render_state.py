@@ -380,27 +380,35 @@ def construct_plotting_df(box_map, actions, num_frames):
         for frame in range(num_frames + 1):  # Include final frame
             alpha = frame / num_frames
             interpolated_frame = df_init.copy()
+            # Add metadata for the current frame
+            interpolated_frame["frame"] = frame_counter
+
+            interpolated_frame["size"] = 100  # Fixed size for uniform markers
             for id_num in interpolated_frame['id'].unique():
                 # Select the rows corresponding to the current ID
+                
                 init_row = df_init.query(f'id == {id_num}')
                 after_row = df_after.query(f'id == {id_num}')
                 if not after_row.empty:
                     # Interpolate x and y values for the current ID
                     x_after = after_row['x'].values[0]
                     y_after = after_row['y'].values[0]
+                    
                 else:
                     for pair in remove_item:
                         if id_num in pair[0] or id_num in pair[1] or df_after.shape[0] == 0:
                             x_after = df_init.query(f'id == {pair[1][2]}')['center'].values[0][0]
                             y_after = df_init.query(f'id == {pair[1][2]}')['center'].values[0][1]
+                            
 
                 # Perform interpolation
                 interpolated_frame.loc[interpolated_frame['id'] == id_num, 'x'] = (1 - alpha) * init_row['x'].values[0] + alpha * x_after
                 interpolated_frame.loc[interpolated_frame['id'] == id_num, 'y'] = (1 - alpha) * init_row['y'].values[0] + alpha * y_after
-        
-            # Add metadata for the current frame
-            interpolated_frame["frame"] = frame_counter
-            interpolated_frame["size"] = 10  # Fixed size for uniform markers
+                interpolated_frame["size"] = (1 - alpha) * 100
+
+                
+                
+                
 
             interpolated_frame = interpolated_frame.drop_duplicates(subset='id')
 
