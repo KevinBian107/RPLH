@@ -37,6 +37,12 @@ Note the following:
     - [`h_vanilla`](https://github.com/KevinBian107/RPLH/tree/master/rplh/h_vanilla)
 4. We have created inference functions in each of the system to be called seperately, or an direct interface can be called by specifying args on the root folder level of rplh (`inference.py`).
 
+
+## RPLH Schematic:
+The below is a graphical overview of our system:
+
+![rplh](assets/rplh.png)
+
 ## Setting Up
 First, we need to install the dependencies and create a separate conda environment:
 
@@ -55,7 +61,7 @@ ollama run qwen2.5:14b-instruct-q3_K_L
 This need to be done in your system terminal directly, not in VScode.
 
 ## Inference Pipeline
-We can diretcly use the central running parser file to cerate the environment and tehn run the main inference loop by:
+We can diretcly use the central running parser file to cerate the environment and then run the main inference loop by:
 
 ```python
 python rplh/inference.py --module_name "h_efficient" --model_name "qwen2.5:14b-instruct-q3_K_L"

@@ -156,6 +156,7 @@ nav:
     - Prompt Structure: system/prompt.md
   - Evaluation:
     - Numerical Evaluation: evaluation/testing.md
+  - About Us: team.md
   # - Examples: examples.md
   # - Changelog: changelog.md
   # - Releases: https://github.com/talmolab/sleap-io/releases
