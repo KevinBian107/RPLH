@@ -5,6 +5,7 @@ import copy
 import plotly.graph_objects as go
 import plotly.io as pio
 import plotly.express as px
+import plotly.express as px
 pio.renderers.default = "plotly_mimetype"
 from PIL import Image
 
@@ -18,7 +19,9 @@ if str(main_path) not in sys.path:
 # from rplh.h_vanilla.memory import *
 import os
 import json
-import numpy as np    
+import numpy as np        
+
+
 
 
 import shutil
@@ -278,6 +281,13 @@ def apply_action(
 
 
 def render_graph(box_map): 
+    df = map_df(box_map)
+    df["hover_text"] = df.apply(
+        lambda row: f"Type: {row['type']}<br>Color: {row['color']}", axis=1
+    )
+
+    # Initialize the Plotly figure
+def render_graph(box_map): 
     fig = go.Figure()
     robot = Image.open("robot.png")
 
@@ -354,19 +364,7 @@ def render_graph(box_map):
     return fig
 
 
-def render_animate(box_map, actions, num_frames=2):
-    """
-    Create an animated scatter plot showing smooth transitions between points for a sequence of actions.
-
-    Args:
-        box_map (dict): Initial box map.
-        actions (list): List of actions to apply.
-        num_frames (int): Number of frames for smooth transition between each action.
-
-    Returns:
-        plotly.express.scatter object with animation.
-    """
-    # Initialize variables
+def construct_plotting_df(box_map, actions, num_frames):
     interpolated_frames = []
     box_map = copy.deepcopy(box_map)
     df_init = map_df(box_map)
@@ -382,62 +380,76 @@ def render_animate(box_map, actions, num_frames=2):
         for frame in range(num_frames + 1):  # Include final frame
             alpha = frame / num_frames
             interpolated_frame = df_init.copy()
-
             for id_num in interpolated_frame['id'].unique():
                 # Select the rows corresponding to the current ID
                 init_row = df_init.query(f'id == {id_num}')
                 after_row = df_after.query(f'id == {id_num}')
-
                 if not after_row.empty:
                     # Interpolate x and y values for the current ID
                     x_after = after_row['x'].values[0]
                     y_after = after_row['y'].values[0]
                 else:
-                    # Use your provided code to handle missing after_row
                     for pair in remove_item:
                         if id_num in pair[0] or id_num in pair[1] or df_after.shape[0] == 0:
                             x_after = df_init.query(f'id == {pair[1][2]}')['center'].values[0][0]
                             y_after = df_init.query(f'id == {pair[1][2]}')['center'].values[0][1]
-                            break
 
                 # Perform interpolation
-                interpolated_frame.loc[interpolated_frame['id'] == id_num, 'x'] = \
-                    (1 - alpha) * init_row['x'].values[0] + alpha * x_after
-                interpolated_frame.loc[interpolated_frame['id'] == id_num, 'y'] = \
-                    (1 - alpha) * init_row['y'].values[0] + alpha * y_after
+                interpolated_frame.loc[interpolated_frame['id'] == id_num, 'x'] = (1 - alpha) * init_row['x'].values[0] + alpha * x_after
+                interpolated_frame.loc[interpolated_frame['id'] == id_num, 'y'] = (1 - alpha) * init_row['y'].values[0] + alpha * y_after
         
             # Add metadata for the current frame
             interpolated_frame["frame"] = frame_counter
             interpolated_frame["size"] = 10  # Fixed size for uniform markers
 
+            interpolated_frame = interpolated_frame.drop_duplicates(subset='id')
+
+
             # Append the current frame to the list
             interpolated_frames.append(interpolated_frame)
             frame_counter += 1  # Increment global frame counter
 
-        if pd.isna(df_after.iloc[0]['x']):
-            break
 
         # Update df_init and box_map for the next action
         df_init = df_after
         box_map = box_map_after
+        
+        if pd.isna(df_after.iloc[0]['x']):
+            break
 
     # Combine all frames into one DataFrame
     df_combined = pd.concat(interpolated_frames, ignore_index=True)
-    df_combined["hover_info"] = df_combined["color"] + " | " + df_combined["type"]
+    df_combined["hover_info"] = df_combined["color"] + " | " + df_combined["type"] + ' | ' + df_combined["id"].apply(str)
+    return df_combined
 
+
+def render_animate(box_map, actions, num_frames=2):
+    """
+    Create an animated scatter plot showing smooth transitions between points for a sequence of actions.
+
+    Args:
+        box_map (dict): Initial box map.
+        actions (list): List of actions to apply.
+        num_frames (int): Number of frames for smooth transition between each action.
+
+    Returns:
+        plotly.express.scatter object with animation.
+    """
+    # Initialize variables
+    df_combined = construct_plotting_df(box_map, actions, num_frames)
     # Create animation using plotly express
     fig = px.scatter(
         df_combined,
         x="x",
         y="y",
-        animation_frame="frame",
+        animation_frame = "frame",
         animation_group="id",
         color="color",
         symbol='type',  # Map symbol column to scatter shapes
         hover_name="hover_info",  # Use the new combined column for hover info
         size="size",  # Ensure the size column is applied
-        range_x=[df_combined["x"].min() - 1, df_combined["x"].max() + 1],
-        range_y=[df_combined["y"].min() - 1, df_combined["y"].max() + 1],
+        range_x=[0, 2],
+        range_y=[0, 2],
     )
 
     robot = Image.open("robot.png")
@@ -486,4 +498,5 @@ def render_animate(box_map, actions, num_frames=2):
         width=600,
         height=600,
     )
-    return fig
+    return fig, df_combined
+
