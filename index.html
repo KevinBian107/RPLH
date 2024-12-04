@@ -412,15 +412,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#rplh-systems" class="md-nav__link">
-    <span class="md-ellipsis">
-      RPLH Systems
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#rplh-schematic" class="md-nav__link">
     <span class="md-ellipsis">
       RPLH Schematic:
@@ -701,15 +692,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#rplh-systems" class="md-nav__link">
-    <span class="md-ellipsis">
-      RPLH Systems
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#rplh-schematic" class="md-nav__link">
     <span class="md-ellipsis">
       RPLH Schematic:
@@ -762,43 +744,6 @@
     <iframe src="assets/rendering.html" width="800" height="600" style="border:none;"></iframe>
 </div>
 
-<h2 id="rplh-systems">RPLH Systems<a class="headerlink" href="#rplh-systems" title="Permanent link">&para;</a></h2>
-<p>We hope to setup an <strong>systematic</strong> and <strong>modularzied</strong> way of doing multi-agent communication for <strong>less parametrized</strong> language models. We have implemented multiple instances of the RPLH system dpending on <code>vanilla</code> or <code>efficient</code> version. Here is the main breakdown of the code:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>rplh/
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├──<span class="w"> </span>d_efficient/
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│<span class="w">   </span>├──<span class="w"> </span>memory.py
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│<span class="w">   </span>├──<span class="w"> </span>rplh_inference.py
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>├──<span class="w"> </span>h_efficient/
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│<span class="w">   </span>├──<span class="w"> </span>env.py
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│<span class="w">   </span>├──<span class="w"> </span>execution_checker.py
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│<span class="w">   </span>├──<span class="w"> </span>memory.py
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│<span class="w">   </span>├──<span class="w"> </span>rplh_inference.py
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>├──<span class="w"> </span>h_vanilla/
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│<span class="w">   </span>├──<span class="w"> </span>env.py
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│<span class="w">   </span>├──<span class="w"> </span>execution_checker.py
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│<span class="w">   </span>├──<span class="w"> </span>memory.py
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│<span class="w">   </span>├──<span class="w"> </span>rplh_inference.py
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>├──<span class="w"> </span>llm/
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│<span class="w">   </span>├──<span class="w"> </span>language_model.py
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│<span class="w">   </span>├──<span class="w"> </span>response_model.py
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>├──<span class="w"> </span>rendering/
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│<span class="w">   </span>├──<span class="w"> </span>render_conversation.py
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│<span class="w">   </span>├──<span class="w"> </span>render_states.py
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│<span class="w">   </span>├──<span class="w"> </span>animations.py
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>├──<span class="w"> </span>test.py
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>└──<span class="w"> </span>inference.py
-</code></pre></div>
-Note the following:</p>
-<ol>
-<li>There are many shared features across all different type of communication system, which we ahve modularized into the <code>llm</code> folder for both using it in the vanilla and efficient models. In addition, because of implementation differences, files such as <code>env.py</code>, <code>execution_checker.py</code>, <code>memory.py</code>, and the main inference loop <code>rplh_inference.py</code> may be different, which is why each system has its own unique implementation.</li>
-<li>The <code>d_efficient</code> (efficient implementation of decentralized framework) is a particular instance of the <code>h_efficient</code> system (our hallucination system) where the inference loops and memory module is adjusted.</li>
-<li>Both <code>h_efficient</code> and <code>h_vanilla</code> are our hallucination system with slight differences in implementation, refer to these links for more details:<ul>
-<li><a href="https://github.com/KevinBian107/RPLH/tree/master/rplh/h_efficient"><code>h_efficient</code></a></li>
-<li><a href="https://github.com/KevinBian107/RPLH/tree/master/rplh/h_vanilla"><code>h_vanilla</code></a></li>
-</ul>
-</li>
-<li>We have created inference functions in each of the system to be called seperately, or an direct interface can be called by specifying args on the root folder level of rplh (<code>inference.py</code>).</li>
-</ol>
 <h2 id="rplh-schematic">RPLH Schematic:<a class="headerlink" href="#rplh-schematic" title="Permanent link">&para;</a></h2>
 <p>The below is a graphical overview of our system:</p>
 <p><img alt="rplh" src="assets/rplh.png" /></p>
