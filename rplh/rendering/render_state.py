@@ -156,10 +156,10 @@ def map_df(states):
             position_factor  = min(5, len(targets)) 
             if count <= 5 :
                 x_offset = (i - int(position_factor / 2)) * offset_factor
-                y_offset = 0.35  # Fixed offset to place targets above the center
+                y_offset = 0.25  # Fixed offset to place targets above the center
             else:
                 x_offset = (i - 5 - int(position_factor / 2)) * offset_factor
-                y_offset = 0.15  # Fixed offset to place targets above the center
+                y_offset = 0.05  # Fixed offset to place targets above the center
             data.append(
                 {
                     "x": cx + x_offset,
@@ -179,10 +179,10 @@ def map_df(states):
             position_factor = min(5, len(boxes))
             if count <= 5:
                 x_offset = (i - int(position_factor / 2)) * offset_factor
-                y_offset = -0.35  # Fixed offset to place boxes below the center
+                y_offset = -0.25  # Fixed offset to place boxes below the center
             else:
                 x_offset = (i - 5 - int(position_factor / 2)) * offset_factor
-                y_offset = -0.15  # Fixed offset to place boxes below the center
+                y_offset = -0.05  # Fixed offset to place boxes below the center
             data.append(
                 {
                     "x": cx + x_offset,
@@ -462,17 +462,17 @@ def render_animate(box_map, actions, num_frames=2):
 
     robot = Image.open("robot.png")
 
-    # Add rectangles and robot images for the "boxes"
     for center in box_map.keys():
         cx, cy = center
         # Add a rectangle representing the box
         fig.add_shape(
             type="rect",
-            x0=cx - 0.5,
-            y0=cy - 0.5,
-            x1=cx + 0.5,
-            y1=cy + 0.5,
+            x0=cx - 0.4,  # Adjust rectangle size for better spacing
+            y0=cy - 0.4,
+            x1=cx + 0.4,
+            y1=cy + 0.4,
             line=dict(color="black", width=2),
+            fillcolor="rgba(0, 0, 255, 0.1)",  # Add a subtle fill color for visual clarity
         )
         # Add a robot image in the center of the box
         fig.add_layout_image(
@@ -482,11 +482,11 @@ def render_animate(box_map, actions, num_frames=2):
                 y=cy,
                 xref="x",
                 yref="y",
-                sizex=0.3,  # Robot image size
-                sizey=0.3,
+                sizex=0.2,  # Slightly larger size for better visibility
+                sizey=0.2,
                 xanchor="center",
                 yanchor="middle",
-                layer="above",  # Layer position
+                layer="above",  # Keep robot image above other layers
             )
         )
 
@@ -498,13 +498,28 @@ def render_animate(box_map, actions, num_frames=2):
             x=0.5,
             xanchor="center",
             yanchor="top",
-            font=dict(size=18),
+            font=dict(size=20, color="black", family="Arial"),  # Larger and more readable title font
         ),
-        xaxis=dict(range=[0, 2], showgrid=False, zeroline=False, title="X Coordinate"),
-        yaxis=dict(range=[0, 2], showgrid=False, zeroline=False, title="Y Coordinate"),
-        plot_bgcolor="white",
-        width=600,
-        height=600,
+        xaxis=dict(
+            range=[0, 2],  # Add padding around the grid
+            showgrid=True,  # Add light gridlines for spatial reference
+            gridcolor="lightgray",
+            zeroline=True,
+            zerolinecolor="gray",
+            title="",
+        ),
+        yaxis=dict(
+            range=[0, 2],  # Add padding around the grid
+            showgrid=True,
+            gridcolor="lightgray",
+            zeroline=True,
+            zerolinecolor="gray",
+            title="",
+        ),
+        plot_bgcolor="rgba(245, 245, 245, 1)",  # Light background for better contrast
+        width=700,  # Increase figure size for clarity
+        height=700,
     )
+
     return fig, df_combined
 
