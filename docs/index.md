@@ -20,6 +20,16 @@ Here is an example of such partial information of describing what an specific lo
 
 We hope to build agent that is caplable of **Social-reasoning** and expecting what the other agent should be doing. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to **Level-one agent**.
 
+## RPLH Demos:
+Here is a demo of our RPLH performing multi-agent resasoning with the first HCA (central) agent hellucinating about future steps:
+
+- Conversation demos are [here](https://github.com/KevinBian107/RPLH/tree/master/demos/conversations)
+- Actual running data are [here](https://github.com/KevinBian107/RPLH/tree/master/demos/converging_samples)
+
+<div style="border: 1px solid #ccc; padding: 10px;">
+    <iframe src="assets/rendering.html" width="800" height="600" style="border:none;"></iframe>
+</div>
+
 ## RPLH Systems
 We hope to setup an **systematic** and **modularzied** way of doing multi-agent communication for **less parametrized** language models. We have implemented multiple instances of the RPLH system dpending on `vanilla` or `efficient` version. Here is the main breakdown of the code:
 
@@ -62,10 +72,4 @@ Note the following:
 The below is a graphical overview of our system:
 
 ![rplh](assets/rplh.png)
-
-## RPLH Demos:
-Here is a demo of our RPLH performing multi-agent resasoning with the first HCA (central) agent hellucinating about future steps:
-
-- Conversation demos are [here](https://github.com/KevinBian107/RPLH/tree/master/demos/conversations)
-- Actual running data are [here](https://github.com/KevinBian107/RPLH/tree/master/demos/converging_samples)
 
