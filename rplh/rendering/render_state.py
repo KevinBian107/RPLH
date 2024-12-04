@@ -289,7 +289,7 @@ def render_graph(box_map):
     # Initialize the Plotly figure
 def render_graph(box_map): 
     fig = go.Figure()
-    robot = Image.open("robot.png")
+    robot = Image.open("demos/robot.png")
 
     # Add rectangles and robot images for the "boxes"
     for center in box_map.keys():
