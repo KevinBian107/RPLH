@@ -9,6 +9,7 @@ N = 5
 
 GOAL_RULES = f"""
             You are an agent in a grid-like field to move colored boxes.
+            You are in a 3x3 grid environment.
             Each agent is assigned to a 1x1 square and can only interact with objects in its area.
             Agents can move a box to a neighboring square or a same-color target.
             You can only move same color boxes to same color targets.

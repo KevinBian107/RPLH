@@ -47,18 +47,18 @@ def main():
     
     print(f"-------------------CREATING ENVIRONMENT IN {args.module_name}-------------------")
     
-    env_module.create_env1(saving_path, repeat_num=1, box_num_upper_bound=1, box_num_low_bound=1, seed=-1)
+    env_module.create_env1(saving_path, repeat_num=1, box_num_upper_bound=2, box_num_low_bound=1, seed=-1)
     
     print(f"-------------------Module: {args.module_name} | Model name: {args.model_name}-------------------")
     
     if (args.module_name == "h_efficient") or (args.module_name == "d_efficient"):
-        dialogue_history_method = "_w_no_history" #"_w_markovian_state_action_history"
+        dialogue_history_method = "_w_markovian_state_action_history"
     else:
         dialogue_history_method = "_w_no_history"
      
     # Experiment parameters
-    pg_row_num = 2
-    pg_column_num = 2
+    pg_row_num = 3
+    pg_column_num = 3
     iteration_num = 0
     query_time_limit = 10
 
