@@ -87,7 +87,7 @@ def run_exp(
         "attitude_dialogue_dict": {},
         "pg_dict": None,  # For initial environment state
         "env_step": -1,
-        "agree_num": 0,
+        "agree_num": {},
     }
 
     # Load initial environment state
@@ -392,6 +392,7 @@ def run_exp(
 
                         else:
                             print("I Agree")
+                            data_dict["agree_num"][f'HCA_{a}'] += 1
                             # agree no judge, use HCA response diretcly, avoid error.
                             with open("conversation.txt", "a") as f:
                                 message = f"------###------###------AGREEING_LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
@@ -400,12 +401,11 @@ def run_exp(
                             continue
                         
                         # should be out, doesn't used too much
-                        data_dict["agree_num"] += 1
-                        if (
-                            data_dict["agree_num"]
-                            >= (pg_column_num + pg_row_num) // 2
-                        ):
-                            break
+                        # if (
+                        #     data_dict["agree_num"]
+                        #     >= (pg_column_num + pg_row_num) // 2
+                        # ):
+                        #     break
 
                     # -----------------------------------------RECONSTRUCT MESSAGES-----------------------------------------#
                     if (
@@ -413,7 +413,7 @@ def run_exp(
                     ):  # if not I agree
 
                         # once not agree, set to zero to re-discuss lat plan
-                        data_dict["agree_num"] = 0
+                        # data_dict["agree_num"] = 0
                         print("I Don't Agree")
 
                         # TODO: Do we need this?
@@ -617,7 +617,9 @@ def run_exp(
             # need to append new states to state list
             data_dict["pg_state_list"].append(data_dict["pg_dict"])
 
-            data_dict["agree_num"] = 0
+            # data_dict["agree_num"] = 0
+            
+            print(f'AGREEMENT NUMBER IS: {data_dict["agree_num"]}')
 
             # -----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
             count = 0
