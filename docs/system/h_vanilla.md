@@ -1,5 +1,5 @@
 # Why Vanilla-RPLH System? 🤔
-RPLH-original is the full representation of our construct where no limits has been posted on the structure of the output of the Language model, which comes with tradeoff of benifits and issues:
+RPLH-vanilla is the vanilla version of our construct where no limits has been posted on the structure of the output of the Language model, which comes with tradeoff of benifits and issues:
 
 1. Have room for much more emergent behavior because the context of the historical conversation is much richer.
     - More planning for future steps.
@@ -10,6 +10,7 @@ RPLH-original is the full representation of our construct where no limits has be
     - There need to be more while loops for re-responding for the same condiion to get a better response, hence increasing the compuatation loads.
 4. Easier for LM to be effected by environmental checking prompt, resulting in some unexecutable iterations.
     - Slower convergence rate because of hallucination issue of the agent.
+5. Only include standard reasoning ability with no agent reasoning baked in since the output of the model is hard to control.
 
 ## Maintaining Syntactic Correctness
 We have also performed a set of carefully designed engineering procedures to adjust the issues metioned above while maintaining the benifits of massive communication through conversations. LM is like an child where it needs very specific and detailed promppt for instructing it to  do things. We have designed and tested a set of prompt that is designed for the LM to maximize the freedom of communication while maintaining sytactic correctness.
