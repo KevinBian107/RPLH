@@ -7,7 +7,7 @@ main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
     
-from rplh.h_efficient.memory.memory import *
+from rplh.h_efficient.memory.memory_standard import *
 import os
 import json
 import re
@@ -288,7 +288,7 @@ def create_env1(Saving_path, repeat_num=10, box_num_upper_bound=3, box_num_low_b
         os.makedirs(Saving_path, exist_ok=True)
 
     # for i, j in [(2, 2), (2, 4), (4, 4), (4, 8)]:
-    for i, j in [(2, 2)]:
+    for i, j in [(3, 3)]:
 
         if not os.path.exists(Saving_path + f"/env_pg_state_{i}_{j}"):
             os.makedirs(Saving_path + f"/env_pg_state_{i}_{j}", exist_ok=True)
