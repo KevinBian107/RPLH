@@ -429,15 +429,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#relapsing-world-model" class="md-nav__link">
-    <span class="md-ellipsis">
-      Relapsing World Model
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#rplh-demos" class="md-nav__link">
     <span class="md-ellipsis">
       RPLH Demos:
@@ -738,15 +729,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#relapsing-world-model" class="md-nav__link">
-    <span class="md-ellipsis">
-      Relapsing World Model
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#rplh-demos" class="md-nav__link">
     <span class="md-ellipsis">
       RPLH Demos:
@@ -778,21 +760,14 @@
 <h2 id="intelligence-lays-in-information-data-flow">Intelligence Lays In Information &amp; Data Flow<a class="headerlink" href="#intelligence-lays-in-information-data-flow" title="Permanent link">&para;</a></h2>
 <p>We believe that the key of collaboration, or of solving issues in such partial observable and actuabtable environment layes in communication and the data/inofrmation we can extract from such communication to gradually build up a world model.</p>
 <h2 id="social-reasoning-agents-perpective">Social Reasoning Agent's Perpective<a class="headerlink" href="#social-reasoning-agents-perpective" title="Permanent link">&para;</a></h2>
-<p>Importantly, non of the agents actually see the full states of the environmnet (where all the boxes are at and where all the targets are at), so they must communicate about <strong>what they can see</strong> and <strong>what they can do</strong> to better collaborate with each other and do the actions. The purpose of designing an HCA agent is to make an hallucinating central agent that have a little bit mroe information (building a world model from seeing previous actions that other agents have taken) compare to other agents and tells what all other what it sees and what the plan should be from that agent's perspective.</p>
-<p>Here is an example of such partial information of describing what an specific local agent can see and do.</p>
+<p>In decentralzie environment, usually each agent must communicate about <strong>what they can see</strong> and <strong>what they can do</strong> to better collaborate with each other and do the actions because of the partial observability situation. Here is an example of such partial information of describing what an specific local agent can see and do.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>- Agent[0.5, 0.5]:
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  - I am in square[0.5, 0.5],
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  - I can observe [&#39;box_green&#39;, &#39;target_orange&#39;],
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  - I can do one of the following action: [&#39;move(box_green, square[1.5, 0.5])&#39;, &#39;move(box_green, square[0.5, 1.5])&#39;]
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>- Agent[0.5, 1.5]:
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  - I am in square[0.5, 1.5],
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  - I can observe [&#39;target_red&#39;, &#39;box_green&#39;, &#39;target_green&#39;, &#39;target_green&#39;, &#39;target_purple&#39;, &#39;target_purple&#39;],
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  - I can do one of the following action: [&#39;move(box_green, square[1.5, 1.5])&#39;, &#39;move(box_green, square[0.5, 0.5])&#39;, &#39;move(box_green, target_green)&#39;]
 </code></pre></div>
-<p>We hope to build agent that is caplable of <strong>Social-reasoning</strong> and expecting what the other agent should be doing. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to <strong>Level-one agent</strong>.</p>
-<h2 id="relapsing-world-model">Relapsing World Model<a class="headerlink" href="#relapsing-world-model" title="Permanent link">&para;</a></h2>
-<p>Our RPLH system constructs a <strong>world model</strong> together with teh help of multiple agents. Since each agent (both HCA and local) only gets partially observable environment, it is extremely hard for them to plan for task when the environment gets more complicated (i.e. a 3x3 grid with 9 agents). Hence, Each HCA agent must build up an <code>world model</code> of what tehir belife of the environment is and what each agent can do. Each local agent/judge helps the HCA agent in this process by contributing their own perspctive and "relapssing" the info they have.</p>
+<p>Differently, we aer using a fully-observable environment, meaning that all agent can see everything (where all the boxes are at and where all the targets are at). Howveer, the environmnet still remains partially actuatable as there are limitations to what each agent can do. However, even with this setting, a common type of problem in usual decentralzied collaboration setting (each agent has their own perspective and doesn't just do whatever the central agent tells them to do) is that it is extremely hard for different agents to come to an agreement on the plan, especially when the number of agent scales.</p>
+<p>Our system propose a novel approach to solve this problem where each HCA agent try to conduct social reasoning of what the other agent would think, do, and react to it's plan and recieve actual sensory feedbacks from local agents to understand what is the problem with teh previous reasoning. Idealy, through longer iyerations, the HCA would gradually build an more correct model of other agents. We hope to build agent that is caplable of <strong>Social-reasoning</strong> and expecting what the other agent should be doing. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to <strong>Level-one agent</strong>.</p>
 <h2 id="rplh-demos">RPLH Demos:<a class="headerlink" href="#rplh-demos" title="Permanent link">&para;</a></h2>
 <p>Here is a demo of our RPLH performing multi-agent resasoning with the first HCA (central) agent hallucinations about future steps:</p>
 <ul>
