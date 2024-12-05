@@ -9,3 +9,5 @@ To compare to the Hallucination RPLH system, please refer to the following:
 
 - [`h_efficient`](https://github.com/KevinBian107/RPLH/tree/master/rplh/h_efficient)
 - [`h_vanilla`](https://github.com/KevinBian107/RPLH/tree/master/rplh/h_vanilla)
+
+Since decentralzied system usually takes long time to solve the communication conflict, we mainly tested our system using GPT-4o.

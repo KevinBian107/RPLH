@@ -47,7 +47,7 @@ def main():
     
     print(f"-------------------CREATING ENVIRONMENT IN {args.module_name}-------------------")
     
-    env_module.create_env1(saving_path, repeat_num=1, box_num_upper_bound=2, box_num_low_bound=1, seed=-1)
+    env_module.create_env1(saving_path, repeat_num=1, box_num_upper_bound=1, box_num_low_bound=1, seed=-1)
     
     print(f"-------------------Module: {args.module_name} | Model name: {args.model_name}-------------------")
     
@@ -57,8 +57,8 @@ def main():
         dialogue_history_method = "_w_no_history"
      
     # Experiment parameters
-    pg_row_num = 3
-    pg_column_num = 3
+    pg_row_num = 2
+    pg_column_num = 2
     iteration_num = 0
     query_time_limit = 10
 

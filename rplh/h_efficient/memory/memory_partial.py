@@ -16,12 +16,33 @@ enc = tiktoken.encoding_for_model("gpt-4")
 input_prompt_token_limit = 3000
 N = 5
 
+WOLRD_MODEL_CENTRAL_PROMPT = f'''
+                    Based on this previous state action interaction, you need to reason what each agent can and cannot do and output in world_model.
+                    You need to think about every single agent, not just the ones you can see.
+                    Notice that you don't see all the environmental state, you can only observe what you can see and make your plan based on your beliefs of what the environmental looks like and  make action plan based on such beliefs.
+                    Other agent in the environment may observe different things than you do and may make comments to your plan later.
+                    Try to make conservative actions as you don't know everything.
+                    Please imagine what each agent can and caannot do first based on the goals mentioned ealier. Remanber to reason for all agent, inclduing yourself.
+                    Don't worry about the partial information as you would get more information as iteration goes on.
+                    '''
+
+WOLRD_MODEL_LOCAL_PROMPT = f'''
+                        Notice that you don't see all the environmental state, you can only observe what you can see and make your plan based on your beliefs of what the environmental looks like and  make action plan based on such beliefs.
+                        Other agent in the environment may observe different things than you do and may make comments to your plan later.
+                        You need to help modify this plan by including your perspectives.
+                        Try to add more actions instead of deleting actions from the action plan, that is, preserve the original action and add more from your perspective.
+                        '''
+
 def rplh_prompt_partial_func(
     state_update_prompt: str,
     data: dict,
     dialogue_history_method: str,
     HCA_agent_location: str,
+    world_model: list[str],
+    local_response: str,
+    cen_response: str,
     feedback: str = "",
+    judging_mode: bool = False,
 ) -> str:
     """
     Designs an input prompt for a role-playing leader-hallucinating (RPLH) agent
@@ -33,6 +54,8 @@ def rplh_prompt_partial_func(
         dialogue_history_method (str): Method to handle dialogue history, e.g.,
                                        "_w_only_state_action_history", "_w_compressed_dialogue_history".
         HCA_agent_location (str): Location of the HCA agent in the grid.
+        feedback (str): Feedback on the previous action plan.
+        world_model (str): World model for the agent.
 
     Returns:
         str: A structured prompt for the role-playing leader-hallucinating agent.
@@ -48,6 +71,11 @@ def rplh_prompt_partial_func(
     else:
         attitude = data["attitude_info"][-1]
         success_action = data["response_total_list"][-1]
+        
+    if judging_mode:
+        is_judge_prompt = f'''Other local agent has provided their opinions on your plan as this feedback {local_response}, with this information, please modify your original plan of {cen_response}.'''
+    else:
+        is_judge_prompt = ""
 
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
@@ -157,10 +185,10 @@ def rplh_prompt_partial_func(
         # Regular expression to extract Agent[0.5, 0.5] data
         escaped_agent = re.escape(HCA_agent_location)
         pattern = fr"{escaped_agent}:.*?(?=Agent\[|$)"
-        print(pattern)
         match = re.search(pattern, state_update_prompt, re.DOTALL)
         agent_data = match.group(0) if match else None
-        print(f'AGENT CAN SEE AND DO: {agent_data}')
+        print(f'AGENT CAN SEE AND CAN DO: {agent_data}')
+        print(f'HISTORY IS {state_action_prompt}')
 
         HCA_prompt = f"""
             You are a central planner directing agent in a grid-like field to move colored boxes.
@@ -174,13 +202,9 @@ def rplh_prompt_partial_func(
             You are the central agent and your job is to coordinate the agents optimally.
             
             The previous state and action pairs at each step are: {state_action_prompt}
-            Based on this previous state action interaction, you need to reason what each agent can and cannot do and output in world_model.
+            {WOLRD_MODEL_CENTRAL_PROMPT}
             
-            Notice that you don't see all the environmental state, you can only observe what you can see and make your plan based on your beliefs of what the environmental looks like and  make action plan based on such beliefs.
-            Other agent in the environment may observe different things than you do and may make comments to your plan later.
-            Try to make conservative actions as you don't know everything
-            
-            Please imagine what each agent can and caannot do first based on the goals mentioned ealier. Remanber to reason for all agent, inclduing yourself.
+            Last Central agent has the world model of {world_model}, you can expands upon this.
             
             The possible that you can take is: {agent_data}.
             
@@ -192,6 +216,8 @@ def rplh_prompt_partial_func(
             Remanber to wirte out for each step, what you plan for every agent to do and what would the state change be.
             
             {feedback}
+            
+            {is_judge_prompt}
 
             Action Plan:
             Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_y, target_y)"}} where box_x and box_y are arbitrary boxes.
@@ -268,7 +294,6 @@ def dialogue_partial_func(
             previous_state_idx = len(response_total_list) - 1
             if previous_state_idx != -1:
                 state_action_prompt = f"""
-            Previous State: {better_state_repres(pg_state_list[previous_state_idx])}
             Previous Action: {response_total_list[previous_state_idx]}\n\n
             """
         elif dialogue_history_method == "_w_no_history":
@@ -327,10 +352,7 @@ def dialogue_partial_func(
             Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
             You can only move same color boxes to same color targets.
             
-            Notice that you don't see all the environmental state, you can only observe what you can see and make your plan based on your beliefs of what the environmental looks like and  make action plan based on such beliefs.
-            Other agent in the environment may observe different things than you do and may make comments to your plan later.
-            You need to help modify this plan by including your perspectives.
-            Try to add more actions instead of deleting actions from the action plan.
+            {WOLRD_MODEL_LOCAL_PROMPT}
             
             The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
             
