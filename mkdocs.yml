@@ -153,6 +153,7 @@ nav:
     - Vanilla: system/h_vanilla.md
     - Efficient: system/h_efficient.md
     - Decentralize: system/d_efficient.md
+    - Prompt Structure: system/prompt.md
   - Evaluation:
     - Numerical Evaluation: evaluation/testing.md
   # - Examples: examples.md
