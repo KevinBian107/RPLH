@@ -351,7 +351,7 @@ def run_exp(
                             message = f"------###------###------LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
                             f.write(message)
 
-                        if response_local_agent != "I Agree":
+                        if "I Agree" not in response_local_agent:
                             data_local["local_agent_response_list_dir"][
                                 "feedback1"
                             ] += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"

@@ -404,7 +404,6 @@ def construct_plotting_df(box_map, actions, num_frames):
                 # Perform interpolation
                 interpolated_frame.loc[interpolated_frame['id'] == id_num, 'x'] = (1 - alpha) * init_row['x'].values[0] + alpha * x_after
                 interpolated_frame.loc[interpolated_frame['id'] == id_num, 'y'] = (1 - alpha) * init_row['y'].values[0] + alpha * y_after
-                interpolated_frame["size"] = (1 - alpha) * 100
 
                 
                 
