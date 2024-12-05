@@ -772,7 +772,7 @@
 </code></pre></div>
 <p>We hope to build agent that is caplable of <strong>Social-reasoning</strong> and expecting what the other agent should be doing. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to <strong>Level-one agent</strong>.</p>
 <h2 id="relapsing-world-model">Relapsing World Model<a class="headerlink" href="#relapsing-world-model" title="Permanent link">&para;</a></h2>
-<p>Since each agent (both HCA and local) only gets partially observable environment, it is extremely hard for them to plan for task when the environment gets more complicated (i.e. a 3x3 grid with 9 agents). Hence, Each HCA agent must build up an <code>world model</code> of what tehir belife of the environment is and what each agent can do. Each local agent/judge helps the HCA agent in this process by contributing their own perspctive and "relapssing" the info they have.</p>
+<p>Our RPLH system constructs a <strong>world model</strong> together with teh help of multiple agents. Since each agent (both HCA and local) only gets partially observable environment, it is extremely hard for them to plan for task when the environment gets more complicated (i.e. a 3x3 grid with 9 agents). Hence, Each HCA agent must build up an <code>world model</code> of what tehir belife of the environment is and what each agent can do. Each local agent/judge helps the HCA agent in this process by contributing their own perspctive and "relapssing" the info they have.</p>
 <h2 id="rplh-demos">RPLH Demos:<a class="headerlink" href="#rplh-demos" title="Permanent link">&para;</a></h2>
 <p>Here is a demo of our RPLH performing multi-agent resasoning with the first HCA (central) agent hallucinations about future steps:</p>
 <ul>
