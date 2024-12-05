@@ -727,7 +727,7 @@
 
 
 <h1 id="why-vanilla-rplh-system">Why Vanilla-RPLH System? 🤔<a class="headerlink" href="#why-vanilla-rplh-system" title="Permanent link">&para;</a></h1>
-<p>RPLH-original is the full representation of our construct where no limits has been posted on the structure of the output of the Language model, which comes with tradeoff of benifits and issues:</p>
+<p>RPLH-vanilla is the vanilla version of our construct where no limits has been posted on the structure of the output of the Language model, which comes with tradeoff of benifits and issues:</p>
 <ol>
 <li>Have room for much more emergent behavior because the context of the historical conversation is much richer.<ul>
 <li>More planning for future steps.</li>
@@ -744,6 +744,7 @@
 <li>Slower convergence rate because of hallucination issue of the agent.</li>
 </ul>
 </li>
+<li>Only include standard reasoning ability with no agent reasoning baked in since the output of the model is hard to control.</li>
 </ol>
 <h2 id="maintaining-syntactic-correctness">Maintaining Syntactic Correctness<a class="headerlink" href="#maintaining-syntactic-correctness" title="Permanent link">&para;</a></h2>
 <p>We have also performed a set of carefully designed engineering procedures to adjust the issues metioned above while maintaining the benifits of massive communication through conversations. LM is like an child where it needs very specific and detailed promppt for instructing it to  do things. We have designed and tested a set of prompt that is designed for the LM to maximize the freedom of communication while maintaining sytactic correctness.</p>
