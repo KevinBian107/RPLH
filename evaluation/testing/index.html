@@ -785,11 +785,11 @@
 </tr>
 </tbody>
 </table>
-<p>Similaerly, the memory module has specific setting as well:</p>
+<p>Similaerly, the Agent model reasoning module has specific setting as well:</p>
 <table>
 <thead>
 <tr>
-<th><strong>Memory/System</strong></th>
+<th><strong>AgentModel/System</strong></th>
 <th><strong>H_Efficient</strong></th>
 <th><strong>Dec_Efficient</strong></th>
 <th><strong>H_Vanilla</strong></th>
@@ -797,15 +797,15 @@
 </thead>
 <tbody>
 <tr>
-<td>Memory</td>
+<td>Standard Model</td>
 <td>✅</td>
-<td>✅</td>
-<td>✅</td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td>Partial Memory</td>
+<td>Agent Model</td>
 <td>✅</td>
-<td>✅</td>
+<td></td>
 <td></td>
 </tr>
 </tbody>
@@ -819,12 +819,11 @@
 <li>Does action decision make snese.</li>
 </ol>
 <h2 id="computation-system-metrics">Computation System Metrics<a class="headerlink" href="#computation-system-metrics" title="Permanent link">&para;</a></h2>
-<p>Run 10 trials:</p>
 <ol>
 <li>Test Success Rate (does the system converge before max number of stesp reached).</li>
 <li>Differences with optimla human plans</li>
 <li>Convergence speed (number of execution steps needed for convergence (solve the given problem)).</li>
-<li>Number of API calls.</li>
+<li>Critically, the number of agreement to see if agent based reasoning actually help.</li>
 </ol>
 
 
