@@ -420,6 +420,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#relapsing-world-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Relapsing World Model
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#rplh-demos" class="md-nav__link">
     <span class="md-ellipsis">
       RPLH Demos:
@@ -711,6 +720,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#relapsing-world-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Relapsing World Model
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#rplh-demos" class="md-nav__link">
     <span class="md-ellipsis">
       RPLH Demos:
@@ -753,6 +771,8 @@
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span>-<span class="w"> </span>I<span class="w"> </span>can<span class="w"> </span><span class="k">do</span><span class="w"> </span>one<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>following<span class="w"> </span>action:<span class="w"> </span><span class="o">[</span><span class="s1">&#39;move(box_green, square[1.5, 1.5])&#39;</span>,<span class="w"> </span><span class="s1">&#39;move(box_green, square[0.5, 0.5])&#39;</span>,<span class="w"> </span><span class="s1">&#39;move(box_green, target_green)&#39;</span><span class="o">]</span>
 </code></pre></div>
 <p>We hope to build agent that is caplable of <strong>Social-reasoning</strong> and expecting what the other agent should be doing. We are building a generalize world model for every single agent in this environment and hopefully moving a step closer to <strong>Level-one agent</strong>.</p>
+<h2 id="relapsing-world-model">Relapsing World Model<a class="headerlink" href="#relapsing-world-model" title="Permanent link">&para;</a></h2>
+<p>Since each agent (both HCA and local) only gets partially observable environment, it is extremely hard for them to plan for task when the environment gets more complicated (i.e. a 3x3 grid with 9 agents). Hence, Each HCA agent must build up an <code>world model</code> of what tehir belife of the environment is and what each agent can do. Each local agent/judge helps the HCA agent in this process by contributing their own perspctive and "relapssing" the info they have.</p>
 <h2 id="rplh-demos">RPLH Demos:<a class="headerlink" href="#rplh-demos" title="Permanent link">&para;</a></h2>
 <p>Here is a demo of our RPLH performing multi-agent resasoning with the first HCA (central) agent hallucinations about future steps:</p>
 <ul>
