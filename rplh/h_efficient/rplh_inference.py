@@ -135,6 +135,10 @@ def run_exp(
             location = (list(data_dict["pg_dict"].keys())[a]).split("_")
             HCA_agent_location = f"Agent[{location[0]}, {location[1]}]"
             print(f"HCA Agent {a} is [{HCA_agent_location}]")
+            
+            if len(list(data_dict["pg_dict"].keys())[a])==0:
+                print(f'Skip HCA {HCA_agent_location} since no boxes and targets in its region.')
+                continue
 
             data_dict["env_step"] += 1
 

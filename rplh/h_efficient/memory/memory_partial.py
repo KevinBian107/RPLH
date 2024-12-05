@@ -157,6 +157,7 @@ def rplh_prompt_partial_func(
         # Regular expression to extract Agent[0.5, 0.5] data
         escaped_agent = re.escape(HCA_agent_location)
         pattern = fr"{escaped_agent}:.*?(?=Agent\[|$)"
+        print(pattern)
         match = re.search(pattern, state_update_prompt, re.DOTALL)
         agent_data = match.group(0) if match else None
         print(f'AGENT CAN SEE AND DO: {agent_data}')
@@ -173,6 +174,7 @@ def rplh_prompt_partial_func(
             You are the central agent and your job is to coordinate the agents optimally.
             
             The previous state and action pairs at each step are: {state_action_prompt}
+            Based on this previous state action interaction, you need to reason what each agent can and cannot do and output in world_model.
             
             Notice that you don't see all the environmental state, you can only observe what you can see and make your plan based on your beliefs of what the environmental looks like and  make action plan based on such beliefs.
             Other agent in the environment may observe different things than you do and may make comments to your plan later.
