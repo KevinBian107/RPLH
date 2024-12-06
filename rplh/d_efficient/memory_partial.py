@@ -37,7 +37,7 @@ FEEDBACK_LCOAL1 = """
             Your response:
             """
 
-def local_agent_prompt_func(
+def local_agent_prompt_partial_func(
     state_update_prompt_local_agent: str,
     state_update_prompt_other_agent: str,
     central_response: str,
@@ -101,7 +101,6 @@ def local_agent_prompt_func(
             previous_state_idx = len(response_total_list) - 1
             if previous_state_idx != -1:
                 state_action_prompt = f"""
-            Previous State: {better_state_repres(pg_state_list[previous_state_idx])}
             Previous Action: {response_total_list[previous_state_idx]}\n\n
             """
         elif dialogue_history_method == "_w_only_state_action_history":
@@ -144,7 +143,6 @@ def local_agent_prompt_func(
             You can only move same color boxes to same color targets.
             
             The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
-            The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
             The previous state and action pairs at each step are: {state_action_prompt}
             Please learn from previous steps in a few steps:
                 

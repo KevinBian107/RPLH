@@ -1,7 +1,8 @@
 """Synthetic checker module/execution module"""
 
 from rplh.h_efficient.memory.memory_standard import *
-from rplh.h_efficient.env import *
+from rplh.env.env import *
+
 from rplh.llm.language_model import *
 from rplh.llm.response_model import *
 import json
@@ -219,7 +220,7 @@ def with_action_syntactic_check_func(
 
     return "Syntactic Error", token_num_count_list_add
 
-
+# TODO: might have issue with processing raw response, need change
 def process_response(response: dict) -> dict:
     """
     Processes a response dictonary that is not suitable for execution, extracts relevant information, 
