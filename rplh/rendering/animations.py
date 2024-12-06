@@ -4,7 +4,7 @@
 # main_path = Path(__file__).resolve().parent.parent.parent
 # if str(main_path) not in sys.path:
 #     sys.path.append(str(main_path))
-    
+
 # from rplh.rendering.render_state import *
 # import pandas as pd
 # import plotly.graph_objects as go
@@ -251,6 +251,6 @@
 #     width=600,
 #     height=600,
 #     )
-    
+
 #     # Render the animation
 #     fig.show()

@@ -10,10 +10,10 @@ We believe that the key of collaboration, or of solving issues in such partial o
 In decentralzie environment, usually each agent must communicate about **what they can see** and **what they can do** to better collaborate with each other and do the actions because of the partial observability situation. Here is an example of such partial information of describing what an specific local agent can see and do.
 
 ```
-- Agent[0.5, 0.5]:
-  - I am in square[0.5, 0.5],
-  - I can observe ['box_green', 'target_orange'],
-  - I can do one of the following action: ['move(box_green, square[1.5, 0.5])', 'move(box_green, square[0.5, 1.5])']
+Agent[0.5, 0.5]:
+- I am in square[0.5, 0.5],
+- I can observe ['box_green', 'target_orange'],
+- I can do one of the following action: ['move(box_green, square[1.5, 0.5])', 'move(box_green, square[0.5, 1.5])']
 ```
 
 Differently, we aer using a **fully-observable environment**, meaning that all agent can see everything (where all the boxes are at and where all the targets are at). Howveer, the environmnet still remains partially actuatable as there are limitations to what each agent can do. However, even with this setting, a common type of problem in usual decentralzied collaboration setting (each agent has their own perspective and doesn't just do whatever the central agent tells them to do) is that it is extremely hard for different agents to come to an agreement on the plan, especially when the number of agent scales.

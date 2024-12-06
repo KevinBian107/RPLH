@@ -1,4 +1,4 @@
-'''Specific memory for decentralzied, other gerenral function in rplh-efficient memory'''
+"""Specific memory for decentralzied, other gerenral function in rplh-efficient memory"""
 
 from rplh.llm.language_model import *
 from rplh.h_efficient.memory import better_state_repres
@@ -36,6 +36,7 @@ FEEDBACK_LCOAL1 = """
             Do not explain, just directly output json directory.
             Your response:
             """
+
 
 def local_agent_prompt_func(
     state_update_prompt_local_agent: str,
