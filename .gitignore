@@ -6,3 +6,4 @@ multi-agent-env-standard-tests/
 *.DS_Store
 conversation.txt
 site/
+docs/
