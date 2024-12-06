@@ -27,7 +27,7 @@ Depending on the communciatioon system, We recommand to use different setup comb
 | **LM/System**        | **H_Efficient** | **Dec_Efficient** | **H_Vanilla** |
 |-----------------------|-----------------|--------------------|---------------|
 | Ollama-qwen           | ✅              | ✅                 |               |
-| GPT-4o-mini           |                 | ✅                 | ✅            |
+| GPT-4o-mini           | ✅              | ✅                 | ✅            |
 
  Notice that for `h_vanilla` and `dec_efficeint`, we are connecting to GPT-4o-mini's backend for our tests, but switching to ollama like other systems is doable as well. Similaerly, the reasoning models has specific setting as well:
 
