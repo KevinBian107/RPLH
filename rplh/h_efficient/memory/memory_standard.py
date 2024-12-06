@@ -45,19 +45,19 @@ def better_state_repres(pg_dict: dict) -> dict:
         dict: A new dictionary with transformed state representation.
 
     Example:
-        Input: {'0.5_0.5': ['box_blue'], 
-                '0.5_1.5': ['box_red'], 
-                '1.5_0.5': ['target_blue'], 
+        Input: {'0.5_0.5': ['box_blue'],
+                '0.5_1.5': ['box_red'],
+                '1.5_0.5': ['target_blue'],
                 '1.5_1.5': ['target_red']},
-        Output: {'0.5, 0.5': ['box_blue'], 
-                 '0.5, 1.5': ['box_red'], 
-                 '1.5, 0.5': ['target_blue'], 
+        Output: {'0.5, 0.5': ['box_blue'],
+                 '0.5, 1.5': ['box_red'],
+                 '1.5, 0.5': ['target_blue'],
                  '1.5, 1.5': ['target_red']},
     """
     new_pg_dict = {}
 
     for key, value in pg_dict.items():
-        new_pg_dict[f'{key[:3]}, {key[-3:]}'] = value
+        new_pg_dict[f"{key[:3]}, {key[-3:]}"] = value
 
     return new_pg_dict
 
@@ -253,7 +253,7 @@ def dialogue_func(
         local_agent_location (str): Location of the local agent in the grid.
 
     Returns:
-        str: Dialogue prompt for the local agent. 
+        str: Dialogue prompt for the local agent.
     """
 
     if data["env_step"] == 0:
@@ -289,7 +289,7 @@ def dialogue_func(
         "_w_compressed_dialogue_history",
         "_w_all_dialogue_history",
         "_w_markovian_state_action_history",
-        "_w_no_history"
+        "_w_no_history",
     ):
         # first iteration no summary
         if dialogue_history_method == "_w_markovian_state_action_history":
@@ -557,9 +557,9 @@ def message_construct_func(
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
     else:
-        print('LESS PROMPT IN MESSAGE CONSTRUCT')
+        print("LESS PROMPT IN MESSAGE CONSTRUCT")
         messages.append({"role": "user", "content": user_prompt_list[-1]})
-        
+
     for i in range(len(response_total_list)):
         messages.append({"role": "assistant", "content": response_total_list[i]})
 

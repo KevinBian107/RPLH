@@ -34,6 +34,7 @@ FEEDBACK_LCOAL1 = """
             Your response:
             """
 
+
 def better_state_repres(pg_dict: dict) -> dict:
     """
     Transforms the state representation the original pg_dict envirionemnt
@@ -45,21 +46,22 @@ def better_state_repres(pg_dict: dict) -> dict:
         dict: A new dictionary with transformed state representation.
 
     Example:
-        Input: {'0.5_0.5': ['box_blue'], 
-                '0.5_1.5': ['box_red'], 
-                '1.5_0.5': ['target_blue'], 
+        Input: {'0.5_0.5': ['box_blue'],
+                '0.5_1.5': ['box_red'],
+                '1.5_0.5': ['target_blue'],
                 '1.5_1.5': ['target_red']},
-        Output: {'0.5, 0.5': ['box_blue'], 
-                 '0.5, 1.5': ['box_red'], 
-                 '1.5, 0.5': ['target_blue'], 
+        Output: {'0.5, 0.5': ['box_blue'],
+                 '0.5, 1.5': ['box_red'],
+                 '1.5, 0.5': ['target_blue'],
                  '1.5, 1.5': ['target_red']},
     """
     new_pg_dict = {}
 
     for key, value in pg_dict.items():
-        new_pg_dict[f'{key[:3]}, {key[-3:]}'] = value
+        new_pg_dict[f"{key[:3]}, {key[-3:]}"] = value
 
     return new_pg_dict
+
 
 def rplh_prompt_func(
     state_update_prompt: str,
@@ -188,7 +190,6 @@ def rplh_prompt_func(
                 "There is error in preivous action plan. Here is the feedbcak: "
                 + feedback
             )
-
 
         HCA_prompt = f"""
             You are a central planner directing agent in a grid-like field to move colored boxes.
@@ -367,11 +368,8 @@ def dialogue_func(
 
 
 def judge_prompt_func(
-        local_response: str, 
-        cen_response: str, 
-        cur_state: dict, 
-        feedback: str = ""
-    ) -> str:
+    local_response: str, cen_response: str, cur_state: dict, feedback: str = ""
+) -> str:
     """
     Constructs a prompt for the judge agent to evaluate and select the best plan.
 
@@ -531,9 +529,9 @@ def message_construct_func(
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
     else:
-        print('LESS PROMPT IN MESSAGE CONSTRUCT')
+        print("LESS PROMPT IN MESSAGE CONSTRUCT")
         messages.append({"role": "user", "content": user_prompt_list[-1]})
-        
+
     for i in range(len(response_total_list)):
         messages.append({"role": "assistant", "content": response_total_list[i]})
 

@@ -62,22 +62,35 @@ ollama run qwen2.5:14b-instruct-q3_K_L
 This need to be done in your system terminal directly, not in VScode.
 
 ## Inference Pipeline
-We can diretcly use the central running parser file to cerate the environment and then run the main inference loop by:
+We can diretcly use the central running parser file to cerate the environment and then run the main inference loop by (the inference loop takes in argument (`module_name`, `model_name`, `row_num`, `column_num`, and `reasoning_model`)):
 
 ```python
-python rplh/inference.py --module_name "h_efficient" --model_name "qwen2.5:14b-instruct-q3_K_L"
+python rplh/inference.py --module_name "h_efficient" --model_name "qwen2.5:14b-instruct-q3_K_L" --row_num 3 --column_num 3 --reasoning_model "agent"
 ```
 
-For communication system, we can choose `module_name` between `h_efficient`, `d_efficient`, or `h_vanilla`. Notice that for `h_vanilla`, we are connecting to GPT-4o-mini's backend, but switching to ollama like other systems is doable as well. For `model_name`, for demonstartion we use `qwen2.5:14b-instruct-q3_K_L` or `gpt-4o-mini`.
+Depending on the communciatioon system, We recommand to use different setup combination between systems and models, which we describe them below:
+
+| **LM/System**        | **H_Efficient** | **Dec_Efficient** | **H_Vanilla** |
+|-----------------------|-----------------|--------------------|---------------|
+| Ollama-qwen           | ✅              | ✅                 |               |
+| GPT-4o-mini           |                 | ✅                 | ✅            |
+
+ Notice that for `h_vanilla` and `dec_efficeint`, we are connecting to GPT-4o-mini's backend for our tests, but switching to ollama like other systems is doable as well. Similaerly, the reasoning models has specific setting as well:
+
+| **Reasoning/System** | **H_Efficient** | **Dec_Efficient** | **H_Vanilla** |
+|-----------------------|-----------------|--------------------|---------------|
+| Standard Reasoning    | ✅              |  ✅                | ✅             |
+| Agent Reasoning       | ✅              |                    |               |
+
 
 ## Testing Systems
 Conduct evaluation using our system by:
 
 ```python
-python rplh/test.py --module_name "h_efficient" --model_name "qwen2.5:14b-instruct-q3_K_L" --num_trials 5 --box_num_upper_bound 1 --start_iter 1
+python rplh/test.py --module_name "h_efficient" --model_name "qwen2.5:14b-instruct-q3_K_L" --num_trials 5 --box_num_upper_bound 1 --start_iter 1 --row_num 3 --column_num 3 --reasoning_model "agent"
 ```
 
-## Visualize Solutions
+## Visualize Text Solutions
 To visualize the reasoning process by rendering the conversation that each of the agent said:
 
 ```python

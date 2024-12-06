@@ -60,11 +60,10 @@ def LLaMA_response_json(
         print(f"API call failed: {e}")
         return None, 0
 
+
 def GPT_response(messages, model_name):
     token_num_count = 0
-    client = OpenAI( # Enter Your API Key Here
-        api_key=''
-    )
+    client = OpenAI(api_key="")  # Enter Your API Key Here
     # for item in messages:
     #     token_num_count += len(enc.encode(item["content"]))
 
@@ -76,36 +75,37 @@ def GPT_response(messages, model_name):
             temperature=0.0,
             top_p=1,
             frequency_penalty=0,
-            presence_penalty=0
+            presence_penalty=0,
         )
     except Exception as e:
         print(e)
         try:
             time.sleep(5)
             result = client.chat.completions.create(
-            model=model_name,
-            messages=messages,
-            temperature=0.0,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0
+                model=model_name,
+                messages=messages,
+                temperature=0.0,
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0,
             )
         except:
             try:
-                print(f'{model_name} Waiting 60 seconds for API query')
+                print(f"{model_name} Waiting 60 seconds for API query")
                 time.sleep(60)
                 result = client.chat.completions.create(
                     model=model_name,
                     messages=messages,
-                    temperature = 0.0,
+                    temperature=0.0,
                     top_p=1,
                     frequency_penalty=0,
-                    presence_penalty=0
+                    presence_penalty=0,
                 )
             except:
-                return 'Out of tokens', token_num_count
-    #token_num_count += len(enc.encode(result.choices[0].message.content))
+                return "Out of tokens", token_num_count
+    # token_num_count += len(enc.encode(result.choices[0].message.content))
     return result.choices[0].message.content, token_num_count
+
 
 def LLaMA_response(messages, model_name, url="http://localhost:11434/api/generate"):
     """

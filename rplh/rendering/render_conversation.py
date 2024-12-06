@@ -148,7 +148,9 @@ def print_response_sections(sections, token_delay=0.01):
         for value in values:
             if isinstance(value, str) and value.startswith("[") and value.endswith("]"):
                 # Handle list-like strings
-                items = eval(value)  # Convert the string representation of a list into an actual list
+                items = eval(
+                    value
+                )  # Convert the string representation of a list into an actual list
                 for item in items:
                     print_token_by_token(item.strip(), token_delay)
                     print()  # Blank line between list items
@@ -157,7 +159,15 @@ def print_response_sections(sections, token_delay=0.01):
                 print()  # Add a blank line between entries in the same section
 
 
-def roll_out_conversation(user_prompts, responses, pg_states, dialogue_histories, hca_responses, delay=1.0, token_delay=0.01):
+def roll_out_conversation(
+    user_prompts,
+    responses,
+    pg_states,
+    dialogue_histories,
+    hca_responses,
+    delay=1.0,
+    token_delay=0.01,
+):
     """
     Simulates a conversation rollout with dynamic dialogue visualization.
 

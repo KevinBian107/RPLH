@@ -65,15 +65,15 @@ def is_valid_action(
 
                 transformed_dict[coordinates] = [item, location]
         except:
-            print(f'NO MATCHING: SYNTAX ERROR, NEED TO RETAKE ACTION')
+            print(f"NO MATCHING: SYNTAX ERROR, NEED TO RETAKE ACTION")
             if is_judge:
                 feedback = f"""You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
                                 so choose the alternative action from the central central planner {central_response};"""
             else:
                 feedback = f"Your assigned task for {key[0]}, {key[1]} is not in the doable action list; "
-            
+
             return feedback
-    print(f'Transformed_dict: {transformed_dict}')
+    print(f"Transformed_dict: {transformed_dict}")
     feedback = ""
     for key, value in transformed_dict.items():
         if (
@@ -178,7 +178,7 @@ def retake_action(
     """
 
     print("----------RETAKE ACTION----------")
-    
+
     # must specify this
     retake_action_prompt_1 = prompt_func(feedback=feedback)
     messages = message_construct_func(
@@ -289,14 +289,16 @@ def with_action_syntactic_check_func(
                     prompt_func,
                 )
                 print(f"ACTION RETAKEN: {response}")
-                print(f'FEEDBACK: {feedback}')
+                print(f"FEEDBACK: {feedback}")
                 response_total_list.append(response)
 
                 if response == "Out of tokens":
                     return response, token_num_count_list_add
 
             # for action validity check, it must be in json format
-            feedback = is_valid_action(response, central_response, pg_dict_input, is_judge)
+            feedback = is_valid_action(
+                response, central_response, pg_dict_input, is_judge
+            )
 
         else:
             # no feedback
