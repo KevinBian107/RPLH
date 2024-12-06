@@ -474,9 +474,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#visualize-solutions" class="md-nav__link">
+  <a href="#visualize-text-solutions" class="md-nav__link">
     <span class="md-ellipsis">
-      Visualize Solutions
+      Visualize Text Solutions
     </span>
   </a>
   
@@ -788,9 +788,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#visualize-solutions" class="md-nav__link">
+  <a href="#visualize-text-solutions" class="md-nav__link">
     <span class="md-ellipsis">
-      Visualize Solutions
+      Visualize Text Solutions
     </span>
   </a>
   
@@ -878,15 +878,64 @@ Note the following:</p>
 </code></pre></div>
 <p>This need to be done in your system terminal directly, not in VScode.</p>
 <h2 id="inference-pipeline">Inference Pipeline<a class="headerlink" href="#inference-pipeline" title="Permanent link">&para;</a></h2>
-<p>We can diretcly use the central running parser file to cerate the environment and then run the main inference loop by:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">module_name</span> <span class="s2">&quot;h_efficient&quot;</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
+<p>We can diretcly use the central running parser file to cerate the environment and then run the main inference loop by (the inference loop takes in argument (<code>module_name</code>, <code>model_name</code>, <code>row_num</code>, <code>column_num</code>, and <code>reasoning_model</code>)):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">module_name</span> <span class="s2">&quot;h_efficient&quot;</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span> <span class="o">--</span><span class="n">row_num</span> <span class="mi">3</span> <span class="o">--</span><span class="n">column_num</span> <span class="mi">3</span> <span class="o">--</span><span class="n">reasoning_model</span> <span class="s2">&quot;agent&quot;</span>
 </code></pre></div>
-<p>For communication system, we can choose <code>module_name</code> between <code>h_efficient</code>, <code>d_efficient</code>, or <code>h_vanilla</code>. Notice that for <code>h_vanilla</code>, we are connecting to GPT-4o-mini's backend, but switching to ollama like other systems is doable as well. For <code>model_name</code>, for demonstartion we use <code>qwen2.5:14b-instruct-q3_K_L</code> or <code>gpt-4o-mini</code>.</p>
+<p>Depending on the communciatioon system, We recommand to use different setup combination between systems and models, which we describe them below:</p>
+<table>
+<thead>
+<tr>
+<th><strong>LM/System</strong></th>
+<th><strong>H_Efficient</strong></th>
+<th><strong>Dec_Efficient</strong></th>
+<th><strong>H_Vanilla</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ollama-qwen</td>
+<td>✅</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td>GPT-4o-mini</td>
+<td></td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p>Notice that for <code>h_vanilla</code> and <code>dec_efficeint</code>, we are connecting to GPT-4o-mini's backend for our tests, but switching to ollama like other systems is doable as well. Similaerly, the reasoning models has specific setting as well:</p>
+<table>
+<thead>
+<tr>
+<th><strong>Reasoning/System</strong></th>
+<th><strong>H_Efficient</strong></th>
+<th><strong>Dec_Efficient</strong></th>
+<th><strong>H_Vanilla</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Standard Reasoning</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Agent Reasoning</td>
+<td>✅</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <h2 id="testing-systems">Testing Systems<a class="headerlink" href="#testing-systems" title="Permanent link">&para;</a></h2>
 <p>Conduct evaluation using our system by:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">test</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">module_name</span> <span class="s2">&quot;h_efficient&quot;</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span> <span class="o">--</span><span class="n">num_trials</span> <span class="mi">5</span> <span class="o">--</span><span class="n">box_num_upper_bound</span> <span class="mi">1</span> <span class="o">--</span><span class="n">start_iter</span> <span class="mi">1</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">test</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">module_name</span> <span class="s2">&quot;h_efficient&quot;</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span> <span class="o">--</span><span class="n">num_trials</span> <span class="mi">5</span> <span class="o">--</span><span class="n">box_num_upper_bound</span> <span class="mi">1</span> <span class="o">--</span><span class="n">start_iter</span> <span class="mi">1</span> <span class="o">--</span><span class="n">row_num</span> <span class="mi">3</span> <span class="o">--</span><span class="n">column_num</span> <span class="mi">3</span> <span class="o">--</span><span class="n">reasoning_model</span> <span class="s2">&quot;agent&quot;</span>
 </code></pre></div>
-<h2 id="visualize-solutions">Visualize Solutions<a class="headerlink" href="#visualize-solutions" title="Permanent link">&para;</a></h2>
+<h2 id="visualize-text-solutions">Visualize Text Solutions<a class="headerlink" href="#visualize-text-solutions" title="Permanent link">&para;</a></h2>
 <p>To visualize the reasoning process by rendering the conversation that each of the agent said:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">rendering</span><span class="o">/</span><span class="n">render_conversation</span><span class="o">.</span><span class="n">py</span>
 </code></pre></div>
