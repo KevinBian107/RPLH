@@ -16,7 +16,7 @@ from rplh.h_efficient.memory.memory_agent import (
     attitude_agent_prompt_func_for_agent,
 )
 
-from rplh.h_efficient.env import *
+from rplh.env.env import *
 from rplh.h_efficient.execution_checker import *
 
 from rplh.rendering.render_state import *
@@ -336,7 +336,6 @@ def run_exp(
                         print(
                             f"SKIPPING Agent[{local_agent_row_i+0.5},{local_agent_column_j+0.5}] as no blocks are present in its region."
                         )
-                        response_local_agent = "I Agree"
                         continue
 
                     # need to relapse responses to each agents
@@ -418,7 +417,8 @@ def run_exp(
 
                         data_dict["token_num_count_list"].append(token_num_count)
 
-                        if "I Agree" not in response_local_agent:
+                        if response_local_agent != "I Agree":
+                            print("I Don't Agree")
                             data_local["local_agent_response_list_dir"][
                                 "feedback1"
                             ] += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
@@ -450,12 +450,8 @@ def run_exp(
                     if (
                         data_local["local_agent_response_list_dir"]["feedback1"] != ""
                     ):  # if not I agree
-
                         # once not agree, set to zero to re-discuss lat plan
                         # data_dict["agree_num"] = 0
-                        print("I Don't Agree")
-
-                        # TODO: Do we need this?
                         data_local["local_agent_response_list_dir"][
                             "feedback1"
                         ] += FEEDBACK_LCOAL1

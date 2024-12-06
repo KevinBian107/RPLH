@@ -158,11 +158,14 @@ def rplh_prompt_agent_func(
                     i. Reason about the reactions each agent would have towards your command.
                     ii. Reason about how they would give actions if they are the central agent.
                     
-                3. Please build your belief on what each agent would do and outpute in agent_model. You should build model for each agent in the format agent_model[{{Agent[0.5, 0.5]: [...], Agent[0.5, 1.5]: [...], Agent[1.5, 0.5]: [...], Agent[1.5, 1.5]: [...]}}].
+                3. Please build your belief on what each agent would do and outpute in agent_model.
                     You will recieve information about what each agent actually do and think later, so pleae leave actual_models blank for now.
                     Do not just say what the agents are doing, but rather use texts to explain their characteristics and behaviors.
+                    You should build model for each agent in the format agent_model[{{Agent[0.5, 0.5]: [This agent is very proactive in moving box], Agent[0.5, 1.5]: [This agent is not really cooperative hence should try to avoid moving boxes to him], ...}}].
+            
                 
                 4. Based on the strategy model, please be very careful in giving action plan to each agent, make plans that makes it more likely for each local agent to obey and agree directly without argument.
+                    Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents.
             """
         if judging_mode:
             re_eval_prompt = f"""{local_agent_location} has provided their perspective on your plan as this feedback {local_response}, with this information, do two things:

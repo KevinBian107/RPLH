@@ -10,7 +10,7 @@ if str(main_path) not in sys.path:
 
 from rplh.llm.language_model import *
 from rplh.h_vanilla.memory import *
-from rplh.h_vanilla.env import *
+from rplh.env.env import *
 from rplh.h_vanilla.execution_checker import *
 from rplh.rendering.render_state import *
 import os
