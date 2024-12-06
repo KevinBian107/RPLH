@@ -25,7 +25,7 @@ def main():
     try:
         # Append ".rplh_inference" to the module name
         inference_loop = args.module_name + ".rplh_agent_inference"
-        env_create = args.module_name + ".env"
+        env_create = "env.env"
         inference_module = importlib.import_module(inference_loop)
         env_module = importlib.import_module(env_create)
     except ModuleNotFoundError:

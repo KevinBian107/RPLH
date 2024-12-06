@@ -1,4 +1,5 @@
 from rplh.llm.language_model import *
+from rplh.env.env import better_state_repres
 import tiktoken
 
 enc = tiktoken.get_encoding("cl100k_base")

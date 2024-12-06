@@ -1,7 +1,7 @@
 '''Specific memory for decentralzied, other gerenral function in rplh-efficient memory'''
 
 from rplh.llm.language_model import *
-from rplh.env.env import better_state_repres
+from env.env import better_state_repres
 import tiktoken
 
 enc = tiktoken.get_encoding("cl100k_base")
@@ -93,6 +93,7 @@ def local_agent_prompt_func(
         "_w_only_state_action_history",
         "_w_all_dialogue_history",
         "_w_markovian_state_action_history",
+        "_w_no_history"
     ):
         # first iteration no summary
         if dialogue_history_method == "_w_markovian_state_action_history":
@@ -104,6 +105,8 @@ def local_agent_prompt_func(
             Previous State: {better_state_repres(pg_state_list[previous_state_idx])}
             Previous Action: {response_total_list[previous_state_idx]}\n\n
             """
+        elif dialogue_history_method == "_w_no_history":
+            state_action_prompt = ""
         elif dialogue_history_method == "_w_only_state_action_history":
             state_action_prompt = ""
             for i in range(len(response_total_list) - 1, -1, -1):
