@@ -299,6 +299,7 @@ def run_exp(
             data_local["local_agent_response_list_dir"]["feedback1"] = ""
             
             local_agent_iter = 0
+            data_dict["agree_num"][f'HCA_{a}'] = 0 
             for local_agent_row_i in range(pg_row_num):
 
                 for local_agent_column_j in range(pg_column_num):
