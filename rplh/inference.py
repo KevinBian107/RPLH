@@ -1,15 +1,15 @@
 import sys
 from pathlib import Path
 
-main_path = Path(__file__).resolve().parent.parent.parent
+main_path = Path(__file__).resolve().parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
-    
+
 import argparse
 import importlib
 import os
 import sys
-from rplh.env import env
+from rplh.env.env import create_env1
 
 
 def main():
@@ -83,7 +83,7 @@ def main():
         f"-------------------CREATING ENVIRONMENT IN {args.module_name}-------------------"
     )
 
-    env.create_env1(
+    create_env1(
         saving_path,
         repeat_num=1,
         box_num_upper_bound=2,

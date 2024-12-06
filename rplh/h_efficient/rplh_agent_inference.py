@@ -417,7 +417,7 @@ def run_exp(
 
                         data_dict["token_num_count_list"].append(token_num_count)
 
-                        if response_local_agent != "I Agree":
+                        if ("I Agree" not in response_local_agent) or ("I Disagree" in response_local_agent) or ("However" in response_local_agent):
                             print("I Don't Agree")
                             data_local["local_agent_response_list_dir"][
                                 "feedback1"
