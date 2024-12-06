@@ -227,7 +227,7 @@ def dialogue_func(
         local_agent_location (str): Location of the local agent in the grid.
 
     Returns:
-        str: Dialogue prompt for the local agent. 
+        str: Dialogue prompt for the local agent.
     """
 
     if data["env_step"] == 0:
@@ -263,7 +263,7 @@ def dialogue_func(
         "_w_compressed_dialogue_history",
         "_w_all_dialogue_history",
         "_w_markovian_state_action_history",
-        "_w_no_history"
+        "_w_no_history",
     ):
         # first iteration no summary
         if dialogue_history_method == "_w_markovian_state_action_history":
@@ -531,9 +531,9 @@ def message_construct_func(
         for i in range(len(user_prompt_list)):
             messages.append({"role": "user", "content": user_prompt_list[i]})
     else:
-        print('LESS PROMPT IN MESSAGE CONSTRUCT')
+        print("LESS PROMPT IN MESSAGE CONSTRUCT")
         messages.append({"role": "user", "content": user_prompt_list[-1]})
-        
+
     for i in range(len(response_total_list)):
         messages.append({"role": "assistant", "content": response_total_list[i]})
 

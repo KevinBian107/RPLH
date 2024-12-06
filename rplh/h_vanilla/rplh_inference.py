@@ -55,8 +55,8 @@ def run_exp(
         Tuple: Contains lists of user prompts, responses, states, token counts,
         success/failure status, query index, and saving path result.
     """
-    
-    print('RUNNIN VANILLA RPLH')
+
+    print("RUNNIN VANILLA RPLH")
 
     Saving_path_result = (
         Saving_path
@@ -150,7 +150,7 @@ def run_exp(
             state_update_prompt = state_update_func(
                 pg_row_num, pg_column_num, data_dict["pg_dict"]
             )
-            print(f'STATE UPDATE PROMPT: {state_update_prompt}')
+            print(f"STATE UPDATE PROMPT: {state_update_prompt}")
 
             user_prompt_1 = rplh_prompt_func(
                 state_update_prompt,
@@ -188,8 +188,8 @@ def run_exp(
 
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
-            
-            #valid = False
+
+            # valid = False
             # max 10 retries
             for _ in range(10):
                 try:
@@ -197,34 +197,38 @@ def run_exp(
 
                     # TODO: No dictionary no run
                     if match:
-                        possible_action_lst = re.findall(r"\{.*?\}", raw_response, re.DOTALL)
+                        possible_action_lst = re.findall(
+                            r"\{.*?\}", raw_response, re.DOTALL
+                        )
                         response = possible_action_lst[-1]
                         print(f"Match response:{response}")
                         response = process_response(response)
                         print(f"Processed response:{response}\n")
 
                         # REDO HCA
-                        response, token_num_count_list_add = with_action_syntactic_check_func(
-                            data_dict["pg_dict"],
-                            response,
-                            [user_prompt_1],
-                            [response],
-                            model_name,
-                            dialogue_history_method,
-                            partial_rplh_prompt_func,
-                            False,
+                        response, token_num_count_list_add = (
+                            with_action_syntactic_check_func(
+                                data_dict["pg_dict"],
+                                response,
+                                [user_prompt_1],
+                                [response],
+                                model_name,
+                                dialogue_history_method,
+                                partial_rplh_prompt_func,
+                                False,
+                            )
                         )
                         data_dict["token_num_count_list"] = (
                             data_dict["token_num_count_list"] + token_num_count_list_add
                         )
                         print(f"AGENT ACTION RESPONSE: {response}")
-                        #valid = True
+                        # valid = True
                         break
                 except:
                     # raise ValueError(
                     #     f"No action format found in raw response: {raw_response}"
                     # )
-                    print('DICTIONARY ERROR, NEED TO REDO')
+                    print("DICTIONARY ERROR, NEED TO REDO")
                     # valid = False
 
             if response == "Out of tokens":
@@ -276,13 +280,15 @@ def run_exp(
             for local_agent_row_i in range(pg_row_num):
 
                 for local_agent_column_j in range(pg_column_num):
-                    
+
                     region_key = f"{local_agent_row_i+0.5}_{local_agent_column_j+0.5}"
                     if len(data_dict["pg_dict"][region_key]) == 0:
-                        print(f"SKIPPING Agent[{local_agent_row_i+0.5},{local_agent_column_j+0.5}] as no blocks are present in its region.")
-                        response_local_agent = 'I Agree'
+                        print(
+                            f"SKIPPING Agent[{local_agent_row_i+0.5},{local_agent_column_j+0.5}] as no blocks are present in its region."
+                        )
+                        response_local_agent = "I Agree"
                         continue
-                    
+
                     data_local["agent_dict"] = json.loads(response)
 
                     print(
@@ -361,13 +367,10 @@ def run_exp(
                             print("I Agree")
                             # agree no judge, use HCA response diretcly, avoid error.
                             continue
-                        
+
                         # should be out, doesn't used too much
                         data_dict["agree_num"] += 1
-                        if (
-                            data_dict["agree_num"]
-                            >= (pg_column_num + pg_row_num) // 2
-                        ):
+                        if data_dict["agree_num"] >= (pg_column_num + pg_row_num) // 2:
                             break
 
                     # -----------------------------------------RECONSTRUCT MESSAGES-----------------------------------------#
@@ -410,9 +413,7 @@ def run_exp(
                         [judge_prompt], [], dialogue_history_method
                     )
 
-                    response_judge, token_num_count = GPT_response(
-                        messages, model_name
-                    )
+                    response_judge, token_num_count = GPT_response(messages, model_name)
 
                     # -----------------------------------------SYNTACTIC CHECK FOR JUDGE-----------------------------------------#
                     data_dict["token_num_count_list"].append(token_num_count)
@@ -453,15 +454,15 @@ def run_exp(
                 else:
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
-                
+
                 data_dict["dialogue_history_list"].append(dialogue_history)
-                
+
                 # not acting agent does not communicate, resolve missing variable issue
                 if (
                     f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                     in data_local["agent_dict"]
-                    ):
-                
+                ):
+
                     data_dict["attitude_dialogue_dict"][
                         f"Agent[{local_agent_location}]"
                     ] = response_local_agent
@@ -479,9 +480,7 @@ def run_exp(
                 data_dict["attitude_dialogue_dict"]
             )
             attitude_message = attitude_message_construct_func(attitude_prompt)
-            attitude_info, token_num_count = GPT_response(
-                attitude_message, model_name
-            )
+            attitude_info, token_num_count = GPT_response(attitude_message, model_name)
             data_dict["token_num_count_list"].append(token_num_count)
 
             data_dict["attitude_info"].append(attitude_info)

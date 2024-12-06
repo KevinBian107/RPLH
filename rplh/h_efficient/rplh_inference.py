@@ -13,7 +13,6 @@ from rplh.llm.response_model import *
 
 from rplh.h_efficient.memory.memory_standard import *
 from rplh.env.env import *
-
 from rplh.h_efficient.execution_checker import *
 
 from rplh.rendering.render_state import *
@@ -59,8 +58,8 @@ def run_exp(
         Tuple: Contains lists of user prompts, responses, states, token counts,
         success/failure status, query index, and saving path result.
     """
-    
-    print('RUNNIN EFFICIENT RPLH')
+
+    print("RUNNIN EFFICIENT RPLH")
 
     Saving_path_result = (
         Saving_path
@@ -108,8 +107,8 @@ def run_exp(
     print(f"query_time_limit: {query_time_limit}")
 
     render_graph_terminal_popup(data_dict["pg_dict"])
-    
-    world_model = ['You are the first HCA agent']
+
+    world_model = ["You are the first HCA agent"]
 
     for index_query_times in range(query_time_limit):
         # -----------------------------------------ONE HCA AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
@@ -124,7 +123,7 @@ def run_exp(
             result_df = pd.DataFrame(result).T
             print(result_df)
             print(result_df.sum(axis=0))
-            
+
             if all(result_df.sum(axis=0)) == 0:
                 break
 
@@ -137,12 +136,14 @@ def run_exp(
             location = (list(data_dict["pg_dict"].keys())[a]).split("_")
             HCA_agent_location = f"Agent[{location[0]}, {location[1]}]"
             print(f"HCA Agent {a} is [{HCA_agent_location}]")
-            
-            agent_key = (list(data_dict["pg_dict"].keys())[a])
-            box_num = len(data_dict['pg_dict'][agent_key])
-            print(f'NUM OF BOX IN HCA LOCATION: {box_num}')
-            if box_num==0:
-                print(f'Skip HCA {HCA_agent_location} since no boxes and targets in its region.')
+
+            agent_key = list(data_dict["pg_dict"].keys())[a]
+            box_num = len(data_dict["pg_dict"][agent_key])
+            print(f"NUM OF BOX IN HCA LOCATION: {box_num}")
+            if box_num == 0:
+                print(
+                    f"Skip HCA {HCA_agent_location} since no boxes and targets in its region."
+                )
                 continue
 
             data_dict["env_step"] += 1
@@ -164,14 +165,14 @@ def run_exp(
                 pg_row_num, pg_column_num, data_dict["pg_dict"]
             )
             print(f"STATE UPDATE PROMPT: {state_update_prompt}")
-            
+
             user_prompt_1 = rplh_prompt_func(
                 state_update_prompt,
                 data_dict,
                 dialogue_history_method,
                 HCA_agent_location,
             )
-            
+
             # partial function
             partial_rplh_prompt_func = partial(
                 rplh_prompt_func,
@@ -189,13 +190,13 @@ def run_exp(
             raw_response, token_num_count = LLaMA_response_json(
                 messages, model_name, HCA
             )
-            print(f'RAW: {raw_response}')
+            print(f"RAW: {raw_response}")
             raw_response = json.loads(raw_response)
             raw_response = process_response(raw_response)
             response_str = "\n".join([f"{k}: {v}" for k, v, in raw_response.items()])
             response = raw_response["actions_plan"]
             world_model = raw_response["world_model"]
-            print("\n", f'WORLD MODEL IS: {world_model}', "\n")
+            print("\n", f"WORLD MODEL IS: {world_model}", "\n")
 
             # save user prompt
             with open(
@@ -271,24 +272,26 @@ def run_exp(
                 "local_agent_response_list_dir": {},
                 "agent_dict": {},
                 "judge_resonse": {},
-                "last_agent_response": ''
+                "last_agent_response": "",
             }
 
             data_local["local_agent_response_list_dir"]["feedback1"] = ""
-            
+
             local_agent_iter = 0
             for local_agent_row_i in range(pg_row_num):
 
                 for local_agent_column_j in range(pg_column_num):
-                    
-                    local_agent_iter+=1
-                    
+
+                    local_agent_iter += 1
+
                     region_key = f"{local_agent_row_i+0.5}_{local_agent_column_j+0.5}"
                     if len(data_dict["pg_dict"][region_key]) == 0:
-                        print(f"SKIPPING Agent[{local_agent_row_i+0.5},{local_agent_column_j+0.5}] as no blocks are present in its region.")
-                        response_local_agent = 'I Agree'
+                        print(
+                            f"SKIPPING Agent[{local_agent_row_i+0.5},{local_agent_column_j+0.5}] as no blocks are present in its region."
+                        )
+                        response_local_agent = "I Agree"
                         continue
-                    
+
                     # need to relapse responses to each agents
                     data_local["agent_dict"] = response
 
@@ -299,15 +302,17 @@ def run_exp(
                     local_agent_location = (
                         f"{local_agent_row_i}, {local_agent_column_j}"
                     )
-                    
-                    print(f'CURRENT AGENT IS Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]')
-                    
+
+                    print(
+                        f"CURRENT AGENT IS Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
+                    )
+
                     if (
                         f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                         in data_local["agent_dict"]
                     ):
                         print(f'AGENT ACTION DICT UPDATING:{data_local["agent_dict"]}')
-                        
+
                         # note, dict, this have space
                         data_local["prompt_list_dir"][
                             f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
@@ -369,13 +374,10 @@ def run_exp(
                             print("I Agree")
                             # agree no judge, use HCA response diretcly, avoid error.
                             continue
-                        
+
                         # should be out, doesn't used too much
                         data_dict["agree_num"] += 1
-                        if (
-                            data_dict["agree_num"]
-                            >= (pg_column_num + pg_row_num) // 2
-                        ):
+                        if data_dict["agree_num"] >= (pg_column_num + pg_row_num) // 2:
                             break
 
                     # -----------------------------------------RECONSTRUCT MESSAGES-----------------------------------------#
@@ -391,7 +393,7 @@ def run_exp(
                         data_local["local_agent_response_list_dir"][
                             "feedback1"
                         ] += FEEDBACK_LCOAL1
-                    
+
                     with open("conversation.txt", "a") as f:
                         message = f"------###------###------LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
                         f.write(message)
@@ -434,19 +436,18 @@ def run_exp(
                     if len(response_judge) == 0:
                         print("JUDGE NO RESPONSE: NO APPEND, HCA IS TEH LAST ONE")
                         continue
-                    
+
                     if local_agent_iter != 1:
-                        print('RELAPSING RESPONSE IS LAST LOCAL RESPONSE')
+                        print("RELAPSING RESPONSE IS LAST LOCAL RESPONSE")
                         relapse_response = data_local["last_agent_response"]
-                        
+
                     else:
-                        print('RELAPSING RESPONSE IS CENTRAL RESPONSE')
+                        print("RELAPSING RESPONSE IS CENTRAL RESPONSE")
                         relapse_response = cen_response
-                        
 
                     # -----------------------------------------SYNTACTIC CHECK FOR JUDGE-----------------------------------------#
                     data_dict["token_num_count_list"].append(token_num_count)
-                    
+
                     # use relapse prompt
                     response, token_num_count_list_add = (
                         with_action_syntactic_check_func(
@@ -469,20 +470,20 @@ def run_exp(
                         f.write(messages)
 
                     print(f"JUDGE MODIFIED:\n {response}")
-                    
+
                 else:
                     print(f"ORIGINAL PLAN:\n {response}")
                     pass
-                
+
                 data_local["last_agent_response"] = response
                 data_dict["dialogue_history_list"].append(dialogue_history)
-                
+
                 # not acting agent does not communicate, resolve missing variable issue
                 if (
                     f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                     in data_local["agent_dict"]
-                    ):
-                
+                ):
+
                     data_dict["attitude_dialogue_dict"][
                         f"Agent[{local_agent_location}]"
                     ] = response_local_agent
@@ -566,7 +567,7 @@ def run_exp(
             count = 0
             for ky, value in data_dict["pg_dict"].items():
                 count += len(value)
-                print(f'STILL HAVE {count} LEFT')
+                print(f"STILL HAVE {count} LEFT")
             if count == 0:
                 break
 

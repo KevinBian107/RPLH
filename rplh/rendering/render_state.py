@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 import plotly.express as px
 import plotly.express as px
+
 pio.renderers.default = "plotly_mimetype"
 from PIL import Image
 
@@ -15,13 +16,11 @@ from pathlib import Path
 main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
-    
+
 # from rplh.h_vanilla.memory import *
 import os
 import json
-import numpy as np        
-
-
+import numpy as np
 
 
 import shutil
@@ -31,14 +30,19 @@ import random
 def render_animate_terminal_popup(box_map, action_list):
     box_map, action_list = trans_data(box_map, action_list)
     fig = render_animate(box_map, action_list[0])
-    
+
     pio.renderers.default = "browser"
     fig.show()
-    
+
     print("Graph displayed in a browser pop-up window.")
 
-def render_graph_terminal_popup(box_map):
-    fig = render_graph(box_map=trans_info_box(box_map))
+
+def render_graph_terminal_popup(box_map, pg_row_num, pg_column_num):
+    fig = render_graph(
+        box_map=trans_info_box(box_map),
+        pg_row_num=pg_row_num,
+        pg_column_num=pg_column_num,
+    )
 
     pio.renderers.default = "browser"
     fig.show()
@@ -56,8 +60,10 @@ def render_animate_terminal_popup(box_map, action_list):
 def position_int(position):
     return tuple([float(pos) for pos in position.split("_")])
 
+
 def split_info(info_list):
     return [info.split("_") for i, info in enumerate(info_list)]
+
 
 # ---------------- Transforming Box_map ---------------
 def trans_info_box(pg_state):
@@ -126,16 +132,16 @@ def trans_data(box_map, action_list):
 # ------------ transform box_map to a data Frame ----------------
 def map_df(states):
     if sum([len(state) for state in states.values()]) == 0:
-        return pd.DataFrame({
-            "x": [None],
-            "y": [None],
-            "center": [None],
-            "type": [None],
-            "color": [None],
-            "id": [None]
-        })
-
-    
+        return pd.DataFrame(
+            {
+                "x": [None],
+                "y": [None],
+                "center": [None],
+                "type": [None],
+                "color": [None],
+                "id": [None],
+            }
+        )
 
     # Prepare data for plotting
     data = []
@@ -153,8 +159,8 @@ def map_df(states):
         # Distribute targets at the top within the box
         for i, item in enumerate(targets):
             item_type, color, id = item
-            position_factor  = min(5, len(targets)) 
-            if count <= 5 :
+            position_factor = min(5, len(targets))
+            if count <= 5:
                 x_offset = (i - int(position_factor / 2)) * offset_factor
                 y_offset = 0.25  # Fixed offset to place targets above the center
             else:
@@ -164,14 +170,14 @@ def map_df(states):
                 {
                     "x": cx + x_offset,
                     "y": cy + y_offset,
-                    'center' : (cx, cy),
+                    "center": (cx, cy),
                     "type": item_type,
                     "color": color,
-                    'id' : id
+                    "id": id,
                 }
             )
             count += 1
-        
+
         count = 1
         # Distribute boxes at the bottom within the box
         for i, item in enumerate(boxes):
@@ -187,10 +193,10 @@ def map_df(states):
                 {
                     "x": cx + x_offset,
                     "y": cy + y_offset,
-                    'center' : (cx, cy),
+                    "center": (cx, cy),
                     "type": item_type,
                     "color": color,
-                    'id': id
+                    "id": id,
                 }
             )
             count += 1
@@ -201,10 +207,10 @@ def map_df(states):
 
 # ------------------- apply action to map ---------------
 
-def apply_action(
-    pg_dict_input, # {(0.5, 0.5): [['box', 'blue', 0], ['target', 'blue', 1], ['target', 'red', 2]]}
 
-    original_response_dict # {(0.5, 0.5): ('box_blue', 'target_blue'), (1.5, 1.5): ('box_red', (1.5, 0.5))}
+def apply_action(
+    pg_dict_input,  # {(0.5, 0.5): [['box', 'blue', 0], ['target', 'blue', 1], ['target', 'red', 2]]}
+    original_response_dict,  # {(0.5, 0.5): ('box_blue', 'target_blue'), (1.5, 1.5): ('box_red', (1.5, 0.5))}
 ):
     """
     Updates the environment state based on the actions in the response.
@@ -225,22 +231,20 @@ def apply_action(
             location = location
         transformed_dict[coordinates] = [item, location]
 
-
     remove_item = []
-    
+
     for key, value in transformed_dict.items():
         # print(f"Key: {key}, Value1: {value[0]}, Value2: {value[1]}")
         condition_1 = False
         condition_2 = False
         for i, element in enumerate(pg_dict_original[key]):
-            if element[0] + '_' + element[1] == value[0]:
+            if element[0] + "_" + element[1] == value[0]:
                 condition_1 = True
                 location_1 = element
-            if element[0] + '_' + element[1] == value[1]:
+            if element[0] + "_" + element[1] == value[1]:
                 condition_2 = True
                 location_2 = element
 
-  
         if (
             condition_1
             and type(value[1]) == tuple
@@ -275,19 +279,19 @@ def apply_action(
     return system_error_feedback, remove_item, pg_dict_original
 
 
-
 # ------------- plot single map ---------------
 
 
-
-def render_graph(box_map): 
+def render_graph(box_map):
     df = map_df(box_map)
     df["hover_text"] = df.apply(
         lambda row: f"Type: {row['type']}<br>Color: {row['color']}", axis=1
     )
 
     # Initialize the Plotly figure
-def render_graph(box_map): 
+
+
+def render_graph(box_map, pg_row_num, pg_column_num):
     fig = go.Figure()
     robot = Image.open("demos/robot.png")
 
@@ -328,15 +332,22 @@ def render_graph(box_map):
             yanchor="top",
             font=dict(size=18),
         ),
-        xaxis=dict(range=[0, 3], showgrid=False, zeroline=False, title="X Coordinate"),
-        yaxis=dict(range=[0, 3], showgrid=False, zeroline=False, title="Y Coordinate"),
+        xaxis=dict(
+            range=[0, pg_row_num], showgrid=False, zeroline=False, title="X Coordinate"
+        ),
+        yaxis=dict(
+            range=[0, pg_column_num],
+            showgrid=False,
+            zeroline=False,
+            title="Y Coordinate",
+        ),
         plot_bgcolor="white",
         width=600,
         height=600,
     )
 
     if sum([len(i) for i in box_map.values()]) == 0:
-        return fig 
+        return fig
 
     df = map_df(box_map)
     df["hover_text"] = df.apply(
@@ -384,49 +395,61 @@ def construct_plotting_df(box_map, actions, num_frames):
             interpolated_frame["frame"] = frame_counter
 
             interpolated_frame["size"] = 100  # Fixed size for uniform markers
-            for id_num in interpolated_frame['id'].unique():
+            for id_num in interpolated_frame["id"].unique():
                 # Select the rows corresponding to the current ID
-                
-                init_row = df_init.query(f'id == {id_num}')
-                after_row = df_after.query(f'id == {id_num}')
+
+                init_row = df_init.query(f"id == {id_num}")
+                after_row = df_after.query(f"id == {id_num}")
                 if not after_row.empty:
                     # Interpolate x and y values for the current ID
-                    x_after = after_row['x'].values[0]
-                    y_after = after_row['y'].values[0]
-                    
+                    x_after = after_row["x"].values[0]
+                    y_after = after_row["y"].values[0]
+
                 else:
                     for pair in remove_item:
-                        if id_num in pair[0] or id_num in pair[1] or df_after.shape[0] == 0:
-                            x_after = df_init.query(f'id == {pair[1][2]}')['center'].values[0][0]
-                            y_after = df_init.query(f'id == {pair[1][2]}')['center'].values[0][1]
-                            
+                        if (
+                            id_num in pair[0]
+                            or id_num in pair[1]
+                            or df_after.shape[0] == 0
+                        ):
+                            x_after = df_init.query(f"id == {pair[1][2]}")[
+                                "center"
+                            ].values[0][0]
+                            y_after = df_init.query(f"id == {pair[1][2]}")[
+                                "center"
+                            ].values[0][1]
 
                 # Perform interpolation
-                interpolated_frame.loc[interpolated_frame['id'] == id_num, 'x'] = (1 - alpha) * init_row['x'].values[0] + alpha * x_after
-                interpolated_frame.loc[interpolated_frame['id'] == id_num, 'y'] = (1 - alpha) * init_row['y'].values[0] + alpha * y_after
+                interpolated_frame.loc[interpolated_frame["id"] == id_num, "x"] = (
+                    1 - alpha
+                ) * init_row["x"].values[0] + alpha * x_after
+                interpolated_frame.loc[interpolated_frame["id"] == id_num, "y"] = (
+                    1 - alpha
+                ) * init_row["y"].values[0] + alpha * y_after
+                interpolated_frame["size"] = (1 - alpha) * 100
 
-                
-                
-                
-
-            interpolated_frame = interpolated_frame.drop_duplicates(subset='id')
-
+            interpolated_frame = interpolated_frame.drop_duplicates(subset="id")
 
             # Append the current frame to the list
             interpolated_frames.append(interpolated_frame)
             frame_counter += 1  # Increment global frame counter
 
-
         # Update df_init and box_map for the next action
         df_init = df_after
         box_map = box_map_after
-        
-        if pd.isna(df_after.iloc[0]['x']):
+
+        if pd.isna(df_after.iloc[0]["x"]):
             break
 
     # Combine all frames into one DataFrame
     df_combined = pd.concat(interpolated_frames, ignore_index=True)
-    df_combined["hover_info"] = df_combined["color"] + " | " + df_combined["type"] + ' | ' + df_combined["id"].apply(str)
+    df_combined["hover_info"] = (
+        df_combined["color"]
+        + " | "
+        + df_combined["type"]
+        + " | "
+        + df_combined["id"].apply(str)
+    )
     return df_combined
 
 
@@ -449,10 +472,10 @@ def render_animate(box_map, actions, num_frames=2):
         df_combined,
         x="x",
         y="y",
-        animation_frame = "frame",
+        animation_frame="frame",
         animation_group="id",
         color="color",
-        symbol='type',  # Map symbol column to scatter shapes
+        symbol="type",  # Map symbol column to scatter shapes
         hover_name="hover_info",  # Use the new combined column for hover info
         size="size",  # Ensure the size column is applied
         range_x=[0, 2],
@@ -521,4 +544,3 @@ def render_animate(box_map, actions, num_frames=2):
     )
 
     return fig, df_combined
-

@@ -2,7 +2,6 @@
 
 from rplh.h_efficient.memory.memory_standard import *
 from rplh.env.env import *
-
 from rplh.llm.language_model import *
 from rplh.llm.response_model import *
 import json
@@ -37,7 +36,7 @@ def is_valid_action(
 
     for key, value in original_response_dict.items():
         coordinates = tuple(map(float, re.findall(r"\d+\.?\d*", key)))
-        
+
         # match the item and location in the value
         try:
             match = re.match(r"move\((.*?),\s(.*?)\)", value)
@@ -49,11 +48,11 @@ def is_valid_action(
 
                 transformed_dict[coordinates] = [item, location]
         except:
-            print(f'NO MATCHING: SYNTAX ERROR, NEED TO RETAKE ACTION')
+            print(f"NO MATCHING: SYNTAX ERROR, NEED TO RETAKE ACTION")
             feedback = "Agent name should be in the form like Agent[0.5, 0.5], you give the wrong format."
-            
+
             return feedback
-            
+
     feedback = ""
     for key, value in transformed_dict.items():
         if (
@@ -223,7 +222,7 @@ def with_action_syntactic_check_func(
 # TODO: might have issue with processing raw response, need change
 def process_response(response: dict) -> dict:
     """
-    Processes a response dictonary that is not suitable for execution, extracts relevant information, 
+    Processes a response dictonary that is not suitable for execution, extracts relevant information,
     and converts it into a format suitable for environment execution.
 
     Args:
@@ -238,22 +237,23 @@ def process_response(response: dict) -> dict:
     Note:
         Do nothing and return original response back if error in parsing the response.
     """
+
     def find_idx(substring, dic):
         for key in dic.keys():
             if substring in key.lower():
                 return key
         return False
 
-    try:            
+    try:
         transformed_dict = dict()
 
         for key, value in response.items():
-            if 'agent' in key.lower():
+            if "agent" in key.lower():
                 coord = tuple(map(float, re.findall(r"\d+\.?\d*", key)))
                 value_action = value
             if isinstance(value, dict):
-                agent = find_idx('agent', value)
-                action = find_idx('action', value)
+                agent = find_idx("agent", value)
+                action = find_idx("action", value)
                 if agent:
                     coord = tuple(map(float, re.findall(r"\d+\.?\d*", agent)))
                     value_action = value[agent]
@@ -266,9 +266,11 @@ def process_response(response: dict) -> dict:
                 item, location = match.groups()
                 if "square" in location:
                     location = tuple(map(float, re.findall(r"\d+\.?\d*", location)))
-                    location = f'square[{location[0]}, {location[1]}]'
+                    location = f"square[{location[0]}, {location[1]}]"
 
-                transformed_dict[f'Agent[{coord[0]}, {coord[1]}]'] = f'move({item}, {location})'
+                transformed_dict[f"Agent[{coord[0]}, {coord[1]}]"] = (
+                    f"move({item}, {location})"
+                )
         return transformed_dict
 
     except:

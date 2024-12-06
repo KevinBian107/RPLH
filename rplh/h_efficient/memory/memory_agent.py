@@ -6,7 +6,7 @@ import argparse
 main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
-    
+
 from rplh.llm.language_model import *
 import tiktoken
 from rplh.h_efficient.memory.memory_standard import *
@@ -16,6 +16,7 @@ assert enc.decode(enc.encode("hello world")) == "hello world"
 enc = tiktoken.encoding_for_model("gpt-4")
 input_prompt_token_limit = 3000
 N = 5
+
 
 def rplh_prompt_agent_func(
     state_update_prompt: str,
@@ -137,7 +138,7 @@ def rplh_prompt_agent_func(
 
         if attitude == None:
             print("ATTITUDE IS NONE")
-            att_promt = "Leave the agent_model, actual_model, and strategy_model empty."
+            att_promt = "You are the first agent, please leave the agent_model, actual_model, and strategy_model response field as empty."
         else:
             att_promt = f"""
             You have a agent_model and actual_model from the rpevious HCA agent, please learn from them before constructing your own:
@@ -156,30 +157,33 @@ def rplh_prompt_agent_func(
                     i. Reason about the reactions each agent would have towards your command.
                     ii. Reason about how they would give actions if they are the central agent.
                     
-                3. Please build your belief on what each agent would do and outpute in agent_model. You should build model for each agent in the format agent_model[{{Agent[0.5, 0.5]: [...], Agent[0.5, 1.5]: [...], Agent[1.5, 0.5]: [...], Agent[1.5, 1.5]: [...]}}].
+                3. Please build your belief on what each agent would do and outpute in agent_model.
                     You will recieve information about what each agent actually do and think later, so pleae leave actual_models blank for now.
-                    You need to think about every single agent, not just the ones you can see.
+                    Do not just say what the agents are doing, but rather use texts to explain their characteristics and behaviors.
+                    You should build model for all the agent in the format agent_model[{{Agent[0.5, 0.5]: [This agent is very proactive in moving box], Agent[0.5, 1.5]: [This agent is not really cooperative hence should try to avoid moving boxes to him], ...}}].
+            
                 
                 4. Based on the strategy model, please be very careful in giving action plan to each agent, make plans that makes it more likely for each local agent to obey and agree directly without argument.
+                    Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents.
             """
         if judging_mode:
-            re_eval_prompt = f'''{local_agent_location} has provided their perspective on your plan as this feedback {local_response}, with this information, do two things:
+            re_eval_prompt = f"""{local_agent_location} has provided their perspective on your plan as this feedback {local_response}, with this information, do two things:
             
                             1. Please modify your original plan of {cen_response}.
                             
-                            2. Please summarize what this particular agent's perspective is and put it in actual_model, actual_model is what each agent actually do.
+                            2. Please summarize what this particular agent's perspective is and put it in actual_model, actual_model is each agent's characteristcs and behaviors, not actions.
                             
                             3. Modify the agent_model based on your summmary in actual_model.
-                            '''
+                            """
         else:
             re_eval_prompt = ""
-        
+
         if feedback != "":
             feedback = (
                 "There is error in preivous action plan. Here is the feedbcak: "
                 + feedback
             )
-        
+
         # escaped_agent = re.escape(HCA_agent_location)
         # pattern = fr"{escaped_agent}:.*?(?=Agent\[|$)"
         # match = re.search(pattern, state_update_prompt, re.DOTALL)
@@ -221,6 +225,7 @@ def rplh_prompt_agent_func(
             """
     return HCA_prompt
 
+
 def dialogue_agent_func(
     state_update_prompt_local_agent: str,
     state_update_prompt_other_agent: str,
@@ -242,7 +247,7 @@ def dialogue_agent_func(
         local_agent_location (str): Location of the local agent in the grid.
 
     Returns:
-        str: Dialogue prompt for the local agent. 
+        str: Dialogue prompt for the local agent.
     """
 
     if data["env_step"] == 0:
@@ -279,7 +284,7 @@ def dialogue_agent_func(
         "_w_compressed_dialogue_history",
         "_w_all_dialogue_history",
         "_w_markovian_state_action_history",
-        "_w_no_history"
+        "_w_no_history",
     ):
         # first iteration no summary
         if dialogue_history_method == "_w_markovian_state_action_history":
@@ -357,6 +362,8 @@ def dialogue_agent_func(
                 1. {att_promt}
 
                 2. You would recieve an plan from the other central planner, please evaluate the given plan and give critical feedbacks.
+                
+                3. Give a self-evaluation of your attitude and your characteristcs.
 
             You can imagine first about how you would plan these actions and specify your action plan.
             This is the success response of previous state: {success_action}
@@ -380,6 +387,7 @@ def dialogue_agent_func(
             Your response:
         """
     return local_HCA_prompt
+
 
 def attitude_agent_prompt_func_for_agent(history: dict, prev_attitude: str) -> str:
     """
