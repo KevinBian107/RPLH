@@ -14,7 +14,7 @@ CHECK_ITER = 10
 
 
 def is_valid_action(
-    response: str, central_response: str, pg_dict_input: list, is_judge: bool
+    response: str, central_response: str, pg_dict_input: list, state_update_prompt: str, is_judge: bool
 ) -> str:
     """
     Validates the actions proposed in a response against the playground's state.
@@ -81,10 +81,10 @@ def is_valid_action(
             pass
         else:
             if is_judge:
-                feedback += f"""You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
-                                so choose the alternative action from the central central planner {central_response};"""
+                feedback = f"""You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
+                                so choose the alternative action from the central central planner {central_response}. Remanber that the doable action for each agent is {state_update_prompt};"""
             else:
-                feedback += f"Your assigned task for {key[0]}, {key[1]} is not in the doable action list; "
+                feedback = f"Your assigned task for {key[0]}, {key[1]} is not in the doable action list; Remanber that the doable action for each agent is {state_update_prompt};"
 
     return feedback
 
@@ -150,6 +150,7 @@ def with_action_syntactic_check_func(
     model_name: str,
     dialogue_history_method: str,
     prompt_func: Callable[[str, dict, str, str], str],
+    state_update_prompt: str,
     is_judge: bool = False,
 ) -> tuple[Union[str, dict], list[int]]:
     """
@@ -191,12 +192,13 @@ def with_action_syntactic_check_func(
     # logic gate: put on DSC20 final exam please
     while iteration_num < CHECK_ITER:
         # preventing JSON checker change action
-        feedback = is_valid_action(response, central_response, pg_dict_input, is_judge)
-
+        feedback = is_valid_action(response, central_response, pg_dict_input, state_update_prompt, is_judge)
+        
+        print(f'ORIGINAL PROPOSED ACTION IS {response}')
         print(f"FEEDBACK IS {feedback}")
 
         if feedback != "":  # this is fine
-            print("RETAKE ACTION")
+            print("ENTERING RETAKE ACTION")
             response, token_num_count_list_add = retake_action(
                 feedback,
                 user_prompt_list,

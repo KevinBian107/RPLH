@@ -268,6 +268,7 @@ def run_exp(
                 model_name,
                 dialogue_history_method,
                 partial_rplh_prompt_func,
+                state_update_prompt,
                 False,
             )
             data_dict["token_num_count_list"] = (
@@ -544,6 +545,7 @@ def run_exp(
                             model_name,
                             dialogue_history_method,
                             partial_judge_prompt_func,
+                            state_update_prompt,
                             is_judge=True,
                         )
                     )
