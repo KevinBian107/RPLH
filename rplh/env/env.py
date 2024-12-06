@@ -6,8 +6,8 @@ from pathlib import Path
 main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
-
-from rplh.h_efficient.memory.memory_standard import *
+    
+# from rplh.h_efficient.memory.memory_standard import *
 import os
 import json
 import re
@@ -16,6 +16,32 @@ import numpy as np
 import shutil
 import random
 
+def better_state_repres(pg_dict: dict) -> dict:
+    """
+    Transforms the state representation the original pg_dict envirionemnt
+
+    Args:
+        pg_dict (dict): A dictionary representing BoxNet envirionment.
+
+    Returns:
+        dict: A new dictionary with transformed state representation.
+
+    Example:
+        Input: {'0.5_0.5': ['box_blue'], 
+                '0.5_1.5': ['box_red'], 
+                '1.5_0.5': ['target_blue'], 
+                '1.5_1.5': ['target_red']},
+        Output: {'0.5, 0.5': ['box_blue'], 
+                 '0.5, 1.5': ['box_red'], 
+                 '1.5, 0.5': ['target_blue'], 
+                 '1.5, 1.5': ['target_red']},
+    """
+    new_pg_dict = {}
+
+    for key, value in pg_dict.items():
+        new_pg_dict[f'{key[:3]}, {key[-3:]}'] = value
+
+    return new_pg_dict
 
 def surround_index_func(
     row_num: int, coloum_num: int, row_index: int, coloum_index: int
@@ -135,28 +161,49 @@ def state_update_func_local_agent(
                 surround_index_list = surround_index_func(
                     pg_row_num, pg_column_num, i, j
                 )
-                state_update_prompt_other_agent += f"Agent[{i+0.5}, {j+0.5}]: I am in square[{i+0.5}, {j+0.5}], I can observe {square_item_list}, I can do "
+                state_update_prompt_other_agent += f"Agent[{i+0.5}, {j+0.5}]: I am in square[{i+0.5}, {j+0.5}] "
+                if len(square_item_list) == 0:
+                    continue
+                else:
+                    state_update_prompt_other_agent += f", I can observe {square_item_list}"
                 action_list = []
                 for box in square_item_only_box:
                     for surround_index in surround_index_list:
                         action_list.append(f"move({box}, square{surround_index})")
                     if "target" + box[3:] in square_item_list:
                         action_list.append(f"move({box}, target{box[3:]})")
-                state_update_prompt_other_agent += f"{action_list}\n"
+                if len(action_list) != 0:
+                    state_update_prompt_other_agent += (
+                        f", I can do: {action_list}\n"
+                    )
+                else:
+                    state_update_prompt_other_agent += "\n"  # I can do nothing
+                # state_update_prompt_other_agent += f"{action_list}\n"
 
     square_item_list = pg_dict_copy[str(pg_row_i + 0.5) + "_" + str(pg_column_j + 0.5)]
     square_item_only_box = [item for item in square_item_list if item[:3] == "box"]
     surround_index_list = surround_index_func(
         pg_row_num, pg_column_num, pg_row_i, pg_column_j
     )
-    state_update_prompt_local_agent += f"Agent[{pg_row_i+0.5}, {pg_column_j+0.5}]: in square[{pg_row_i+0.5}, {pg_column_j+0.5}], can observe {square_item_list}, can do "
+    state_update_prompt_local_agent += f"Agent[{pg_row_i+0.5}, {pg_column_j+0.5}]: in square[{pg_row_i+0.5}, {pg_column_j+0.5}]"
+    if len(square_item_list) != 0:
+        state_update_prompt_local_agent += f", can observe {square_item_list}"
+
     action_list = []
     for box in square_item_only_box:
         for surround_index in surround_index_list:
             action_list.append(f"move({box}, square{surround_index})")
         if "target" + box[3:] in square_item_list:
             action_list.append(f"move({box}, target{box[3:]})")
-    state_update_prompt_local_agent += f"{action_list}\n"
+
+    if len(action_list) != 0:
+        state_update_prompt_local_agent += (
+            f", can do: {action_list}\n"
+        )
+    else:
+        state_update_prompt_local_agent += "\n"  # I can do nothing
+    # state_update_prompt_local_agent += f"{action_list}\n"
+
     return state_update_prompt_local_agent, state_update_prompt_other_agent
 
 

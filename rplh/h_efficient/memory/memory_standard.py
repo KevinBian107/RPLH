@@ -1,4 +1,5 @@
 from rplh.llm.language_model import *
+from rplh.env.env import better_state_repres
 import tiktoken
 
 enc = tiktoken.get_encoding("cl100k_base")
@@ -33,33 +34,6 @@ FEEDBACK_LCOAL1 = """
             Your response:
             """
 
-
-def better_state_repres(pg_dict: dict) -> dict:
-    """
-    Transforms the state representation the original pg_dict envirionemnt
-
-    Args:
-        pg_dict (dict): A dictionary representing BoxNet envirionment.
-
-    Returns:
-        dict: A new dictionary with transformed state representation.
-
-    Example:
-        Input: {'0.5_0.5': ['box_blue'],
-                '0.5_1.5': ['box_red'],
-                '1.5_0.5': ['target_blue'],
-                '1.5_1.5': ['target_red']},
-        Output: {'0.5, 0.5': ['box_blue'],
-                 '0.5, 1.5': ['box_red'],
-                 '1.5, 0.5': ['target_blue'],
-                 '1.5, 1.5': ['target_red']},
-    """
-    new_pg_dict = {}
-
-    for key, value in pg_dict.items():
-        new_pg_dict[f"{key[:3]}, {key[-3:]}"] = value
-
-    return new_pg_dict
 
 
 def rplh_prompt_func(

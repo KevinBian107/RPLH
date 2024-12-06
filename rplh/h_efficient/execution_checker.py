@@ -219,7 +219,7 @@ def with_action_syntactic_check_func(
 
     return "Syntactic Error", token_num_count_list_add
 
-
+# TODO: might have issue with processing raw response, need change
 def process_response(response: dict) -> dict:
     """
     Processes a response dictonary that is not suitable for execution, extracts relevant information,

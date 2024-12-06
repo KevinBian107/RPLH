@@ -4,13 +4,14 @@ import instructor
 from pydantic import ValidationError
 from openai import OpenAI
 import time
+import os
 
 enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"
 
 
 def LLaMA_response_json(
-    messages, model_name, response_model, url="http://localhost:11434/v1"
+    messages, model_name, response_model, api_key='ollama', url="http://localhost:11434/v1"
 ):
     """
     LLM module to be called
@@ -22,13 +23,25 @@ def LLaMA_response_json(
     """
     MAX_RETRY = 7
     count = 0
+
+    if model_name[:3] == 'gpt':
+        api_key = os.getenv('OPENAI_API_KEY')
+        if api_key is None:
+            raise ValueError('OPEN AI api key not found')
+    
+    # enables `response_model` in create call
     try:
-        # enables `response_model` in create call
-        client = instructor.from_openai(
-            OpenAI(
+        if api_key == 'ollama':
+            client = OpenAI(
                 base_url=url,
-                api_key="ollama",  # required, but unused
-            ),
+                api_key=api_key, 
+            )
+        # OPEN AI model
+        else:
+            client = OpenAI(api_key=api_key)
+
+        client = instructor.from_openai(
+            client, 
             mode=instructor.Mode.JSON,
         )
         while True:
@@ -63,7 +76,9 @@ def LLaMA_response_json(
 
 def GPT_response(messages, model_name):
     token_num_count = 0
-    client = OpenAI(api_key="")  # Enter Your API Key Here
+    client = OpenAI(
+        api_key=os.getenv('OPANAI_API_KEY')
+    )
     # for item in messages:
     #     token_num_count += len(enc.encode(item["content"]))
 
@@ -72,7 +87,7 @@ def GPT_response(messages, model_name):
         result = client.chat.completions.create(
             model=model_name,
             messages=messages,
-            temperature=0.0,
+            temperature=0.5,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0,
@@ -82,12 +97,12 @@ def GPT_response(messages, model_name):
         try:
             time.sleep(5)
             result = client.chat.completions.create(
-                model=model_name,
-                messages=messages,
-                temperature=0.0,
-                top_p=1,
-                frequency_penalty=0,
-                presence_penalty=0,
+            model=model_name,
+            messages=messages,
+            temperature=0.5,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
             )
         except:
             try:
@@ -96,7 +111,7 @@ def GPT_response(messages, model_name):
                 result = client.chat.completions.create(
                     model=model_name,
                     messages=messages,
-                    temperature=0.0,
+                    temperature = 0.5,
                     top_p=1,
                     frequency_penalty=0,
                     presence_penalty=0,

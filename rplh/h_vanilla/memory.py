@@ -1,4 +1,5 @@
 from rplh.llm.language_model import *
+from rplh.env.env import better_state_repres
 import tiktoken
 
 enc = tiktoken.get_encoding("cl100k_base")
@@ -204,6 +205,8 @@ def rplh_prompt_func(
   
             Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible actions: {state_update_prompt}.
 
+            Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
+            
             {att_promt}
 
             Think about what the future {N} actions would be if you want to achieve the goal and write this justification out.
@@ -338,6 +341,9 @@ def dialogue_func(
             
             The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
             The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
+            
+            Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
+
             The previous state and action pairs at each step are: {state_action_prompt}
             Please learn from previous steps in a few steps:
                 
