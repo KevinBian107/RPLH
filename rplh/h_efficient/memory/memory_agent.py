@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import re
 import argparse
 
 main_path = Path(__file__).resolve().parent.parent.parent
@@ -8,7 +9,7 @@ if str(main_path) not in sys.path:
     
 from rplh.llm.language_model import *
 import tiktoken
-from rplh.h_efficient.memory.memory import *
+from rplh.h_efficient.memory.memory_standard import *
 
 enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"
@@ -16,12 +17,19 @@ enc = tiktoken.encoding_for_model("gpt-4")
 input_prompt_token_limit = 3000
 N = 5
 
-def rplh_prompt_partial_func(
+def rplh_prompt_agent_func(
     state_update_prompt: str,
     data: dict,
     dialogue_history_method: str,
     HCA_agent_location: str,
+    local_agent_location: str,
+    agent_model: dict[str, list[str]],
+    actual_model: dict[str, list[str]],
+    strategy_model: dict[str, list[str]],
+    local_response: str,
+    cen_response: str,
     feedback: str = "",
+    judging_mode: bool = False,
 ) -> str:
     """
     Designs an input prompt for a role-playing leader-hallucinating (RPLH) agent
@@ -33,6 +41,7 @@ def rplh_prompt_partial_func(
         dialogue_history_method (str): Method to handle dialogue history, e.g.,
                                        "_w_only_state_action_history", "_w_compressed_dialogue_history".
         HCA_agent_location (str): Location of the HCA agent in the grid.
+        feedback (str): Feedback on the previous action plan.
 
     Returns:
         str: A structured prompt for the role-playing leader-hallucinating agent.
@@ -129,9 +138,14 @@ def rplh_prompt_partial_func(
 
         if attitude == None:
             print("ATTITUDE IS NONE")
-            att_promt = ""
+            att_promt = "Leave the agent_model, actual_model, and strategy_model empty."
         else:
             att_promt = f"""
+            You have a agent_model and actual_model from the rpevious HCA agent, please learn from them before constructing your own:
+            Previous agent model" {agent_model}
+            Previous actual model {actual_model}
+            Previous strategy model {strategy_model}
+            
             Please learn from attitude in the following ways:
 
                 1. Please undrstand the attitude of each agents in this environment,
@@ -142,25 +156,37 @@ def rplh_prompt_partial_func(
                 2. Based on this charcteristics of each agent, please do two things and added them after each agent's attitude:
                     i. Reason about the reactions each agent would have towards your command.
                     ii. Reason about how they would give actions if they are the central agent.
-            
-            Use the following format:
-            - Attitude of agent...
-            - Reaction of agent...
+                    
+                3. Please build your belief on what each agent would do and outpute in agent_model. You should build model for each agent in the format agent_model[{{Agent[0.5, 0.5]: [...], Agent[0.5, 1.5]: [...], Agent[1.5, 0.5]: [...], Agent[1.5, 1.5]: [...]}}].
+                    You will recieve information about what each agent actually do and think later, so pleae leave actual_models blank for now.
+                    You need to think about every single agent, not just the ones you can see.
+                
+                4. Based on the strategy model, please be very careful in giving action plan to each agent, make plans that makes it more likely for each local agent to obey and agree directly without argument.
             """
+        if judging_mode:
+            re_eval_prompt = f'''{local_agent_location} has provided their perspective on your plan as this feedback {local_response}, with this information, do two things:
+            
+                            1. Please modify your original plan of {cen_response}.
+                            
+                            2. Please summarize what this particular agent's perspective is and put it in actual_model, actual_model is what each agent actually do.
+                            
+                            3. Modify the agent_model based on your summmary in actual_model.
+                            '''
+        else:
+            re_eval_prompt = ""
+        
         if feedback != "":
             feedback = (
                 "There is error in preivous action plan. Here is the feedbcak: "
                 + feedback
             )
         
-        import re
-        # Regular expression to extract Agent[0.5, 0.5] data
-        escaped_agent = re.escape(HCA_agent_location)
-        pattern = fr"{escaped_agent}:.*?(?=Agent\[|$)"
-        print(pattern)
-        match = re.search(pattern, state_update_prompt, re.DOTALL)
-        agent_data = match.group(0) if match else None
-        print(f'AGENT CAN SEE AND DO: {agent_data}')
+        # escaped_agent = re.escape(HCA_agent_location)
+        # pattern = fr"{escaped_agent}:.*?(?=Agent\[|$)"
+        # match = re.search(pattern, state_update_prompt, re.DOTALL)
+        # agent_data = match.group(0) if match else None
+        # print(f'AGENT CAN SEE AND CAN DO: {agent_data}')
+        # print(f'HISTORY IS {state_action_prompt}')
 
         HCA_prompt = f"""
             You are a central planner directing agent in a grid-like field to move colored boxes.
@@ -174,19 +200,14 @@ def rplh_prompt_partial_func(
             You are the central agent and your job is to coordinate the agents optimally.
             
             The previous state and action pairs at each step are: {state_action_prompt}
-            Based on this previous state action interaction, you need to reason what each agent can and cannot do and output in world_model.
             
-            Notice that you don't see all the environmental state, you can only observe what you can see and make your plan based on your beliefs of what the environmental looks like and  make action plan based on such beliefs.
-            Other agent in the environment may observe different things than you do and may make comments to your plan later.
-            Try to make conservative actions as you don't know everything
-            
-            Please imagine what each agent can and caannot do first based on the goals mentioned ealier. Remanber to reason for all agent, inclduing yourself.
-            
-            The possible that you can take is: {agent_data}.
+            Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible that each agent can take: {state_update_prompt}.
             
             Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
 
             {att_promt}
+            
+            {re_eval_prompt}
 
             Think about what the future {N} actions would be if you want to achieve the goal with the reasoning.
             Remanber to wirte out for each step, what you plan for every agent to do and what would the state change be.
@@ -201,8 +222,7 @@ def rplh_prompt_partial_func(
             """
     return HCA_prompt
 
-
-def dialogue_partial_func(
+def dialogue_agent_func(
     state_update_prompt_local_agent: str,
     state_update_prompt_other_agent: str,
     central_response: str,
@@ -240,6 +260,7 @@ def dialogue_partial_func(
     else:
         att_promt = f"""
             Please pick up an attitude on this problem for yourself based on the attitude that this attitude report assigned to you: {attitude}.
+            your response should reflect such attitude.
         """
 
     response_total_list = data["response_total_list"]
@@ -268,7 +289,6 @@ def dialogue_partial_func(
             previous_state_idx = len(response_total_list) - 1
             if previous_state_idx != -1:
                 state_action_prompt = f"""
-            Previous State: {better_state_repres(pg_state_list[previous_state_idx])}
             Previous Action: {response_total_list[previous_state_idx]}\n\n
             """
         elif dialogue_history_method == "_w_no_history":
@@ -327,12 +347,8 @@ def dialogue_partial_func(
             Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
             You can only move same color boxes to same color targets.
             
-            Notice that you don't see all the environmental state, you can only observe what you can see and make your plan based on your beliefs of what the environmental looks like and  make action plan based on such beliefs.
-            Other agent in the environment may observe different things than you do and may make comments to your plan later.
-            You need to help modify this plan by including your perspectives.
-            Try to add more actions instead of deleting actions from the action plan.
-            
             The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
+            The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
             
             Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
             
@@ -361,6 +377,42 @@ def dialogue_partial_func(
             
             {feedback}
             
+            Remaanber to state who you are first before giving responses.
             Your response:
         """
     return local_HCA_prompt
+
+def attitude_agent_prompt_func_for_agent(history: dict, prev_attitude: str) -> str:
+    """
+    Generates a prompt to analyze and derive the attitudes of agents based on their dialogue history.
+    Usage for condensed memory
+
+    Args:
+        history (str): A string representing the dialogue history of the agents.
+
+    Returns:
+        str: The attitudes are expected in the format:
+             {Agent[0.5, 0.5]: attitude, Agent[0.5, 1.5]: attitude}.
+    """
+    attitude_prompt = f"""
+        The goals and rules of this environment are:
+        {GOAL_RULES}
+
+        Given the dialogue history of each agent {history}. 
+
+        Please derive the attitude of each agents given their response.
+        Try to make this new attitude align with previous attitude that you give. The previous attitudes are {prev_attitude}.
+        
+        Please list out the attitute of each agent in the folloing format:
+        {{Agent[0.5, 0.5]: attitude, Agent[0.5, 1.5]: attitude}}
+        
+        Example: 
+        {{Agent[0.5, 0.5]: "A Good Decision Maker", 
+          Agent[0.5, 1.5]: "Too Aggressive",
+          Agent[1.5, 0.5]: "Serious",
+          Agent[1.5, 1.5]: "Smart Agent"}}
+        
+        State your justification after listing out attitudes
+        Justification: ...
+        """
+    return attitude_prompt

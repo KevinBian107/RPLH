@@ -1,4 +1,4 @@
-The RPLH system is built by three undergraduate student from UCSD in 2024. The system was presented in 2024 Fall and the presentation video can be found here
+The RPLH system is built by three undergraduate student from UCSD in 2024. The system was presented in 2024 Fall and the presentation video can be found [here](https://www.youtube.com/watch?v=6Dw6S8QKyTA)
 
 ## Meet The Team!
 

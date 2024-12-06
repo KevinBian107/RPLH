@@ -20,6 +20,7 @@ RPLH-efficient is the improved version of the original RPLH system where we prev
 3. Under this system, the judge also serve as an syntactic checker as well where it would change the wrong syntax that the HCA agent have given.
 4. To remain the clearness of information flow and decision making, when needed to retake action, the LMs that is making the new decision would use teh original functions that the original HCA agent/Local agent/Judge uses with additional feedbacks giving through functional pass in with `functool.partial`.
 5. To still promote some conversation going on, only output agent (HCA and judge) uses the strict output formatter on LMs, the local_agent and attitude agent outputs strings directly and is free to have more conversations.
+6. Extending standard reasoning, we can bake in agent based reasoning because of the structured output.
 
 ## Optimization Tricks
 We used many optimization hacks:

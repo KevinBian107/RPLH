@@ -24,7 +24,7 @@ def main():
     # Dynamically import the specified module
     try:
         # Append ".rplh_inference" to the module name
-        inference_loop = args.module_name + ".rplh_inference"
+        inference_loop = args.module_name + ".rplh_agent_inference"
         env_create = args.module_name + ".env"
         inference_module = importlib.import_module(inference_loop)
         env_module = importlib.import_module(env_create)

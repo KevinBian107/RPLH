@@ -10,9 +10,10 @@ rplh/
 │   ├── env.py
 │   ├── execution_checker.py
 │   ├── memory/
-│     ├── memory.py
-│     ├── memory_partial.py
+│     ├── memory_standard.py
+│     ├── memory_agent.py
 │   ├── rplh_inference.py
+│   ├── rplh_agent_inference.py
 ├── h_vanilla/
 │   ├── env.py
 │   ├── execution_checker.py

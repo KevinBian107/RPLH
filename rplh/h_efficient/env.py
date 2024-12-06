@@ -7,7 +7,7 @@ main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
     
-from rplh.h_efficient.memory.memory import *
+from rplh.h_efficient.memory.memory_standard import *
 import os
 import json
 import re
