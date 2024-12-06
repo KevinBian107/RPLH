@@ -148,7 +148,9 @@ copyright: >
 
 nav:
   - Why RPLH?: index.md
-  - API Calls: api.md
+  - API:
+    - System Structure: api/structure.md
+    - API Calls: api/api.md
   - System:
     - Vanilla: system/h_vanilla.md
     - Efficient: system/h_efficient.md

@@ -1,7 +1,14 @@
+import sys
+import os
+from pathlib import Path
+
+main_path = Path(__file__).resolve().parent.parent
+if str(main_path) not in sys.path:
+    sys.path.append(str(main_path))
+
 import argparse
 import importlib
-import os
-import sys
+from rplh.env.env import create_env1
 
 
 def main():
@@ -50,6 +57,7 @@ def main():
         type=str,
         required=True,
         help="Reasoning model (agent or standard)",
+    )
 
     args = parser.parse_args()
 
@@ -59,10 +67,8 @@ def main():
             inference_loop = args.module_name + ".rplh_agent_inference"
         else:
             inference_loop = args.module_name + ".rplh_inference"
-            
-        env_create = args.module_name + ".env"
+
         inference_module = importlib.import_module(inference_loop)
-        env_module = importlib.import_module(env_create)
     except ModuleNotFoundError:
         print(f"Error: Module '{args.module_name}' not found.")
         sys.exit(1)
@@ -94,13 +100,13 @@ def main():
 
         seed = trial  # seed from trial
 
-        env_module.create_env1(
+        create_env1(
             trial_path,
             repeat_num=1,
             box_num_upper_bound=args.box_num_upper_bound,
             box_num_low_bound=1,
             pg_row_num=pg_row_num,
-            pg_column_num=pg_column_num, 
+            pg_column_num=pg_column_num,
             seed=seed,
         )
 
