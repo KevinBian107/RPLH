@@ -187,7 +187,7 @@ def run_exp(
                 json.dump(data_dict["pg_dict"], f)
 
             # at second iter, should have more info, get available actions
-            state_update_prompt = state_update_func(
+            state_update_prompt, agent_action = state_update_func(
                 pg_row_num, pg_column_num, data_dict["pg_dict"]
             )
             print(f"STATE UPDATE PROMPT: {state_update_prompt}")
