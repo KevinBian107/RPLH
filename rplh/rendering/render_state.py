@@ -523,7 +523,7 @@ def render_animate(box_map, actions, num_frames=2):
             font=dict(size=20, color="black", family="Arial"),  # Larger and more readable title font
         ),
         xaxis=dict(
-            range=[0, 2],  # Add padding around the grid
+            range=[0, df_combined['x'].max() + 0.5],  # Add padding around the grid
             showgrid=True,  # Add light gridlines for spatial reference
             gridcolor="lightgray",
             zeroline=True,
@@ -531,7 +531,7 @@ def render_animate(box_map, actions, num_frames=2):
             title="",
         ),
         yaxis=dict(
-            range=[0, 2],  # Add padding around the grid
+            range=[0, df_combined['y'].max() + 0.5],  # Add padding around the grid
             showgrid=True,
             gridcolor="lightgray",
             zeroline=True,

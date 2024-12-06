@@ -74,20 +74,23 @@ def LLaMA_response_json(
         return None, 0
 
 
-def GPT_response(messages, model_name):
+def GPT_response(messages, model_name, api_key=None):
     token_num_count = 0
-    client = OpenAI(
-        api_key=os.getenv('OPANAI_API_KEY')
-    )
-    # for item in messages:
-    #     token_num_count += len(enc.encode(item["content"]))
+    if api_key is None:
+        client = OpenAI(
+            api_key=os.getenv('OPANAI_API_KEY')
+        )
+        # for item in messages:
+        #     token_num_count += len(enc.encode(item["content"]))
+    else:
+        client = OpenAI(api_key=api_key)
 
     try:
-        time.sleep(5)
+        # time.sleep(5)
         result = client.chat.completions.create(
             model=model_name,
             messages=messages,
-            temperature=0.5,
+            temperature=0.1,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0,
@@ -95,11 +98,11 @@ def GPT_response(messages, model_name):
     except Exception as e:
         print(e)
         try:
-            time.sleep(5)
+            # time.sleep(5)
             result = client.chat.completions.create(
             model=model_name,
             messages=messages,
-            temperature=0.5,
+            temperature=0.1,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0
@@ -111,7 +114,7 @@ def GPT_response(messages, model_name):
                 result = client.chat.completions.create(
                     model=model_name,
                     messages=messages,
-                    temperature = 0.5,
+                    temperature = 0.1,
                     top_p=1,
                     frequency_penalty=0,
                     presence_penalty=0,
@@ -131,32 +134,43 @@ def LLaMA_response(messages, model_name, url="http://localhost:11434/api/generat
         model_name: name of the LLaMA model
         url: endpoint where LLaMA is hosted
     """
-    prompt = "\n".join(
-        [f"{msg['role'].capitalize()}: {msg['content']}" for msg in messages]
-    )
-    data = {
-        "model": model_name,
-        "prompt": prompt,
-        "temperature": 0.0,
-        "top_p": 1,
-        "frequency_penalty": 0,
-        "presence_penalty": 0,
-        "stream": False,
-    }
+    
+    if model_name[:3] == 'gpt':
+        api_key = os.getenv('OPENAI_API_KEY')
+        if api_key is None:
+            raise ValueError('OPEN AI api key not found')
+        
+        response, token_num_count = GPT_response(messages, model_name, api_key=api_key)
+        
+        return response, token_num_count
+        
+    else:
+        prompt = "\n".join(
+            [f"{msg['role'].capitalize()}: {msg['content']}" for msg in messages]
+        )
+        data = {
+            "model": model_name,
+            "prompt": prompt,
+            "temperature": 0.0,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 0,
+            "stream": False,
+        }
+        
+        try:
+            response = requests.post(url=url, json=data)
 
-    try:
-        response = requests.post(url=url, json=data)
-
-        if response.status_code == 200:
-            response_text = response.json().get("response", "")
-            token_num_count = sum(
-                len(enc.encode(msg["content"])) for msg in messages
-            ) + len(enc.encode(response_text))
-            # print(f"Token_num_count: {token_num_count}")
-            return response_text, token_num_count
-        else:
-            print("Error:", response.status_code, response.json())
+            if response.status_code == 200:
+                response_text = response.json().get("response", "")
+                token_num_count = sum(
+                    len(enc.encode(msg["content"])) for msg in messages
+                ) + len(enc.encode(response_text))
+                # print(f"Token_num_count: {token_num_count}")
+                return response_text, token_num_count
+            else:
+                print("Error:", response.status_code, response.json())
+                return None, 0
+        except Exception as e:
+            print(f"API call failed: {e}")
             return None, 0
-    except Exception as e:
-        print(f"API call failed: {e}")
-        return None, 0

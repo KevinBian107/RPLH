@@ -163,11 +163,12 @@ def rplh_prompt_agent_func(
                     You should build model for all the agent in the format agent_model[{{Agent[0.5, 0.5]: [This agent is very proactive in moving box], Agent[0.5, 1.5]: [This agent is not really cooperative hence should try to avoid moving boxes to him], ...}}].
             
                 
-                4. Based on the strategy model, please be very careful in giving action plan to each agent, make plans that makes it more likely for each local agent to obey and agree directly without argument.
+                4. Form a strategy_model, specifically based on agent_model, identify agents that are uncoopertaive and that you don't want to give actions to.
+                    Try to make plans that makes it more likely for each local agent to obey and agree directly without argument.
                     Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents.
             """
         if judging_mode:
-            re_eval_prompt = f"""{local_agent_location} has provided their perspective on your plan as this feedback {local_response}, with this information, do two things:
+            re_eval_prompt = f"""{local_agent_location} has provided their perspective on your plan (notice that they will think that they are the central planner) as this feedback {local_response}, with this information, do two things:
             
                             1. Please modify your original plan of {cen_response}.
                             
@@ -205,6 +206,8 @@ def rplh_prompt_agent_func(
             The previous state and action pairs at each step are: {state_action_prompt}
             
             Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible that each agent can take: {state_update_prompt}.
+            
+            Notice that you should try to utilize all agents by assigning actions to agents that doesn't have boxes in their region for transportations.
             
             Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
 

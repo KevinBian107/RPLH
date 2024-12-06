@@ -334,10 +334,14 @@ def run_exp(
 
                     region_key = f"{local_agent_row_i+0.5}_{local_agent_column_j+0.5}"
                     if len(data_dict["pg_dict"][region_key]) == 0:
-                        print(
-                            f"SKIPPING Agent[{local_agent_row_i+0.5},{local_agent_column_j+0.5}] as no blocks are present in its region."
-                        )
-                        continue
+                        if (
+                        f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
+                        not in data_local["agent_dict"]
+                        ):
+                            print(
+                                f"SKIPPING Agent[{local_agent_row_i+0.5},{local_agent_column_j+0.5}] as no blocks are present in its region and no action assigned by HCA."
+                            )
+                            continue
 
                     # need to relapse responses to each agents
                     data_local["agent_dict"] = response
