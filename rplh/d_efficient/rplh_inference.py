@@ -65,7 +65,7 @@ def run_exp(
     num_agent = pg_row_num * pg_column_num
     
     att_config = load_config("rplh/configs/attitude_config.yaml")
-    att_config = att_config["h_efficient_agent"]
+    att_config = att_config["d_efficient_standard"]
 
     Saving_path_result = (
         Saving_path
@@ -112,9 +112,13 @@ def run_exp(
         pg_column_num=pg_column_num,
     )
 
-    for index_query_times in range(query_time_limit):
+    for index_query_times in range(10):
 
         data_dict["env_step"] += 1
+        
+        if data_dict["env_step"] >= query_time_limit:
+            print("QUERY TIME LIMIT REACHED")
+            break
 
         result = {
             key: {
@@ -144,7 +148,7 @@ def run_exp(
         response = "You are the first agent, no one made response yet"
 
         counter = 0
-        while data_dict["agree_num"] != data_local["agent_in_action_count"] // 2:
+        while data_dict["agree_num"] < 2:
             # not half of people doing action agree, does not execute
             counter += 1
             print(f"#{counter} TIME IN WHILE LOOP")
@@ -172,7 +176,7 @@ def run_exp(
                     )
 
                     print(
-                        f"CURRENT AGENT IS Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
+                        f"CURRENT AGENT IS Agent[{local_agent_row_i}, {local_agent_column_j}]"
                     )
 
                     if (
@@ -223,6 +227,7 @@ def run_exp(
                             data_dict,
                             dialogue_history_method,
                             local_agent_location,
+                            assigned_attitude
                         )
 
                         data_dict["user_prompt_list"].append(local_reprompt)
@@ -235,6 +240,7 @@ def run_exp(
                             data=data_dict,
                             dialogue_history_method=dialogue_history_method,
                             local_agent_location=local_agent_location,
+                            assigned_attitude=assigned_attitude
                         )
 
                         data_local["prompt_list_dir"][
@@ -293,7 +299,7 @@ def run_exp(
                         )
 
                         with open("conversation.txt", "a") as f:
-                            message = f"------###------###------LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
+                            message = f"------###------###------{assigned_attitude}_LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
                             f.write(message)
 
                         if response_local_agent != "I Agree":
@@ -419,11 +425,7 @@ def run_exp(
             break
 
     # -----------------------------------------TASK SUCCESS OUT-----------------------------------------#
-    if index_query_times < query_time_limit - 1:
-        success_failure = "success"
-    else:
-        success_failure = "failure over query time limit"
-    print(success_failure)
+
 
     return (
         data_dict["user_prompt_list"],
