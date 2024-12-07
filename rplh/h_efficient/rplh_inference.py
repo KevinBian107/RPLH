@@ -82,7 +82,6 @@ def run_exp(
         "token_num_count_list": [],
         "hca_agent_response_list": [],
         "hca_conversation_list": [],
-        "attitude_info": [],
         "attitude_dialogue_dict": {},
         "pg_dict": None,  # For initial environment state
         "env_step": -1,
@@ -106,7 +105,7 @@ def run_exp(
 
     print(f"query_time_limit: {query_time_limit}")
 
-    render_graph_terminal_popup(data_dict["pg_dict"])
+    render_graph_terminal_popup(data_dict["pg_dict"], pg_column_num = pg_column_num, pg_row_num = pg_row_num)
 
     world_model = ["You are the first HCA agent"]
 
@@ -195,8 +194,8 @@ def run_exp(
             raw_response = process_response(raw_response)
             response_str = "\n".join([f"{k}: {v}" for k, v, in raw_response.items()])
             response = raw_response["actions_plan"]
-            world_model = raw_response["world_model"]
-            print("\n", f"WORLD MODEL IS: {world_model}", "\n")
+            # world_model = raw_response["world_model"]
+            # print("\n", f"WORLD MODEL IS: {world_model}", "\n")
 
             # save user prompt
             with open(
@@ -497,20 +496,7 @@ def run_exp(
                 "-------###-------###-------###-------ATTITUDE CHECK-------###-------###-------###-------"
             )
 
-            attitude_prompt = attitude_agent_prompt_func(
-                data_dict["attitude_dialogue_dict"]
-            )
-            attitude_message = attitude_message_construct_func(attitude_prompt)
-            attitude_info, token_num_count = LLaMA_response(
-                attitude_message, model_name
-            )
             data_dict["token_num_count_list"].append(token_num_count)
-
-            data_dict["attitude_info"].append(attitude_info)
-
-            with open("conversation.txt", "a") as f:
-                message = f"------###------###------ATTITUDE_AGENT_{a}------###------###------: \n {attitude_info} \n \n"
-                f.write(message)
 
             # -----------------------------------------EXECUTION OF ACTION AT EACH HCA AGENT LEVEL-----------------------------------------#
             print(
@@ -551,7 +537,7 @@ def run_exp(
 
                 data_dict["pg_dict"] = pg_dict_returned
 
-                render_graph_terminal_popup(data_dict["pg_dict"])
+                render_graph_terminal_popup(data_dict["pg_dict"], pg_column_num = pg_column_num, pg_row_num = pg_row_num)
                 # render_animate_terminal_popup(data_dict["pg_dict"], [original_response_dict])
 
             except:
