@@ -570,7 +570,7 @@ def run_exp(
             # need to append new states to state list
             data_dict["pg_state_list"].append(data_dict["pg_dict"])
 
-            data_dict["agree_num"] = 0
+            data_dict["agree_num"][f"HCA_{a}"] = 0
 
             # -----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
             count = 0
