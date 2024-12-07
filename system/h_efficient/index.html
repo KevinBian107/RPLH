@@ -597,6 +597,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#advesarial-reasonin-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advesarial Reasonin System
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -778,6 +787,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#advesarial-reasonin-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advesarial Reasonin System
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -834,6 +852,24 @@
 <li>Instead of letting the HCA agent figuring out attitude, we limit the prompt length that can be given by assigning an attitude agent taht judges the attitude of each agent on the field with current round information only, then only this attitude information is passed to teh next round HCA agent.</li>
 </ol>
 <p>Because of these optimization tricks, it gets really quick in later trials for execution to happen.</p>
+<h2 id="advesarial-reasonin-system">Advesarial Reasonin System<a class="headerlink" href="#advesarial-reasonin-system" title="Permanent link">&para;</a></h2>
+<p>To perform agent based reasoning, there is few game rules that we have implemented for this advesarial environment:
+1. There exist extra information in the response field, namely <code>agent_model</code> and <code>spy_model</code> to capture LM's thoughts on explictly building an agent reasoning system:
+    - These models ar incrementally imrpoved by teh judge HCA, not the HCA that is giving command.</p>
+<div class="highlight"><pre><span></span><code>````python 
+class HCA_AgentModel(HCA):
+    agent_model: Dict[str, str]
+    spy_model: Dict[str, str]
+````
+</code></pre></div>
+<ol>
+<li>
+<p>Each <code>agent_model</code> and <code>spy_model</code> are two degree Markovian (though this can be a hyperparameter) where each judege HCA when updating the models can see the previous two versions of the models.</p>
+</li>
+<li>
+<p>For the speedyness of our system, once a spy does not have boxes to move or tragets to match in its grid, then the system will remaind the HCA that one spy agent has been identifided. If all the spy agent has been identified, the system would remaind the HCA agent to not look for spy anymore.</p>
+</li>
+</ol>
 
 
 
