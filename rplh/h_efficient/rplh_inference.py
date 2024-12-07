@@ -86,6 +86,7 @@ def run_exp(
         "pg_dict": None,  # For initial environment state
         "env_step": -1,
         "agree_num": {},
+        "spy_detect": 0,
     }
 
     # Load initial environment state
@@ -287,6 +288,7 @@ def run_exp(
 
                     local_agent_iter += 1
 
+                    # two version, identify needed
                     region_key = f"{local_agent_row_i+0.5}_{local_agent_column_j+0.5}"
                     if len(data_dict["pg_dict"][region_key]) == 0:
                         if (
@@ -321,6 +323,14 @@ def run_exp(
                         # decide attitude
                         if local_agent_location in att_config["spy_agent"]:
                             assigned_attitude = "SPY"
+                            #check if spy is out
+                            if len(data_dict['pg_dict'][region_key]) == 0:
+                                print(f"SPY AT {local_agent_location} HAS NO BOXES?TARGETS, OUT")
+                                data_dict['spy_detect'] += 1
+                                
+                                if data_dict['spy_detect'] == len(att_config["spy_agent"]):
+                                    print("ALL SPY OUT, END")
+                        
                         elif local_agent_location in att_config["nice_agent"]:
                             assigned_attitude = "NICE"
                         elif local_agent_location in att_config["critic_agent"]:
