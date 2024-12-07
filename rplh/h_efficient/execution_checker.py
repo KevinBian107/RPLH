@@ -14,7 +14,12 @@ CHECK_ITER = 10
 
 
 def is_valid_action(
-    response: str, central_response: str, pg_dict_input: list, state_update_prompt: str, is_judge: bool
+    response: str, 
+    central_response: str, 
+    pg_dict_input: list, 
+    state_update_prompt: str, 
+    is_judge: bool, 
+    agent_action: dict
 ) -> str:
     """
     Validates the actions proposed in a response against the playground's state.
@@ -80,11 +85,20 @@ def is_valid_action(
         ):
             pass
         else:
+            agent_name = f'Agent[{key[0]}, {key[0]}]'
+            doable_action_lst = agent_action[agent_name]
+            doable_action = f'The list of doable action for {agent_name} is {doable_action_lst}'
             if is_judge:
-                feedback = f"""You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
-                                so choose the alternative action from the central central planner {central_response}. Remanber that the doable action for each agent is {state_update_prompt};"""
+                feedback = f"""
+                You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
+                {doable_action}
+                So choose the alternative action from the central central planner {central_response}.
+                """
             else:
-                feedback = f"Your assigned task for {key[0]}, {key[1]} is not in the doable action list; Remanber that the doable action for each agent is {state_update_prompt};"
+                feedback = f"""
+                Your assigned task for {key[0]}, {key[1]} is not in the doable action list, 
+                {doable_action}.
+                """
 
     return feedback
 
@@ -151,6 +165,7 @@ def with_action_syntactic_check_func(
     dialogue_history_method: str,
     prompt_func: Callable[[str, dict, str, str], str],
     state_update_prompt: str,
+    agent_action: dict,
     is_judge: bool = False,
 ) -> tuple[Union[str, dict], list[int]]:
     """
@@ -192,7 +207,9 @@ def with_action_syntactic_check_func(
     # logic gate: put on DSC20 final exam please
     while iteration_num < CHECK_ITER:
         # preventing JSON checker change action
-        feedback = is_valid_action(response, central_response, pg_dict_input, state_update_prompt, is_judge)
+        feedback = is_valid_action(
+            response, central_response, pg_dict_input, state_update_prompt, is_judge, agent_action
+        )
         
         print(f'ORIGINAL PROPOSED ACTION IS {response}')
         print(f"FEEDBACK IS {feedback}")
@@ -206,7 +223,7 @@ def with_action_syntactic_check_func(
                 token_num_count_list_add,
                 dialogue_history_method,
                 model_name,
-                prompt_func,
+                prompt_func, 
                 is_judge,
             )
             print(f"ACTION RETAKEN: {response}")

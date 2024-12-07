@@ -120,7 +120,7 @@ def state_update_func(
 
     pg_dict_copy = copy.deepcopy(pg_dict)
     state_update_prompt = ""
-    # agent_action = dict()
+    agent_action = dict()
     for i in range(pg_row_num):
         for j in range(pg_column_num):
             square_item_list = pg_dict_copy[str(i + 0.5) + "_" + str(j + 0.5)]
@@ -148,8 +148,8 @@ def state_update_func(
                 )
             else:
                 state_update_prompt += "\n"  # I can do nothing
-            # agent_action[f"Agent[{i+0.5}, {j+0.5}]"] = action_list
-    return state_update_prompt
+            agent_action[f"Agent[{i+0.5}, {j+0.5}]"] = action_list
+    return state_update_prompt, agent_action
 
 
 def state_update_func_local_agent(
