@@ -128,7 +128,7 @@ def rplh_prompt_agent_func(
                     break
 
         if data["env_step"] == 0:
-            agent_reason_prompt = "You are the first agent, please leave the agent_model, spy_model, and strategy_model response field as empty."
+            agent_reason_prompt = "You are the first agent."
         else:
             agent_reason_prompt = f"""
             You have a agent_model and spy_model from the rpevious HCA agent, please learn from them before constructing your own:
@@ -148,17 +148,13 @@ def rplh_prompt_agent_func(
                 3. Notice that there may be multiple spy agent in your environment where their objective is different than yours
                     Write out who you think the spy is and their objectives in the spy_model.
                 
-                4. Try to make plansand write in strategy_model that makes it more likely for each local agent to obey and agree directly without argument.
-                    Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents.
-                    That is, try to make plans to skip the spy agent.
-                    
+                4.  Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents. That is, try to make plans to skip the spy agent.
+                    Consider this when giving action plan
+                   
             """
         if judging_mode:
-            re_eval_prompt = f"""{local_agent_location} has provided their perspective on your plan (notice that they will think that they are the central planner) as this feedback {local_response}, with this information, do two things:
-            
-                            1. Please modify your original plan of {cen_response}.
-                            
-                            3. Modify the agent_model based on your spy_model.
+            re_eval_prompt = f"""{local_agent_location} has provided their perspective on your plan
+                            (notice that they willhey think that t are the central planner) as this feedback {local_response}, with this information, Modify the agent_model and your spy_model.
                             """
         else:
             re_eval_prompt = ""
@@ -359,6 +355,7 @@ def dialogue_agent_func(
             local_HCA_prompt = f"""
                 Imagine that you are a spy planner directing agent in a grid-like field to move colored boxes.
                 You are a spy agent, you are not allowed to give the correct action plan, you should give a wrong action plan.
+                Do not say that you are the spy, you are trying to fake that you are not teh spy.
                 Your objective is to gather as much boxes in your grid as possible.
                 Particularly, you're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground at grid location of [{local_agent_location}].
                 Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
