@@ -73,7 +73,7 @@ def main():
     Code_dir_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     # Set up paths and parameters
-    path = "multi-agent-env"
+    path = "inference-env"
     saving_path = os.path.join(Code_dir_path, path)
     os.makedirs(saving_path, exist_ok=True)
     pg_row_num = args.row_num
