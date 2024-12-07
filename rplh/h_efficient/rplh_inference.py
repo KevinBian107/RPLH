@@ -107,8 +107,6 @@ def run_exp(
 
     render_graph_terminal_popup(data_dict["pg_dict"], pg_column_num = pg_column_num, pg_row_num = pg_row_num)
 
-    world_model = ["You are the first HCA agent"]
-
     for index_query_times in range(10):
         # -----------------------------------------ONE HCA AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
         for a in range(num_agent):

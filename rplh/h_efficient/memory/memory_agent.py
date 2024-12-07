@@ -132,6 +132,7 @@ def rplh_prompt_agent_func(
             agent_reason_prompt = "You are the first agent. Leave spy_model and agent_model empty"
             print('FIRST HCA')
         else:
+            # when being HCA, judeg who is spy directly
             print("NEW HCA DOING SOCIAL REASONING")
             agent_reason_prompt = f"""
             You have a agent_model and spy_model from the rpevious HCA agent, please learn from them before constructing your own:
@@ -161,10 +162,13 @@ def rplh_prompt_agent_func(
                    
             """
         if judging_mode:
+            # when being judge, find spy incrementally
             re_eval_prompt = f"""{local_agent_location} has provided their perspective on your plan
                             (notice that they will think that they are the central planner) as this feedback {local_responses}.
                             Use this inofrmation to judge if this agent is a spy and then update your agent_model and spy_moddel.
                             Remamber to append ths previous agent_model and spy_model.
+                            
+                            If you think an loca agent is an spy, don't listen to his opinions.
                             """
         else:
             re_eval_prompt = ""
