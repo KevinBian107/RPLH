@@ -404,7 +404,7 @@ def run_exp(
             render_graph_terminal_popup(
                 data_dict["pg_dict"], 
                 pg_row_num=pg_row_num,
-                pg_column_num=pg_column_num,
+                pg_column_num=pg_column_num
             )
 
         except:
