@@ -561,6 +561,7 @@ def run_exp(
                             dialogue_history_method,
                             partial_judge_prompt_func,
                             state_update_prompt,
+                            agent_action,
                             is_judge=True,
                         )
                     )
