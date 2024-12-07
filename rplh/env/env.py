@@ -2,6 +2,7 @@
 
 import sys
 from pathlib import Path
+import yaml
 
 main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
@@ -15,6 +16,32 @@ import copy
 import numpy as np
 import shutil
 import random
+
+def load_config(config_path):
+    """Load and validate YAML configuration."""
+
+    def validate_and_cast(value):
+        if isinstance(value, str):
+            try:
+                # Try to cast to float if it's a scientific notation string
+                return float(value)
+            except ValueError:
+                return value
+        return value
+
+    with open(config_path, "r") as file:
+        config = yaml.safe_load(file)
+
+    # Recursively apply the validation and casting function
+    def recursive_validate_cast(data):
+        if isinstance(data, dict):
+            return {k: recursive_validate_cast(v) for k, v in data.items()}
+        elif isinstance(data, list):
+            return [recursive_validate_cast(item) for item in data]
+        else:
+            return validate_and_cast(data)
+
+    return recursive_validate_cast(config)
 
 def better_state_repres(pg_dict: dict) -> dict:
     """
