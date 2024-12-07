@@ -173,16 +173,16 @@ def run_exp(
             state_update_prompt = state_update_func(
                 pg_row_num, pg_column_num, data_dict["pg_dict"]
             )
-            print(f"STATE UPDATE PROMPT: {state_update_prompt}")
-
+            # print(f"STATE UPDATE PROMPT: {state_update_prompt}")
+            
+            
             user_prompt_1 = rplh_prompt_agent_func(
                 state_update_prompt,
                 data_dict,
                 dialogue_history_method,
                 HCA_agent_location,
                 local_agent_location="",
-                cen_response="",
-                local_response="",
+                local_response=,
                 judging_mode=False,
             )
 
@@ -194,8 +194,7 @@ def run_exp(
                 dialogue_history_method=dialogue_history_method,
                 HCA_agent_location=HCA_agent_location,
                 local_agent_location="",
-                cen_response="",
-                local_response="",
+                local_response=data_dict["dialogue_history_list"][-1],
                 judging_mode=False,
             )
 
@@ -229,7 +228,7 @@ def run_exp(
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
 
-            print(f"HCA Raw Response: {raw_response}")
+            # print(f"HCA Raw Response: {raw_response}")
 
             # REDO HCA
             response, token_num_count_list_add = with_action_syntactic_check_func(
@@ -398,7 +397,7 @@ def run_exp(
                             messages, model_name
                         )
 
-                        print(f"LOCAL AGENT RESPONSE: {response_local_agent}")
+                        # print(f"LOCAL AGENT RESPONSE: {response_local_agent}")
 
                         data_dict["token_num_count_list"].append(token_num_count)
 
@@ -449,8 +448,7 @@ def run_exp(
                         dialogue_history_method,
                         HCA_agent_location,
                         local_agent_location=local_agent_location,
-                        local_response=local_response,
-                        cen_response=cen_response,
+                        local_response=[local_response],
                         judging_mode=True,
                     )
 
@@ -462,8 +460,7 @@ def run_exp(
                         dialogue_history_method=dialogue_history_method,
                         HCA_agent_location=HCA_agent_location,
                         local_agent_location=local_agent_location,
-                        local_response=local_response,
-                        cen_response=cen_response,
+                        local_response=[local_response],
                         judging_mode=True,
                     )
 
