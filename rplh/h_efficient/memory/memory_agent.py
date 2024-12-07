@@ -1,15 +1,16 @@
 import sys
 from pathlib import Path
-from rplh.env.env import *
+import tiktoken
 
 main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
 
 from rplh.llm.language_model import *
-import tiktoken
+from rplh.env.env import *
 from rplh.h_efficient.memory.memory_standard import *
 from rplh.env.env import better_state_repres
+
 
 enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"

@@ -1,6 +1,16 @@
-from rplh.llm.language_model import *
-from rplh.env.env import better_state_repres
+
+import sys
+from pathlib import Path
 import tiktoken
+
+main_path = Path(__file__).resolve().parent.parent.parent
+if str(main_path) not in sys.path:
+    sys.path.append(str(main_path))
+    
+from rplh.llm.language_model import *
+from rplh.env.env import *
+
+from rplh.env.env import better_state_repres
 
 enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"
@@ -60,14 +70,6 @@ def rplh_prompt_func(
     Notes:
         Boxes just need to be moved to the target location, not in the target location.
     """
-
-    # if data["env_step"] == 0:
-    #     attitude = None
-    #     success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
-    #     {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
-    # else:
-    #     attitude = data["attitude_info"][-1]
-    #     success_action = data["response_total_list"][-1]
 
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
@@ -146,27 +148,7 @@ def rplh_prompt_func(
                     state_action_prompt = state_action_prompt_next
                 else:
                     break
-
-        # if data["env_step"] == None:
-        #     print("ATTITUDE IS NONE")
-        #     att_promt = ""
-        # else:
-        #     att_promt = f"""
-        #     Please learn from attitude in the following ways:
-
-        #         1. Please undrstand the attitude of each agents in this environment,
-        #         including yourself based on this attitude report given from another agent: 
                 
-        #         {attitude}.
-
-        #         2. Based on this charcteristics of each agent, please do two things and added them after each agent's attitude:
-        #             i. Reason about the reactions each agent would have towards your command.
-        #             ii. Reason about how they would give actions if they are the central agent.
-            
-        #     Use the following format:
-        #     - Attitude of agent...
-        #     - Reaction of agent...
-        #     """
         if feedback != "":
             feedback = (
                 "There is error in preivous action plan. Here is the feedbcak: "
@@ -204,7 +186,7 @@ def rplh_prompt_func(
     return HCA_prompt
 
 
-def dialogue_agent_func(
+def dialogue_func(
     state_update_prompt_local_agent: str,
     state_update_prompt_other_agent: str,
     central_response: str,

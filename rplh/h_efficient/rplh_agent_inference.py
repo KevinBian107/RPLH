@@ -1,6 +1,10 @@
 import sys
 from pathlib import Path
 import argparse
+import os
+import json
+import pandas as pd
+from functools import partial
 
 main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
@@ -19,13 +23,6 @@ from rplh.env.env import *
 from rplh.h_efficient.execution_checker import *
 
 from rplh.rendering.render_state import *
-
-import os
-import json
-import sys
-import os
-import pandas as pd
-from functools import partial
 
 
 def run_exp(
