@@ -85,21 +85,26 @@ def is_valid_action(
         ):
             pass
         else:
+
             agent_name = f'Agent[{key[0]}, {key[0]}]'
-            doable_action_lst = agent_action[agent_name]
-            doable_action = f'The list of doable action for {agent_name} is {doable_action_lst}'
+            if agent_name in agent_action:
+                doable_action_lst = agent_action[agent_name]
+                doable_action = f'The list of doable action for {agent_name} is {doable_action_lst}'
+            else:
+                print('ERROR: NOT DOABLE ACTION FOR AGENT')
+                doable_action = 'No doable action for this agent'
+
             if is_judge:
                 feedback = f"""
-                You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
-                {doable_action}
-                So choose the alternative action from the central central planner {central_response}.
+        You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
+        {doable_action}
+        So choose the alternative action from the central central planner {central_response}.
                 """
             else:
                 feedback = f"""
-                Your assigned task for {key[0]}, {key[1]} is not in the doable action list, 
-                {doable_action}.
+        Your assigned task for {key[0]}, {key[1]} is not in the doable action list, 
+        {doable_action}.
                 """
-
     return feedback
 
 

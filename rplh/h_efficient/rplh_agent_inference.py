@@ -241,6 +241,7 @@ def run_exp(
                 dialogue_history_method,
                 partial_rplh_prompt_func,
                 state_update_prompt,
+                agent_action, 
                 False,
             )
             data_dict["token_num_count_list"] = (
