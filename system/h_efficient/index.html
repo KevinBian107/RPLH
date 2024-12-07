@@ -856,11 +856,9 @@
 <p>To perform agent based reasoning, there is few game rules that we have implemented for this advesarial environment:
 1. There exist extra information in the response field, namely <code>agent_model</code> and <code>spy_model</code> to capture LM's thoughts on explictly building an agent reasoning system:
     - These models ar incrementally imrpoved by teh judge HCA, not the HCA that is giving command.</p>
-<div class="highlight"><pre><span></span><code>````python 
-class HCA_AgentModel(HCA):
-    agent_model: Dict[str, str]
-    spy_model: Dict[str, str]
-````
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">class</span> <span class="nc">HCA_AgentModel</span><span class="p">(</span><span class="n">HCA</span><span class="p">):</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">agent_model</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">spy_model</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
 </code></pre></div>
 <ol>
 <li>
