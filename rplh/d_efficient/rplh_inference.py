@@ -172,11 +172,11 @@ def run_exp(
                     )
 
                     local_agent_location = (
-                        f"{local_agent_row_i}, {local_agent_column_j}"
+                        f"Agent[{local_agent_row_i}, {local_agent_column_j}]"
                     )
 
                     print(
-                        f"CURRENT AGENT IS Agent[{local_agent_row_i}, {local_agent_column_j}]"
+                        f"CURRENT AGENT IS {local_agent_location}"
                     )
 
                     if (
