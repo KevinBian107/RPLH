@@ -172,7 +172,7 @@ def run_exp(
                     )
 
                     local_agent_location = (
-                        f"Agent[{local_agent_row_i}, {local_agent_column_j}]"
+                        f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                     )
 
                     print(
@@ -298,25 +298,30 @@ def run_exp(
                             data_dict["token_num_count_list"] + token_num_count_list_add
                         )
 
-                        with open("conversation.txt", "a") as f:
-                            message = f"------###------###------{assigned_attitude}_LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
-                            f.write(message)
-
-                        if response_local_agent != "I Agree":
+                        if ("I Agree" not in response_local_agent) or ("I Disagree" in response_local_agent) or ("However" in response_local_agent):
+                            print("I Don't Agree")
                             data_local["local_agent_response_list_dir"][
                                 "feedback1"
                             ] += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
 
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
+                            with open("conversation.txt", "a") as f:
+                                message = f"------###------###------{assigned_attitude}_DISAGREEING_LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
+                                f.write(message)
                         else:
                             print("I Agree")
                             data_dict["agree_num"] += 1
+                            with open("conversation.txt", "a") as f:
+                                message = f"------###------###------{assigned_attitude}_AGREEING_LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
+                                f.write(message)
                             # agree no judge, use HCA response diretcly, avoid error.
                             continue
 
                     else:
                         # no action assiged, noes not participate
                         data_local["agent_in_action_count"] -= 1
+
+                    print(f"THE CURRENT AGREEMENT NUMBER: {data_dict["agree_num"]}")
 
                     # -----------------------------------------RECONSTRUCT MESSAGES-----------------------------------------#
                     if (
