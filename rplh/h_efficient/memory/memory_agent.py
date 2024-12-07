@@ -127,50 +127,66 @@ def rplh_prompt_agent_func(
                     state_action_prompt = state_action_prompt_next
                 else:
                     break
-                
+        
+        try:
+            agent_model = data['agent_model'][-2]
+            spy_model = data['spy_model'][:-2]
+        except:
+            agent_model =  data['agent_model']
+            spy_model = data['spy_model']
+        
         if (judging_mode == False) and (data["env_step"] == 0):
             agent_reason_prompt = "You are the first agent. Leave spy_model and agent_model empty"
             print('FIRST HCA')
-        else:
-            # when being HCA, judeg who is spy directly
-            print("NEW HCA DOING SOCIAL REASONING")
-            agent_reason_prompt = f"""
-            You have a agent_model and spy_model from the rpevious HCA agent, please learn from them before constructing your own:
-            Previous agent model" {data['agent_model']}
-            Previous spt model {data['spy_model']}
-            
-            Do not fully beleive these models, look at actions from each agent and reason who is the spy.
-            
-            Please learn from attitude in the following ways:                
-
-                1. Based on the action taken by each agent and the reasoning they give charcteristics of each agent, please do two things and added them after each agent's attitude:
-                    i. Reason about the reactions each agent would have towards your command.
-                    ii. Reason about how they would give actions if they are the central agent.
-                    
-                2. Please build your belief on what each agent would do and outpute in agent_model. Use one world to describe their attitude and then some reasoning.
-                    Do not just say what the agents are doing, but rather use texts to explain their characteristics.
-                    You should build model for all the agent in the format agent_model[{{Agent[0.5, 0.5]: [proactive: good in moving box], Agent[0.5, 1.5]: [This agent is not really cooperative hence should try to avoid moving boxes to him], ...}}].
-                
-                3. Notice that there may be multiple spy agent in your environment where their objective is different than yours.
-                    Write out who you think the spy is and their objectives in the spy_model.
-                    Do your reasoning based on agent's action, not just their conversation. Think if their action makes sense.
-                    Here are the actions {local_responses}
-                    At least half of the agents are spys.
-                    
-                4.  Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents. That is, try to make plans to skip the spy agent.
-                    Consider this when giving action plan
-                   
-            """
+        
         if judging_mode:
+            print('JUDGING MODE HCA')
             # when being judge, find spy incrementally
             re_eval_prompt = f"""{local_agent_location} has provided their perspective on your plan
                             (notice that they will think that they are the central planner) as this feedback {local_responses}.
                             Use this inofrmation to judge if this agent is a spy and then update your agent_model and spy_moddel.
-                            Remamber to append ths previous agent_model and spy_model.
+                            Remamber to append ths previous agent_model and spy_model. Don't acuse agent being spy when they are not {local_agent_location}, only acuse {local_agent_location} if you think it's spy.
                             
-                            If you think an loca agent is an spy, don't listen to his opinions.
+                            If you think an local agent is an spy, don't listen to it's opinions.
+                            
+                            You only see {local_agent_location}, do not build agent_model or spy_model for any other agent other than {local_agent_location}.
+                            
+                            Please append the previous agent model" {agent_model} and previous spt model {spy_model}
+                            """
+            
+            agent_reason_prompt = f"""Please learn from spy_model and agent_modelin the following ways:
+                                    
+                                1. Please build your belief on what each agent would do and outpute in agent_model. Use one world to describe their attitude and then some reasoning.
+                                    Do not just say what the agents are doing, but rather use texts to explain their characteristics.
+                                    You should build model for all the agent in the format agent_model[{{Agent[0.5, 0.5]: [proactive: good in moving box], Agent[0.5, 1.5]: [This agent is not really cooperative hence should try to avoid moving boxes to him], ...}}].
+                                
+                                2. Notice that there may be multiple spy agent in your environment where their objective is different than yours.
+                                    Write out who you think the spy is and their objectives in the spy_model.
+                                    Notice that the spy is not trying to not move box but rather having a different objective in mind (i.e. putting boxes in the wrong place or move boxes away from targets), so lazy agent is not a sign of spy.
+                                    Spy knows how to fake themselves, so you must reason from not just there attitude in text, but they are doing in action.
+                                    Do your reasoning based on agent's action, not just their conversation. Think if their action makes sense.
+                                    
                             """
         else:
+            # when being HCA, no judegement, just use info.
+            print("NEW HCA DOING OPTIMAL PLANNING")
+            
+            agent_reason_prompt = f"""
+                            You have a agent_model and spy_model from the rpevious HCA agent, please learn from them before constructing your own:
+                            Previous agent model" {agent_model}
+                            Previous spt model {spy_model}
+                            
+                            Please learn from spy_model and agent_model in the following ways:                
+
+                            1. Based on the action taken by each agent and the reasoning they give charcteristics of each agent, please do two things and added them after each agent's attitude:
+                                    i. Reason about the reactions each agent would have towards your command.
+                                    ii. Reason about how they would give actions if they are the central agent.
+                            
+                            2. Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents.
+                            That is, try to make plans to skip the spy agent.
+                            
+                            3. You should not change anything in the spy_model and agent_model, only learn from them to plan better actions.
+                        """
             re_eval_prompt = ""
 
         if feedback != "":
@@ -369,7 +385,10 @@ def dialogue_agent_func(
                 Imagine that you are a spy planner directing agent in a grid-like field to move colored boxes.
                 You are a spy agent, you are not allowed to give the correct action plan, you should give a wrong action plan.
                 Do not say that you are the spy, you are trying to fake that you are not the spy.
-                Fake in your conversation, but your action should try to do your objective, which is to gather as much boxes in your grid as possible.
+                Fake in your conversation, do not state your objective, but your action should try to do your objective, which is to make sure that boxes does not match targets.
+                However, you should still talk more describing why tou are taking these actions.
+                Try to make multiple action plans, not just for yourself, but for all agents.
+                
                 Do not say anything that may reveal your objective.
                 Refuse any action where the central agent ask you to move boxes away from your boxes or try to put boxes to taregets.
                 
