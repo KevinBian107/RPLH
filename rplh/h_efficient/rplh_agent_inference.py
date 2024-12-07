@@ -13,7 +13,6 @@ from rplh.h_efficient.memory.memory_standard import *
 from rplh.h_efficient.memory.memory_agent import (
     rplh_prompt_agent_func,
     dialogue_agent_func,
-    attitude_agent_prompt_func_for_agent,
 )
 
 from rplh.env.env import *
@@ -64,6 +63,10 @@ def run_exp(
     """
 
     print("RUNNIN EFFICIENT RPLH")
+    
+    # load attitudes
+    att_config = load_config("rplh/configs/attitude_config.yaml")
+    att_config = att_config["h_efficient_agent"]
 
     Saving_path_result = (
         Saving_path
@@ -86,12 +89,11 @@ def run_exp(
         "token_num_count_list": [],
         "hca_agent_response_list": [],
         "hca_conversation_list": [],
-        "attitude_info": [],
-        "pre_attitude_info": [],
-        "attitude_dialogue_dict": {},
         "pg_dict": None,  # For initial environment state
         "env_step": -1,
         "agree_num": {},
+        "agent_model": {},
+        "spy_model": {},
     }
 
     # Load initial environment state
@@ -116,25 +118,6 @@ def run_exp(
         pg_row_num=pg_row_num,
         pg_column_num=pg_column_num,
     )
-
-    agent_model = {
-        "Agent[0.5, 0.5]": "..",
-        "Agent[1.5, 0.5]": "...",
-        "Agent[0.5, 1.5]": "....",
-        "Agent[1.5, 1.5]": ".....",
-    }
-    actual_model = {
-        "Agent[0.5, 0.5]": "..",
-        "Agent[1.5, 0.5]": "...",
-        "Agent[0.5, 1.5]": "....",
-        "Agent[1.5, 1.5]": ".....",
-    }
-    strategy_model = {
-        "Agent[0.5, 0.5]": "..",
-        "Agent[1.5, 0.5]": "...",
-        "Agent[0.5, 1.5]": "....",
-        "Agent[1.5, 1.5]": ".....",
-    }
 
     for index_query_times in range(query_time_limit):
         # -----------------------------------------ONE HCA AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
@@ -190,19 +173,16 @@ def run_exp(
             state_update_prompt = state_update_func(
                 pg_row_num, pg_column_num, data_dict["pg_dict"]
             )
-            print(f"STATE UPDATE PROMPT: {state_update_prompt}")
-
+            # print(f"STATE UPDATE PROMPT: {state_update_prompt}")
+            
+            
             user_prompt_1 = rplh_prompt_agent_func(
                 state_update_prompt,
                 data_dict,
                 dialogue_history_method,
                 HCA_agent_location,
                 local_agent_location="",
-                agent_model=agent_model,
-                actual_model=actual_model,
-                strategy_model=strategy_model,
-                cen_response="",
-                local_response="",
+                local_response=,
                 judging_mode=False,
             )
 
@@ -214,11 +194,7 @@ def run_exp(
                 dialogue_history_method=dialogue_history_method,
                 HCA_agent_location=HCA_agent_location,
                 local_agent_location="",
-                agent_model=agent_model,
-                actual_model=actual_model,
-                strategy_model=strategy_model,
-                cen_response="",
-                local_response="",
+                local_response=data_dict["dialogue_history_list"][-1],
                 judging_mode=False,
             )
 
@@ -236,13 +212,8 @@ def run_exp(
             response_str = "\n".join([f"{k}: {v}" for k, v, in raw_response.items()])
             response = raw_response["actions_plan"]
 
-            agent_model = raw_response["agent_model"]
-            actual_model = raw_response["actual_model"]
-            strategy_model = raw_response["strategy_model"]
-
-            print("\n", f"AGENT MODEL IS: {agent_model}", "\n")
-            print("\n", f"ACTUAL MODEL IS: {actual_model}", "\n")
-            print("\n", f"STRATEGY MODEL IS: {strategy_model}", "\n")
+            data_dict['agent_model'] = raw_response["agent_model"]
+            data_dict['spy_model'] = raw_response["spy_model"]
 
             # save user prompt
             with open(
@@ -257,7 +228,7 @@ def run_exp(
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
 
-            print(f"HCA Raw Response: {raw_response}")
+            # print(f"HCA Raw Response: {raw_response}")
 
             # REDO HCA
             response, token_num_count_list_add = with_action_syntactic_check_func(
@@ -284,9 +255,6 @@ def run_exp(
 
             data_dict["hca_agent_response_list"].append(response)
             data_dict["hca_conversation_list"].append(response_str)
-            data_dict["attitude_dialogue_dict"][
-                f"Agent[{HCA_agent_location}]"
-            ] = response_str
 
             with open(
                 Saving_path_result
@@ -358,16 +326,26 @@ def run_exp(
                         f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                         in data_local["agent_dict"]
                     ):
-                        print(
-                            f"-------###-------###-------###-------LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
-                        )
-
                         local_agent_location = (
                             f"Agent[{local_agent_row_i}, {local_agent_column_j}]"
                         )
-
+                        
                         print(f"CURRENT AGENT IS {local_agent_location}")
                         print(f'AGENT ACTION DICT UPDATING:{data_local["agent_dict"]}')
+                        
+                        # decide attitude
+                        if local_agent_location in att_config["spy_agent"]:
+                            assigned_attitude = "SPY"
+                        elif local_agent_location in att_config["nice_agent"]:
+                            assigned_attitude = "NICE"
+                        elif local_agent_location in att_config["critic_agent"]:
+                            assigned_attitude = "CRITIC"
+                        else:
+                            assigned_attitude = "NEUTRAL"
+                            
+                        print(
+                            f"-------###-------###-------###-------{assigned_attitude}_LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
+                        )
 
                         # note, dict, this have space
                         data_local["prompt_list_dir"][
@@ -396,6 +374,7 @@ def run_exp(
                             data_dict,
                             dialogue_history_method,
                             local_agent_location,
+                            assigned_attitude=assigned_attitude,
                         )
                         data_local["prompt_list_dir"][
                             f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
@@ -418,7 +397,7 @@ def run_exp(
                             messages, model_name
                         )
 
-                        print(f"LOCAL AGENT RESPONSE: {response_local_agent}")
+                        # print(f"LOCAL AGENT RESPONSE: {response_local_agent}")
 
                         data_dict["token_num_count_list"].append(token_num_count)
 
@@ -431,7 +410,7 @@ def run_exp(
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
 
                             with open("conversation.txt", "a") as f:
-                                message = f"------###------###------DISAGREEING_LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
+                                message = f"------###------###------{assigned_attitude}_DISAGREEING_LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
                                 f.write(message)
 
                         else:
@@ -439,24 +418,16 @@ def run_exp(
                             data_dict["agree_num"][f"HCA_{a}"] += 1
                             # agree no judge, use HCA response diretcly, avoid error.
                             with open("conversation.txt", "a") as f:
-                                message = f"------###------###------AGREEING_LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
+                                message = f"------###------###------{assigned_attitude}_AGREEING_LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
                                 f.write(message)
 
                             continue
-
-                        # should be out, doesn't used too much
-                        # if (
-                        #     data_dict["agree_num"]
-                        #     >= (pg_column_num + pg_row_num) // 2
-                        # ):
-                        #     break
 
                     # -----------------------------------------RECONSTRUCT MESSAGES-----------------------------------------#
                     if (
                         data_local["local_agent_response_list_dir"]["feedback1"] != ""
                     ):  # if not I agree
                         # once not agree, set to zero to re-discuss lat plan
-                        # data_dict["agree_num"] = 0
                         data_local["local_agent_response_list_dir"][
                             "feedback1"
                         ] += FEEDBACK_LCOAL1
@@ -464,11 +435,11 @@ def run_exp(
                     # -----------------------------------------JUDGE IF NO AGREEMENT MET, SEND MESSAGE IF AGREE-----------------------------------------#
                     # This message should be constructed for teh judge, include both central and local response, agree on global plan
                     print(
-                        f"-------###-------###-------###-------HCA_JUDGE_ON_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
+                        f"-------###-------###-------###-------{assigned_attitude}_HCA_JUDGE_ON_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
                     )
-                    # local_response = data_local["local_agent_response_list_dir"][
-                    #     "feedback1"
-                    # ]
+                    local_response = data_local["local_agent_response_list_dir"][
+                        "feedback1"
+                    ]
                     cen_response = data_dict["hca_agent_response_list"][-1]
 
                     judge_prompt = rplh_prompt_agent_func(
@@ -477,11 +448,7 @@ def run_exp(
                         dialogue_history_method,
                         HCA_agent_location,
                         local_agent_location=local_agent_location,
-                        agent_model=agent_model,
-                        actual_model=actual_model,
-                        strategy_model=strategy_model,
-                        local_response=response_local_agent,
-                        cen_response=cen_response,
+                        local_response=[local_response],
                         judging_mode=True,
                     )
 
@@ -493,11 +460,7 @@ def run_exp(
                         dialogue_history_method=dialogue_history_method,
                         HCA_agent_location=HCA_agent_location,
                         local_agent_location=local_agent_location,
-                        agent_model=agent_model,
-                        actual_model=actual_model,
-                        strategy_model=strategy_model,
-                        local_response=response_local_agent,
-                        cen_response=cen_response,
+                        local_response=[local_response],
                         judging_mode=True,
                     )
 
@@ -517,14 +480,9 @@ def run_exp(
                     )
                     response_judge = raw_response_judge["actions_plan"]
 
-                    agent_model = raw_response_judge["agent_model"]
-                    actual_model = raw_response_judge["actual_model"]
-                    strategy_model = raw_response_judge["strategy_model"]
-
-                    print("\n", f"NEW AGENT MODEL IS: {agent_model}", "\n")
-                    print("\n", f"NEW ACTUAL MODEL IS: {actual_model}", "\n")
-                    print("\n", f"NEW STRATEGY MODEL IS: {strategy_model}", "\n")
-
+                    data_dict['agent_model'] = raw_response["agent_model"]
+                    data_dict['spy_model'] = raw_response["spy_model"]
+                    
                     if len(response_judge) == 0:
                         print("JUDGE NO RESPONSE: NO APPEND, HCA IS TEH LAST ONE")
                         continue
@@ -569,43 +527,12 @@ def run_exp(
 
                 data_local["last_agent_response"] = response
                 data_dict["dialogue_history_list"].append(dialogue_history)
-
-                # not acting agent does not communicate, resolve missing variable issue
-                if (
-                    f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
-                    in data_local["agent_dict"]
-                ):
-
-                    data_dict["attitude_dialogue_dict"][
-                        f"{local_agent_location}"
-                    ] = response_local_agent
-
+                
+            # response come from HCA if no in judgement
             data_dict["response_total_list"].append(
                 response
-            )  # response come from HCA if no in judgement
-
-            # -----------------------------------------ATTITUDE CHECK AFTER ALL AGENT-----------------------------------------#
-            print(
-                "-------###-------###-------###-------ATTITUDE CHECK-------###-------###-------###-------"
             )
-
-            attitude_prompt = attitude_agent_prompt_func_for_agent(
-                data_dict["attitude_dialogue_dict"], data_dict["pre_attitude_info"]
-            )
-            attitude_message = attitude_message_construct_func(attitude_prompt)
-            attitude_info, token_num_count = LLaMA_response(
-                attitude_message, model_name
-            )
-            data_dict["token_num_count_list"].append(token_num_count)
-
-            data_dict["attitude_info"].append(attitude_info)
-
-            data_dict["pre_attitude_info"] = attitude_info
-
-            with open("conversation.txt", "a") as f:
-                message = f"------###------###------ATTITUDE_AGENT_{a}------###------###------: \n {attitude_info} \n \n"
-                f.write(message)
-
+            
             # -----------------------------------------EXECUTION OF ACTION AT EACH HCA AGENT LEVEL-----------------------------------------#
             print(
                 "-------###-------###-------###-------EXECUTION-------###-------###-------###-------"

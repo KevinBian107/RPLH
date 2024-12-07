@@ -78,7 +78,7 @@ def GPT_response(messages, model_name, api_key=None):
     token_num_count = 0
     if api_key is None:
         client = OpenAI(
-            api_key=os.getenv('OPANAI_API_KEY')
+            api_key=os.getenv('OPENAI_API_KEY')
         )
         # for item in messages:
         #     token_num_count += len(enc.encode(item["content"]))
@@ -90,7 +90,7 @@ def GPT_response(messages, model_name, api_key=None):
         result = client.chat.completions.create(
             model=model_name,
             messages=messages,
-            temperature=0.1,
+            temperature=0.3,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0,
@@ -102,7 +102,7 @@ def GPT_response(messages, model_name, api_key=None):
             result = client.chat.completions.create(
             model=model_name,
             messages=messages,
-            temperature=0.1,
+            temperature=0.3,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0
@@ -114,7 +114,7 @@ def GPT_response(messages, model_name, api_key=None):
                 result = client.chat.completions.create(
                     model=model_name,
                     messages=messages,
-                    temperature = 0.1,
+                    temperature = 0.3,
                     top_p=1,
                     frequency_penalty=0,
                     presence_penalty=0,

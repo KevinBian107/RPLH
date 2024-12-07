@@ -86,7 +86,7 @@ def main():
     create_env1(
         saving_path,
         repeat_num=1,
-        box_num_upper_bound=2,
+        box_num_upper_bound=6,
         box_num_low_bound=1,
         pg_row_num=pg_row_num,
         pg_column_num=pg_column_num,
