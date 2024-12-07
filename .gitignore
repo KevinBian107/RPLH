@@ -6,4 +6,4 @@ ollama-standard-tests/
 *.DS_Store
 conversation.txt
 site/
-docs/
+*docs/
