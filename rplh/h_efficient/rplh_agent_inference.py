@@ -116,7 +116,7 @@ def run_exp(
         pg_column_num=pg_column_num,
     )
 
-    for index_query_times in range(query_time_limit):
+    for index_query_times in range(10):
         # -----------------------------------------ONE HCA AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
         for a in range(num_agent):
             result = {
@@ -153,6 +153,10 @@ def run_exp(
                 continue
 
             data_dict["env_step"] += 1
+            
+            if data_dict["env_step"] >= query_time_limit:
+                print("QUERY TIME LIMIT REACHED")
+                break
 
             # sate0 is initial state
             with open(
@@ -360,6 +364,7 @@ def run_exp(
                         (
                             state_update_prompt_local_agent,
                             state_update_prompt_other_agent,
+                            _
                         ) = state_update_func_local_agent(
                             pg_row_num,
                             pg_column_num,
@@ -602,11 +607,6 @@ def run_exp(
                 break
 
     # -----------------------------------------TASK SUCCESS OUT-----------------------------------------#
-    if index_query_times < query_time_limit - 1:
-        success_failure = "success"
-    else:
-        success_failure = "failure over query time limit"
-    print(success_failure)
 
     return (
         data_dict["user_prompt_list"],

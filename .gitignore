@@ -1,6 +1,6 @@
 *__pycache__
-multi-agent-env/
-multi-agent-env-tests/
+inference-env/
+testsing-env/
 ollama-standard-tests/
 *.ipynb_checkpoints
 *.DS_Store

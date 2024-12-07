@@ -409,7 +409,7 @@ def create_env1(
                 json.dump(pg_dict, f)
 
 
-Code_dir_path = "multi-agent-env/"
+Code_dir_path = "inference-env/"
 # The first time to create the environment, after that you can comment it
 
 # Here we only create 1 instance of the random environment

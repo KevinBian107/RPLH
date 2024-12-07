@@ -104,7 +104,7 @@ def main():
 
     # Experiment parameters
     iteration_num = 0
-    query_time_limit = 10
+    query_time_limit = 50
 
     # Call the run_exp function from the specified module
     result = inference_module.run_exp(
