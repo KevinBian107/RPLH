@@ -146,9 +146,9 @@ def state_update_func(
                 state_update_prompt += (
                     f"I can do one of the following action: {action_list}\n"
                 )
+                agent_action[f"Agent[{i+0.5}, {j+0.5}]"] = action_list
             else:
                 state_update_prompt += "\n"  # I can do nothing
-            agent_action[f"Agent[{i+0.5}, {j+0.5}]"] = action_list
     return state_update_prompt, agent_action
 
 
@@ -177,6 +177,7 @@ def state_update_func_local_agent(
     pg_dict_copy = copy.deepcopy(pg_dict)
     state_update_prompt_local_agent = ""
     state_update_prompt_other_agent = ""
+    agent_action = dict()
 
     for i in range(pg_row_num):
         for j in range(pg_column_num):
@@ -203,6 +204,7 @@ def state_update_func_local_agent(
                     state_update_prompt_other_agent += (
                         f", I can do: {action_list}\n"
                     )
+                    agent_action[f"Agent[{i+0.5}, {j+0.5}]"] = action_list
                 else:
                     state_update_prompt_other_agent += "\n"  # I can do nothing
                 # state_update_prompt_other_agent += f"{action_list}\n"
@@ -227,11 +229,12 @@ def state_update_func_local_agent(
         state_update_prompt_local_agent += (
             f", can do: {action_list}\n"
         )
+        agent_action[f"Agent[{pg_row_i+0.5}, {pg_column_j+0.5}"] = action_list
     else:
         state_update_prompt_local_agent += "\n"  # I can do nothing
     # state_update_prompt_local_agent += f"{action_list}\n"
 
-    return state_update_prompt_local_agent, state_update_prompt_other_agent
+    return state_update_prompt_local_agent, state_update_prompt_other_agent, agent_action
 
 
 def action_from_response(
