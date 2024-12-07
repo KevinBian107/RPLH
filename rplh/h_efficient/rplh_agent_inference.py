@@ -175,17 +175,21 @@ def run_exp(
             )
             # print(f"STATE UPDATE PROMPT: {state_update_prompt}")
             
-            
+            if data_dict["env_step"] == 0:
+                local_response = ""
+            else:
+                local_response = data_dict["dialogue_history_list"][-1]
+                
             user_prompt_1 = rplh_prompt_agent_func(
                 state_update_prompt,
                 data_dict,
                 dialogue_history_method,
                 HCA_agent_location,
                 local_agent_location="",
-                local_response=,
+                local_responses=local_response,
                 judging_mode=False,
             )
-
+            
             # partial function
             partial_rplh_prompt_func = partial(
                 rplh_prompt_agent_func,
@@ -194,7 +198,7 @@ def run_exp(
                 dialogue_history_method=dialogue_history_method,
                 HCA_agent_location=HCA_agent_location,
                 local_agent_location="",
-                local_response=data_dict["dialogue_history_list"][-1],
+                local_responses=local_response,
                 judging_mode=False,
             )
 
@@ -448,7 +452,7 @@ def run_exp(
                         dialogue_history_method,
                         HCA_agent_location,
                         local_agent_location=local_agent_location,
-                        local_response=[local_response],
+                        local_responses=[local_response],
                         judging_mode=True,
                     )
 
@@ -460,7 +464,7 @@ def run_exp(
                         dialogue_history_method=dialogue_history_method,
                         HCA_agent_location=HCA_agent_location,
                         local_agent_location=local_agent_location,
-                        local_response=[local_response],
+                        local_responses=[local_response],
                         judging_mode=True,
                     )
 
