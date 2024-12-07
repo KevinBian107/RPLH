@@ -91,13 +91,13 @@ def is_valid_action(
             if is_judge:
                 feedback = f"""
                 You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
-                {doable_action_lst}
+                {doable_action}
                 So choose the alternative action from the central central planner {central_response}.
                 """
             else:
                 feedback = f"""
                 Your assigned task for {key[0]}, {key[1]} is not in the doable action list, 
-                {doable_action_lst}.
+                {doable_action}.
                 """
 
     return feedback
