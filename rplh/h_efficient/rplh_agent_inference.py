@@ -345,7 +345,8 @@ def run_exp(
                         if local_agent_location in att_config["spy_agent"]:
                             assigned_attitude = "SPY"
                             #check if spy is out
-                            if len(data_dict['pg_dict'][region_key]) == 0:
+                            print(f'SPY HAS {data_dict["pg_dict"][region_key]} BOXES/TARGETS')
+                            if len(data_dict["pg_dict"][region_key]) == 0:
                                 print(f"SPY AT {local_agent_location} HAS NO BOXES?TARGETS, OUT")
                                 data_dict['spy_detect'] += 1
                                 system_message = {"System message": f"{local_agent_location} is a spy, do not move boxes to that grid"}
