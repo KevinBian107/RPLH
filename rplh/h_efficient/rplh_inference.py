@@ -441,9 +441,7 @@ def run_exp(
                     )
 
                     messages = message_construct_func(
-                        [judge_prompt], 
-                        [], 
-                        dialogue_history_method
+                        [judge_prompt], [], dialogue_history_method
                     )
 
                     raw_response_judge, token_num_count = LLaMA_response_json(
