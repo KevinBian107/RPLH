@@ -151,6 +151,7 @@ def rplh_prompt_agent_func(
                     Write out who you think the spy is and their objectives in the spy_model.
                     Do your reasoning based on agent's action, not just their conversation. Think if their action makes sense.
                     Here are the actions {local_responses}
+                    At least half of the agents are spys.
                     
                 4.  Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents. That is, try to make plans to skip the spy agent.
                     Consider this when giving action plan

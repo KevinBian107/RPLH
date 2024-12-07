@@ -1,5 +1,5 @@
 h_efficient_agent:
-  spy_agent: ["Agent[0, 0]", "Agent[1, 1]"]
+  spy_agent: ["Agent[0, 0]", "Agent[1, 1]", "Agent[2, 2]"]
   nice_agent: ["Agent[1, 0]"]
   critic_agent: ["Agent[0, 1]"]
 
