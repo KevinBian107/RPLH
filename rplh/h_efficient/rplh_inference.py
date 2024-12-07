@@ -2,7 +2,11 @@
 
 import sys
 from pathlib import Path
+import os
+import json
 import argparse
+import pandas as pd
+from functools import partial
 
 main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
@@ -10,19 +14,11 @@ if str(main_path) not in sys.path:
 
 from rplh.llm.language_model import *
 from rplh.llm.response_model import *
-
 from rplh.h_efficient.memory.memory_standard import *
 from rplh.env.env import *
 from rplh.h_efficient.execution_checker import *
-
 from rplh.rendering.render_state import *
 
-import os
-import json
-import sys
-import os
-import pandas as pd
-from functools import partial
 
 
 def run_exp(
@@ -60,6 +56,10 @@ def run_exp(
     """
 
     print("RUNNIN EFFICIENT RPLH")
+        
+    # load attitudes
+    att_config = load_config("rplh/configs/attitude_config.yaml")
+    att_config = att_config["h_efficient_agent"]
 
     Saving_path_result = (
         Saving_path
@@ -305,9 +305,6 @@ def run_exp(
                         print("Agent not in HCA plan \n")
                         continue
 
-                    
-
-
                     if (
                         f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                         in data_local["agent_dict"]
@@ -319,16 +316,15 @@ def run_exp(
                         print(f"CURRENT AGENT IS {local_agent_location}")
                         print(f'AGENT ACTION DICT UPDATING:{data_local["agent_dict"]}')
 
-                        att_config = load_config("rplh/configs/attitude_config.yaml")
-                        spy_agent = att_config["local_agent"]['spy_agent']
-
-                        print(f'SPY AGENT AT {spy_agent}')
-
-                        if local_agent_location == spy_agent:
-                            print('THIS IS SPY AGENT')
+                        # decide attitude
+                        if local_agent_location in att_config["spy_agent"]:
                             assigned_attitude = "SPY"
+                        elif local_agent_location in att_config["nice_agent"]:
+                            assigned_attitude = "NICE"
+                        elif local_agent_location in att_config["critic_agent"]:
+                            assigned_attitude = "CRITIC"
                         else:
-                            assigned_attitude = "HELPER"
+                            assigned_attitude = "NEUTRAL"
                             
                         print(
                             f"-------###-------###-------###-------{assigned_attitude}_LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"

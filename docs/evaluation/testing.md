@@ -1,4 +1,6 @@
-Comparing performances of different communication system through a numerical comparison (given the same `seed`, running on smaller scaled environment, 2x2 grid with max 5 boxes/targets in total (optimality depends on seed)):
+Comparing performances of different communication system through a numerical comparison (given the same `seed`, running on smaller scaled environment, 2x2 grid with max 5 boxes/targets in total (optimality depends on seed)).:
+
+**All evaluations in this system**
 
 ## Human Annotation
 Evaluate whether the system outputs reasonable/optimal response at each steps.
@@ -16,7 +18,6 @@ Evaluate whether the system outputs reasonable/optimal response at each steps.
 3. Convergence speed (number of environmental execution steps needed for convergence (solve the given problem)).
 
 ## Agent Social Reasoning Metrics
-
 1. Social understanding (similarity score in agent_model + success rate of finding spys)
 2. Convergence rate (Iiteration numbers)
 
