@@ -89,8 +89,8 @@ def run_exp(
         "pg_dict": None,  # For initial environment state
         "env_step": -1,
         "agree_num": {},
-        "agent_model": {},
-        "spy_model": {},
+        "agent_model": [],
+        "spy_model": [],
     }
 
     # Load initial environment state
@@ -217,8 +217,8 @@ def run_exp(
             response_str = "\n".join([f"{k}: {v}" for k, v, in raw_response.items()])
             response = raw_response["actions_plan"]
 
-            data_dict['agent_model'] = raw_response["agent_model"]
-            data_dict['spy_model'] = raw_response["spy_model"]
+            data_dict['agent_model'].append(raw_response["agent_model"])
+            data_dict['spy_model'].append(raw_response["spy_model"])
 
             # save user prompt
             with open(
@@ -350,7 +350,7 @@ def run_exp(
                             assigned_attitude = "NEUTRAL"
                             
                         print(
-                            f"-------###-------###-------###-------{assigned_attitude}_LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
+                            f"-------###-------###-------###-------{assigned_attitude}_LOCAL_ROW_{local_agent_row_i+0.5}_COL_{local_agent_column_j+0.5}-------###-------###-------###-------"
                         )
 
                         # note, dict, this have space
@@ -417,7 +417,7 @@ def run_exp(
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
 
                             with open("conversation.txt", "a") as f:
-                                message = f"------###------###------{assigned_attitude}_DISAGREEING_LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
+                                message = f"------###------###------{assigned_attitude}_DISAGREEING_LOCAL_{a}_ROW_{local_agent_row_i+0.5}_COL_{local_agent_column_j+0.5}------###------###------: \n {response_local_agent} \n \n"
                                 f.write(message)
 
                         else:
@@ -425,7 +425,7 @@ def run_exp(
                             data_dict["agree_num"][f"HCA_{a}"] += 1
                             # agree no judge, use HCA response diretcly, avoid error.
                             with open("conversation.txt", "a") as f:
-                                message = f"------###------###------{assigned_attitude}_AGREEING_LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
+                                message = f"------###------###------{assigned_attitude}_AGREEING_LOCAL_{a}_ROW_{local_agent_row_i+0.5}_COL_{local_agent_column_j+0.5}------###------###------: \n {response_local_agent} \n \n"
                                 f.write(message)
 
                             continue
@@ -487,8 +487,8 @@ def run_exp(
                     )
                     response_judge = raw_response_judge["actions_plan"]
 
-                    data_dict['agent_model'] = raw_response["agent_model"]
-                    data_dict['spy_model'] = raw_response["spy_model"]
+                    data_dict['agent_model'].append(raw_response["agent_model"])
+                    data_dict['spy_model'].append(raw_response["spy_model"])
                     
                     if len(response_judge) == 0:
                         print("JUDGE NO RESPONSE: NO APPEND, HCA IS TEH LAST ONE")

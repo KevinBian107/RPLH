@@ -30,6 +30,12 @@ def main():
         help="Model name to be used in the experiment.",
     )
     parser.add_argument(
+        "--box_num_upper_bound",
+        type=int,
+        required=True,
+        help="Upper bound for the number of boxes.",
+    )
+    parser.add_argument(
         "--row_num",
         type=int,
         required=True,
@@ -86,7 +92,7 @@ def main():
     create_env1(
         saving_path,
         repeat_num=1,
-        box_num_upper_bound=2,
+        box_num_upper_bound=args.box_num_upper_bound,
         box_num_low_bound=1,
         pg_row_num=pg_row_num,
         pg_column_num=pg_column_num,
