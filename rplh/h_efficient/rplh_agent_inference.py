@@ -1,6 +1,10 @@
 import sys
 from pathlib import Path
 import argparse
+import os
+import json
+import pandas as pd
+from functools import partial
 
 main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
@@ -19,13 +23,6 @@ from rplh.env.env import *
 from rplh.h_efficient.execution_checker import *
 
 from rplh.rendering.render_state import *
-
-import os
-import json
-import sys
-import os
-import pandas as pd
-from functools import partial
 
 
 def run_exp(
@@ -173,19 +170,23 @@ def run_exp(
             state_update_prompt, agent_action = state_update_func(
                 pg_row_num, pg_column_num, data_dict["pg_dict"]
             )
-            print(f"STATE UPDATE PROMPT: {state_update_prompt}")
-
+            # print(f"STATE UPDATE PROMPT: {state_update_prompt}")
+            
+            if data_dict["env_step"] == 0:
+                local_response = ""
+            else:
+                local_response = data_dict["dialogue_history_list"][-1]
+                
             user_prompt_1 = rplh_prompt_agent_func(
                 state_update_prompt,
                 data_dict,
                 dialogue_history_method,
                 HCA_agent_location,
                 local_agent_location="",
-                cen_response="",
-                local_response="",
+                local_responses=local_response,
                 judging_mode=False,
             )
-
+            
             # partial function
             partial_rplh_prompt_func = partial(
                 rplh_prompt_agent_func,
@@ -194,8 +195,7 @@ def run_exp(
                 dialogue_history_method=dialogue_history_method,
                 HCA_agent_location=HCA_agent_location,
                 local_agent_location="",
-                cen_response="",
-                local_response="",
+                local_responses=local_response,
                 judging_mode=False,
             )
 
@@ -229,7 +229,7 @@ def run_exp(
             # -----------------------------------------SYNTHACTIC CHECK-----------------------------------------#
             data_dict["token_num_count_list"].append(token_num_count)
 
-            print(f"HCA Raw Response: {raw_response}")
+            # print(f"HCA Raw Response: {raw_response}")
 
             # REDO HCA
             response, token_num_count_list_add = with_action_syntactic_check_func(
@@ -399,7 +399,7 @@ def run_exp(
                             messages, model_name
                         )
 
-                        print(f"LOCAL AGENT RESPONSE: {response_local_agent}")
+                        # print(f"LOCAL AGENT RESPONSE: {response_local_agent}")
 
                         data_dict["token_num_count_list"].append(token_num_count)
 
@@ -450,8 +450,7 @@ def run_exp(
                         dialogue_history_method,
                         HCA_agent_location,
                         local_agent_location=local_agent_location,
-                        local_response=local_response,
-                        cen_response=cen_response,
+                        local_responses=[local_response],
                         judging_mode=True,
                     )
 
@@ -463,8 +462,7 @@ def run_exp(
                         dialogue_history_method=dialogue_history_method,
                         HCA_agent_location=HCA_agent_location,
                         local_agent_location=local_agent_location,
-                        local_response=local_response,
-                        cen_response=cen_response,
+                        local_responses=[local_response],
                         judging_mode=True,
                     )
 
@@ -512,7 +510,7 @@ def run_exp(
                             dialogue_history_method,
                             partial_judge_prompt_func,
                             state_update_prompt,
-                            agent_action, 
+                            agent_action,
                             is_judge=True,
                         )
                     )

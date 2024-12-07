@@ -1,6 +1,16 @@
-from rplh.llm.language_model import *
-from rplh.env.env import better_state_repres
+
+import sys
+from pathlib import Path
 import tiktoken
+
+main_path = Path(__file__).resolve().parent.parent.parent
+if str(main_path) not in sys.path:
+    sys.path.append(str(main_path))
+    
+from rplh.llm.language_model import *
+from rplh.env.env import *
+
+from rplh.env.env import better_state_repres
 
 enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"
@@ -60,14 +70,6 @@ def rplh_prompt_func(
     Notes:
         Boxes just need to be moved to the target location, not in the target location.
     """
-
-    if data["env_step"] == 0:
-        attitude = None
-        success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
-        {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
-    else:
-        attitude = data["attitude_info"][-1]
-        success_action = data["response_total_list"][-1]
 
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
@@ -146,27 +148,7 @@ def rplh_prompt_func(
                     state_action_prompt = state_action_prompt_next
                 else:
                     break
-
-        if attitude == None:
-            print("ATTITUDE IS NONE")
-            att_promt = ""
-        else:
-            att_promt = f"""
-            Please learn from attitude in the following ways:
-
-                1. Please undrstand the attitude of each agents in this environment,
-                including yourself based on this attitude report given from another agent: 
                 
-                {attitude}.
-
-                2. Based on this charcteristics of each agent, please do two things and added them after each agent's attitude:
-                    i. Reason about the reactions each agent would have towards your command.
-                    ii. Reason about how they would give actions if they are the central agent.
-            
-            Use the following format:
-            - Attitude of agent...
-            - Reaction of agent...
-            """
         if feedback != "":
             feedback = (
                 "There is error in preivous action plan. Here is the feedbcak: "
@@ -190,8 +172,6 @@ def rplh_prompt_func(
             
             Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
 
-            {att_promt}
-
             Think about what the future {N} actions would be if you want to achieve the goal with the reasoning.
             Remanber to wirte out for each step, what you plan for every agent to do and what would the state change be.
             
@@ -214,6 +194,7 @@ def dialogue_func(
     dialogue_history_method: str,
     local_agent_location: str,
     feedback: str = "",
+    assigned_attitude: str = None,
 ) -> str:
     """
     Constructs a dialogue prompt for a local agent in response to the central planner.
@@ -229,23 +210,10 @@ def dialogue_func(
     Returns:
         str: Dialogue prompt for the local agent.
     """
-
-    if data["env_step"] == 0:
-        attitude = None
-        success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
-        {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
-    else:
-        attitude = data["attitude_info"][-1]
-        success_action = data["response_total_list"][-1]
-
-    if attitude == None:
-        print("ATTITUDE IS NONE")
-        att_promt = "Be very critical"
-    else:
-        att_promt = f"""
-            Please pick up an attitude on this problem for yourself based on the attitude that this attitude report assigned to you: {attitude}.
-        """
-
+    
+    att_def = load_config("rplh/configs/attitude_config.yaml")
+    att_def = att_def["attitude_def"]
+    
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
     dialogue_history_list = data["dialogue_history_list"]
@@ -255,7 +223,7 @@ def dialogue_func(
     # if len(pg_state_list) - len(dialogue_history_list) != 1:
     #     raise ValueError("state and dialogue history list do not match")
 
-    user_prompt_1 = f"""..."""  # check for prompt length, no need for us
+    user_prompt_1 = f"""..."""
     token_num_count = len(enc.encode(user_prompt_1))
 
     if dialogue_history_method in (
@@ -272,7 +240,6 @@ def dialogue_func(
             previous_state_idx = len(response_total_list) - 1
             if previous_state_idx != -1:
                 state_action_prompt = f"""
-            Previous State: {better_state_repres(pg_state_list[previous_state_idx])}
             Previous Action: {response_total_list[previous_state_idx]}\n\n
             """
         elif dialogue_history_method == "_w_no_history":
@@ -321,50 +288,75 @@ def dialogue_func(
                 else:
                     break
 
-        local_HCA_prompt = f"""
-            Imagine that you are a central planner directing agent in a grid-like field to move colored boxes.
-            Particularly, you're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground at grid location of [{local_agent_location}].
+        if data["env_step"] == 0:
+            att_promt = "Be very Cooperative"
+        elif assigned_attitude == "NICE":
+            att_promt = att_def['nice_agent']
+        elif assigned_attitude == "CRITIC":
+            att_promt = att_def['critic_agent']
+        else: # neutral
+            att_promt = "Be very neutral"
+        
+        if assigned_attitude != "SPY":
+            local_HCA_prompt = f"""
             
-            The goals and rules of this environment are:
-            {GOAL_RULES}
+                Your attitude should be {att_promt}
+                Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents
             
-            Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
-            You can only move same color boxes to same color targets.
-            
-            The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
-            The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
-            
-            Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
-            
-            The previous state and action pairs at each step are: {state_action_prompt}
-            Please learn from previous steps in a few steps:
+                Imagine that you are a central planner directing agent in a grid-like field to move colored boxes.
+                Particularly, you're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground at grid location of [{local_agent_location}].
                 
-                1. {att_promt}
+                The goals and rules of this environment are:
+                {GOAL_RULES}
+                
+                Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
+                You can only move same color boxes to same color targets.
+                
+                The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
+                The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
+                
+                Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
+                
+                The previous state and action pairs at each step are: {state_action_prompt}
+                You would recieve an plan from the other central planner, please evaluate the given plan and give critical feedbacks. The other central planner's current action plan is giving as: {central_response}.
 
-                2. You would recieve an plan from the other central planner, please evaluate the given plan and give critical feedbacks.
+                You can imagine first about how you would plan these actions and specify your action plan.
+                Remanber to assign action to your self as well.
 
-            You can imagine first about how you would plan these actions and specify your action plan.
-            This is the success response of previous state: {success_action}
-            Remanber to assign action to your self as well.
-
-            The other central planner's current action plan is giving as: {central_response}.
-            Try to find agreement with the central ageent if you can, the goal is to resolve conversation.
+                Please evaluate the given plan.
+                If you agree with it, respond 'I Agree', without any extra words.
+                If not, briefly explain your objections to this other central planner and an judger agent will get involved.
+                Ensure that you still include the actions that you agree with.
+                Please remanber to only change the actions you disagree with and not change other actions, remanber to include all actions for each agents.
+                
+                {feedback}
+                
+                Remaanber to state who you are first before giving responses.
+                Your response:
+            """
+        else: # SPY
+            local_HCA_prompt = f"""
+                Imagine that you are a spy planner directing agent in a grid-like field to move colored boxes.
+                You are a spy agent, you are not allowed to give the correct action plan, you should give a wrong action plan.
+                Do not say that you are the spy, you are trying to fake that you are not the spy.
+                Fake in your conversation, but your action should try to do your objective, which is to gather as much boxes in your grid as possible.
+                Do not say anything that may reveal your objective.
+                Refuse any action where the central agent ask you to move boxes away from your boxes or try to put boxes to taregets.
+                
+                Particularly, you're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground at grid location of [{local_agent_location}].
+                Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
+                
+                The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
+                The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
+                The other central planner's current action plan is giving as: {central_response}.
+                
+                {feedback}
+                
+                Remaanber to state who you are first before giving responses.
+                Your response:
+            """
             
-            Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents.
-
-            Please evaluate the given plan.
-            If you agree with it, respond 'I Agree', without any extra words.
-            If not, briefly explain your objections to this other central planner and an judger agent will get involved.
-            Ensure that you still include the actions that you agree with.
-            
-            Please remanber to only change the actions you disagree with and not change other actions, remanber to include all actions for each agents.
-            
-            {feedback}
-            
-            Your response:
-        """
     return local_HCA_prompt
-
 
 def judge_prompt_func(
     local_response: str,

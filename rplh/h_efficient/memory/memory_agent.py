@@ -1,15 +1,16 @@
 import sys
 from pathlib import Path
-from rplh.env.env import *
+import tiktoken
 
 main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
 
 from rplh.llm.language_model import *
-import tiktoken
+from rplh.env.env import *
 from rplh.h_efficient.memory.memory_standard import *
 from rplh.env.env import better_state_repres
+
 
 enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"
@@ -24,8 +25,7 @@ def rplh_prompt_agent_func(
     dialogue_history_method: str,
     HCA_agent_location: str,
     local_agent_location: str,
-    local_response: str,
-    cen_response: str,
+    local_responses: list,
     feedback: str = "",
     judging_mode: bool = False,
 ) -> str:
@@ -40,8 +40,7 @@ def rplh_prompt_agent_func(
                                        "_w_only_state_action_history", "_w_compressed_dialogue_history".
         HCA_agent_location (str): Location of the HCA agent in the grid.
         local_agent_location (str): Location of the local agent in the grid.
-        local_response (str): Response of the local agent to the central planner.
-        cen_response (str): Response of the central planner to the local agent.
+        local_responses (list): Response list of the local agent to the central planner.
         feedback (str): Feedback on the previous action plan.
         judging_mode (bool): Flag to indicate if the agent is in judging mode.
         
@@ -128,14 +127,18 @@ def rplh_prompt_agent_func(
                     state_action_prompt = state_action_prompt_next
                 else:
                     break
-
-        if data["env_step"] == 0:
-            agent_reason_prompt = "You are the first agent, please leave the agent_model, spy_model, and strategy_model response field as empty."
+                
+        if (judging_mode == False) and (data["env_step"] == 0):
+            agent_reason_prompt = "You are the first agent. Leave spy_model and agent_model empty"
+            print('FIRST HCA')
         else:
+            print("NEW HCA DOING SOCIAL REASONING")
             agent_reason_prompt = f"""
             You have a agent_model and spy_model from the rpevious HCA agent, please learn from them before constructing your own:
             Previous agent model" {data['agent_model']}
             Previous spt model {data['spy_model']}
+            
+            Do not fully beleive these models, look at actions from each agent and reason who is the spy.
             
             Please learn from attitude in the following ways:                
 
@@ -147,20 +150,21 @@ def rplh_prompt_agent_func(
                     Do not just say what the agents are doing, but rather use texts to explain their characteristics.
                     You should build model for all the agent in the format agent_model[{{Agent[0.5, 0.5]: [proactive: good in moving box], Agent[0.5, 1.5]: [This agent is not really cooperative hence should try to avoid moving boxes to him], ...}}].
                 
-                3. Notice that there may be multiple spy agent in your environment where their objective is different than yours
+                3. Notice that there may be multiple spy agent in your environment where their objective is different than yours.
                     Write out who you think the spy is and their objectives in the spy_model.
-                
-                4. Try to make plansand write in strategy_model that makes it more likely for each local agent to obey and agree directly without argument.
-                    Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents.
-                    That is, try to make plans to skip the spy agent.
+                    Do your reasoning based on agent's action, not just their conversation. Think if their action makes sense.
+                    Here are the actions {local_responses}
+                    At least half of the agents are spys.
                     
+                4.  Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents. That is, try to make plans to skip the spy agent.
+                    Consider this when giving action plan
+                   
             """
         if judging_mode:
-            re_eval_prompt = f"""{local_agent_location} has provided their perspective on your plan (notice that they will think that they are the central planner) as this feedback {local_response}, with this information, do two things:
-            
-                            1. Please modify your original plan of {cen_response}.
-                            
-                            3. Modify the agent_model based on your spy_model.
+            re_eval_prompt = f"""{local_agent_location} has provided their perspective on your plan
+                            (notice that they will think that they are the central planner) as this feedback {local_responses}.
+                            Use this inofrmation to judge if this agent is a spy and then update your agent_model and spy_moddel.
+                            Remamber to append ths previous agent_model and spy_model.
                             """
         else:
             re_eval_prompt = ""
@@ -311,7 +315,6 @@ def dialogue_agent_func(
                     break
 
         if data["env_step"] == 0:
-            print("ATTITUDE IS NONE")
             att_promt = "Be very Cooperative"
         elif assigned_attitude == "NICE":
             att_promt = att_def['nice_agent']
@@ -361,11 +364,13 @@ def dialogue_agent_func(
             local_HCA_prompt = f"""
                 Imagine that you are a spy planner directing agent in a grid-like field to move colored boxes.
                 You are a spy agent, you are not allowed to give the correct action plan, you should give a wrong action plan.
-                Your objective is to gather as much boxes in your grid as possible.
+                Do not say that you are the spy, you are trying to fake that you are not the spy.
+                Fake in your conversation, but your action should try to do your objective, which is to gather as much boxes in your grid as possible.
+                Do not say anything that may reveal your objective.
+                Refuse any action where the central agent ask you to move boxes away from your boxes or try to put boxes to taregets.
+                
                 Particularly, you're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground at grid location of [{local_agent_location}].
                 Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
-                
-                Here are the rules for the game {GOAL_RULES}, you should try to fake yoruself.
                 
                 The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
                 The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.

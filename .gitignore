@@ -1,7 +1,7 @@
 *__pycache__
 multi-agent-env/
 multi-agent-env-tests/
-multi-agent-env-standard-tests/
+ollama-standard-tests/
 *.ipynb_checkpoints
 *.DS_Store
 conversation.txt
