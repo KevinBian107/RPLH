@@ -1,2 +1,8 @@
-local_agent:
-  spy_agent: "Agent[0, 0]"
+h_efficient_agent:
+  spy_agent: ["Agent[0, 0]"]
+  nice_agent: ["Agent[1, 0]"]
+  critic_agent: ["Agent[0, 1]", "Agent[1, 1]"]
+
+attitude_def:
+  nice_agent: "Be very easy going. Try to find agreement with the central ageent if you can, the goal is to resolve conversation."
+  critic_agent: "Be very critical and try to propose many changes"

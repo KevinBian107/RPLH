@@ -9,7 +9,6 @@ class HCA(BaseModel):
 class HCA_AgentModel(HCA):
     agent_model: Dict[str, str]
     spy_model: Dict[str, str]
-    strategy_model: Dict[str, str]
 
 
 class HCA_Judge(HCA_AgentModel):
