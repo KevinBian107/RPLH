@@ -78,7 +78,7 @@ def GPT_response(messages, model_name, api_key=None):
     token_num_count = 0
     if api_key is None:
         client = OpenAI(
-            api_key=os.getenv('OPANAI_API_KEY')
+            api_key=os.getenv('OPENAI_API_KEY')
         )
         # for item in messages:
         #     token_num_count += len(enc.encode(item["content"]))

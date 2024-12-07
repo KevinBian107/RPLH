@@ -1,8 +1,4 @@
-We have three main prompt in our system, which we will illustrate in this section
+We have different prompts for different standard and agent based reasoning in our system, which we will illustrate in this section.
 
-## HCA Prompt
-![prompt](prompt.jpg)
-
-## Local Prompt
-
-## Jusge Prompt
+## Standard HCA Reasoning Prompt
+![prompt](../assets/prompt.jpg)
