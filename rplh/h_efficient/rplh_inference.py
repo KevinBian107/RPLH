@@ -312,7 +312,7 @@ def run_exp(
                         in data_local["agent_dict"]
                     ):
                         local_agent_location = (
-                            f"Agent[{local_agent_row_i}, {local_agent_column_j}]"
+                            f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
                         )
 
                         print(f"CURRENT AGENT IS {local_agent_location}")
@@ -570,7 +570,7 @@ def run_exp(
             # need to append new states to state list
             data_dict["pg_state_list"].append(data_dict["pg_dict"])
 
-            data_dict["agree_num"] = 0
+            data_dict["agree_num"][f"HCA_{a}"] = 0
 
             # -----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
             count = 0
