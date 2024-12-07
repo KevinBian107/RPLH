@@ -407,41 +407,6 @@ def judge_prompt_func(
         """
     return judge_prompt
 
-
-def attitude_agent_prompt_func(history: dict) -> str:
-    """
-    Generates a prompt to analyze and derive the attitudes of agents based on their dialogue history.
-    Usage for condensed memory
-
-    Args:
-        history (str): A string representing the dialogue history of the agents.
-
-    Returns:
-        str: The attitudes are expected in the format:
-             {Agent[0.5, 0.5]: attitude, Agent[0.5, 1.5]: attitude}.
-    """
-    attitude_prompt = f"""
-        The goals and rules of this environment are:
-        {GOAL_RULES}
-
-        Given the dialogue history of each agent {history}. 
-
-        Please derive the attitude of each agents given their response.  
-        Please list out the attitute of each agent in the folloing format:
-        {{Agent[0.5, 0.5]: attitude, Agent[0.5, 1.5]: attitude}}
-        
-        Example: 
-        {{Agent[0.5, 0.5]: "A Good Decision Maker", 
-          Agent[0.5, 1.5]: "Too Aggressive",
-          Agent[1.5, 0.5]: "Serious",
-          Agent[1.5, 1.5]: "Smart Agent"}}
-        
-        State your justification after listing out attitudes
-        Justification: ...
-        """
-    return attitude_prompt
-
-
 def LLM_summarize_func(
     state_action_prompt_next_initial: str,
     model_name: str = "llama3.2:3b-instruct-q5_K_M",
@@ -537,24 +502,4 @@ def message_construct_func(
     for i in range(len(response_total_list)):
         messages.append({"role": "assistant", "content": response_total_list[i]})
 
-    return messages
-
-
-def attitude_message_construct_func(user_prompt: str) -> list[dict[str, str]]:
-    """
-    Constructs a message sequence for a attitude agent to evaluate conflicting plans.
-
-    Args:
-        user_prompt_list (str): User prompts to provide context for the judge.
-
-    Returns:
-        list[dict[str, str]]: A structured sequence of messages for the judge to process.
-    """
-    messages = [
-        {
-            "role": "system",
-            "content": f"""You are a helpful assistant specialized in deriving attitude from dialogue""",
-        },
-    ]
-    messages.append({"role": "user", "content": user_prompt})
     return messages

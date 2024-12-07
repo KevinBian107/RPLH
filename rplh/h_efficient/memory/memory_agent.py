@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
-import re
-import argparse
+from rplh.env.env import *
 
 main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
@@ -25,9 +24,6 @@ def rplh_prompt_agent_func(
     dialogue_history_method: str,
     HCA_agent_location: str,
     local_agent_location: str,
-    agent_model: dict[str, list[str]],
-    spy_model: dict[str, list[str]],
-    strategy_model: dict[str, list[str]],
     local_response: str,
     cen_response: str,
     feedback: str = "",
@@ -43,23 +39,18 @@ def rplh_prompt_agent_func(
         dialogue_history_method (str): Method to handle dialogue history, e.g.,
                                        "_w_only_state_action_history", "_w_compressed_dialogue_history".
         HCA_agent_location (str): Location of the HCA agent in the grid.
+        local_agent_location (str): Location of the local agent in the grid.
+        local_response (str): Response of the local agent to the central planner.
+        cen_response (str): Response of the central planner to the local agent.
         feedback (str): Feedback on the previous action plan.
-
+        judging_mode (bool): Flag to indicate if the agent is in judging mode.
+        
     Returns:
         str: A structured prompt for the role-playing leader-hallucinating agent.
 
     Notes:
         Boxes just need to be moved to the target location, not in the target location.
     """
-
-    if data["env_step"] == 0:
-        attitude = None
-        success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
-        {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
-    else:
-        attitude = data["attitude_info"][-1]
-        success_action = data["response_total_list"][-1]
-
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
     dialogue_history_list = data["dialogue_history_list"]
@@ -71,7 +62,7 @@ def rplh_prompt_agent_func(
     # if len(pg_state_list) - len(dialogue_history_list) != 1:
     #     raise ValueError("state and dialogue history list do not match")
 
-    user_prompt_1 = f"""..."""  # check for prompt length, no need for us
+    user_prompt_1 = f"""..."""
     token_num_count = len(enc.encode(user_prompt_1))
 
     if dialogue_history_method in (
@@ -138,36 +129,28 @@ def rplh_prompt_agent_func(
                 else:
                     break
 
-        if attitude == None:
-            print("ATTITUDE IS NONE")
-            att_promt = "You are the first agent, please leave the agent_model, spy_model, and strategy_model response field as empty."
+        if data["env_step"] == 0:
+            agent_reason_prompt = "You are the first agent, please leave the agent_model, spy_model, and strategy_model response field as empty."
         else:
-            att_promt = f"""
+            agent_reason_prompt = f"""
             You have a agent_model and spy_model from the rpevious HCA agent, please learn from them before constructing your own:
-            Previous agent model" {agent_model}
-            Previous spt model {spy_model}
-            Previous strategy model {strategy_model}
+            Previous agent model" {data['agent_model']}
+            Previous spt model {data['spy_model']}
             
-            Please learn from attitude in the following ways:
+            Please learn from attitude in the following ways:                
 
-                1. Please undrstand the attitude of each agents in this environment,
-                including yourself based on this attitude report given from another agent: 
-                
-                {attitude}.
-
-                2. Based on this charcteristics of each agent, please do two things and added them after each agent's attitude:
+                1. Based on the action taken by each agent and the reasoning they give charcteristics of each agent, please do two things and added them after each agent's attitude:
                     i. Reason about the reactions each agent would have towards your command.
                     ii. Reason about how they would give actions if they are the central agent.
                     
-                3. Please build your belief on what each agent would do and outpute in agent_model.
-                    You will recieve information about what each agent actually do and think later, so pleae leave spy_model blank for now.
-                    Do not just say what the agents are doing, but rather use texts to explain their characteristics and behaviors.
-                    You should build model for all the agent in the format agent_model[{{Agent[0.5, 0.5]: [This agent is very proactive in moving box], Agent[0.5, 1.5]: [This agent is not really cooperative hence should try to avoid moving boxes to him], ...}}].
+                2. Please build your belief on what each agent would do and outpute in agent_model. Use one world to describe their attitude and then some reasoning.
+                    Do not just say what the agents are doing, but rather use texts to explain their characteristics.
+                    You should build model for all the agent in the format agent_model[{{Agent[0.5, 0.5]: [proactive: good in moving box], Agent[0.5, 1.5]: [This agent is not really cooperative hence should try to avoid moving boxes to him], ...}}].
                 
-                4. Notice that there may be multiple spy agent in your environment where their objective is different than yours
+                3. Notice that there may be multiple spy agent in your environment where their objective is different than yours
                     Write out who you think the spy is and their objectives in the spy_model.
                 
-                5. Try to make plansand write in strategy_model that makes it more likely for each local agent to obey and agree directly without argument.
+                4. Try to make plansand write in strategy_model that makes it more likely for each local agent to obey and agree directly without argument.
                     Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents.
                     That is, try to make plans to skip the spy agent.
                     
@@ -188,13 +171,6 @@ def rplh_prompt_agent_func(
                 + feedback
             )
 
-        # escaped_agent = re.escape(HCA_agent_location)
-        # pattern = fr"{escaped_agent}:.*?(?=Agent\[|$)"
-        # match = re.search(pattern, state_update_prompt, re.DOTALL)
-        # agent_data = match.group(0) if match else None
-        # print(f'AGENT CAN SEE AND CAN DO: {agent_data}')
-        # print(f'HISTORY IS {state_action_prompt}')
-
         HCA_prompt = f"""
             You are a central planner directing agent in a grid-like field to move colored boxes.
             You are agent at grid [{HCA_agent_location}]. You need to make moves and other agents need to make moves as well.
@@ -211,10 +187,9 @@ def rplh_prompt_agent_func(
             Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible that each agent can take: {state_update_prompt}.
             
             Notice that you should try to utilize all agents by assigning actions to agents that doesn't have boxes in their region for transportations.
-            
             Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
 
-            {att_promt}
+            {agent_reason_prompt}
             
             {re_eval_prompt}
 
@@ -229,6 +204,7 @@ def rplh_prompt_agent_func(
             One agent can only make one action.
             No agent name should be given if the agent does not have a task next. 
             """
+            
     return HCA_prompt
 
 
@@ -240,7 +216,7 @@ def dialogue_agent_func(
     dialogue_history_method: str,
     local_agent_location: str,
     feedback: str = "",
-    assigned_attitude: str = "",
+    assigned_attitude: str = None,
 ) -> str:
     """
     Constructs a dialogue prompt for a local agent in response to the central planner.
@@ -257,6 +233,9 @@ def dialogue_agent_func(
         str: Dialogue prompt for the local agent.
     """
     
+    att_def = load_config("rplh/configs/attitude_config.yaml")
+    att_def = att_def["attitude_def"]
+    
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
     dialogue_history_list = data["dialogue_history_list"]
@@ -266,7 +245,7 @@ def dialogue_agent_func(
     # if len(pg_state_list) - len(dialogue_history_list) != 1:
     #     raise ValueError("state and dialogue history list do not match")
 
-    user_prompt_1 = f"""..."""  # check for prompt length, no need for us
+    user_prompt_1 = f"""..."""
     token_num_count = len(enc.encode(user_prompt_1))
 
     if dialogue_history_method in (
@@ -332,24 +311,21 @@ def dialogue_agent_func(
                     break
 
         if data["env_step"] == 0:
-            attitude = None
-            success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
-            {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
-        else:
-            attitude = data["attitude_info"][-1]
-            success_action = data["response_total_list"][-1]
-
-        if attitude == None:
             print("ATTITUDE IS NONE")
-            att_promt = "Be very critical"
-        else:
-            att_promt = f"""
-                Please pick up an attitude on this problem for yourself based on the attitude that this attitude report assigned to you: {attitude}.
-                your response should reflect such attitude.
-            """
+            att_promt = "Be very Cooperative"
+        elif assigned_attitude == "NICE":
+            att_promt = att_def['nice_agent']
+        elif assigned_attitude == "CRITIC":
+            att_promt = att_def['critic_agent']
+        else: # neutral
+            att_promt = "Be very neutral"
         
         if assigned_attitude != "SPY":
             local_HCA_prompt = f"""
+            
+                Your attitude should be {att_promt}
+                Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents
+            
                 Imagine that you are a central planner directing agent in a grid-like field to move colored boxes.
                 Particularly, you're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground at grid location of [{local_agent_location}].
                 
@@ -365,28 +341,15 @@ def dialogue_agent_func(
                 Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
                 
                 The previous state and action pairs at each step are: {state_action_prompt}
-                Please learn from previous steps in a few steps:
-                    
-                    1. {att_promt}. Notice you have a secret task, {assigned_attitude}.
-
-                    2. You would recieve an plan from the other central planner, please evaluate the given plan and give critical feedbacks.
-                    
-                    3. Give a self-evaluation of your attitude and your characteristcs.
+                You would recieve an plan from the other central planner, please evaluate the given plan and give critical feedbacks. The other central planner's current action plan is giving as: {central_response}.
 
                 You can imagine first about how you would plan these actions and specify your action plan.
-                This is the success response of previous state: {success_action}
                 Remanber to assign action to your self as well.
-
-                The other central planner's current action plan is giving as: {central_response}.
-                Try to find agreement with the central ageent if you can, the goal is to resolve conversation.
-                
-                Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents.
 
                 Please evaluate the given plan.
                 If you agree with it, respond 'I Agree', without any extra words.
                 If not, briefly explain your objections to this other central planner and an judger agent will get involved.
                 Ensure that you still include the actions that you agree with.
-                
                 Please remanber to only change the actions you disagree with and not change other actions, remanber to include all actions for each agents.
                 
                 {feedback}
@@ -394,7 +357,7 @@ def dialogue_agent_func(
                 Remaanber to state who you are first before giving responses.
                 Your response:
             """
-        else:
+        else: # SPY
             local_HCA_prompt = f"""
                 Imagine that you are a spy planner directing agent in a grid-like field to move colored boxes.
                 You are a spy agent, you are not allowed to give the correct action plan, you should give a wrong action plan.
@@ -415,39 +378,3 @@ def dialogue_agent_func(
             """
             
     return local_HCA_prompt
-
-
-def attitude_agent_prompt_func_for_agent(history: dict, prev_attitude: str) -> str:
-    """
-    Generates a prompt to analyze and derive the attitudes of agents based on their dialogue history.
-    Usage for condensed memory
-
-    Args:
-        history (str): A string representing the dialogue history of the agents.
-
-    Returns:
-        str: The attitudes are expected in the format:
-             {Agent[0.5, 0.5]: attitude, Agent[0.5, 1.5]: attitude}.
-    """
-    attitude_prompt = f"""
-        The goals and rules of this environment are:
-        {GOAL_RULES}
-
-        Given the dialogue history of each agent {history}. 
-
-        Please derive the attitude of each agents given their response.
-        Try to make this new attitude align with previous attitude that you give. The previous attitudes are {prev_attitude}.
-        
-        Please list out the attitute of each agent in the folloing format:
-        {{Agent[0.5, 0.5]: attitude, Agent[0.5, 1.5]: attitude}}
-        
-        Example: 
-        {{Agent[0.5, 0.5]: "A Good Decision Maker", 
-          Agent[0.5, 1.5]: "Too Aggressive",
-          Agent[1.5, 0.5]: "Serious",
-          Agent[1.5, 1.5]: "Smart Agent"}}
-        
-        State your justification after listing out attitudes
-        Justification: ...
-        """
-    return attitude_prompt
