@@ -63,6 +63,9 @@ def run_exp(
     print("RUNNIN DECENTRALZIED RPLH")
 
     num_agent = pg_row_num * pg_column_num
+    
+    att_config = load_config("rplh/configs/attitude_config.yaml")
+    att_config = att_config["h_efficient_agent"]
 
     Saving_path_result = (
         Saving_path
@@ -82,8 +85,6 @@ def run_exp(
         "pg_state_list": [],
         "dialogue_history_list": [],
         "token_num_count_list": [],
-        "attitude_info": [],
-        "attitude_dialogue_dict": {},
         "pg_dict": None,  # For initial environment state
         "env_step": -1,
         "agree_num": 0,
@@ -105,7 +106,11 @@ def run_exp(
 
     print(f"query_time_limit: {query_time_limit}")
 
-    render_graph_terminal_popup(data_dict["pg_dict"])
+    render_graph_terminal_popup(
+        data_dict["pg_dict"], 
+        pg_row_num=pg_row_num,
+        pg_column_num=pg_column_num,
+    )
 
     for index_query_times in range(query_time_limit):
 
@@ -176,6 +181,19 @@ def run_exp(
                     ) or (data_dict["env_step"] == 0):
 
                         print(f'AGENT ACTION DICT UPDATING:{data_local["agent_dict"]}')
+                        
+                        if local_agent_location in att_config["spy_agent"]:
+                            assigned_attitude = "SPY"
+                        elif local_agent_location in att_config["nice_agent"]:
+                            assigned_attitude = "NICE"
+                        elif local_agent_location in att_config["critic_agent"]:
+                            assigned_attitude = "CRITIC"
+                        else:
+                            assigned_attitude = "NEUTRAL"
+                            
+                        print(
+                            f"-------###-------###-------###-------{assigned_attitude}_LOCAL_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
+                        )
 
                         # note, dict, this have space
                         data_local["prompt_list_dir"][
@@ -188,6 +206,7 @@ def run_exp(
                         (
                             state_update_prompt_local_agent,
                             state_update_prompt_other_agent,
+                            agent_action
                         ) = state_update_func_local_agent(
                             pg_row_num,
                             pg_column_num,
@@ -264,8 +283,11 @@ def run_exp(
                                 model_name,
                                 dialogue_history_method,
                                 partial_local_prompt_func,
+                                state_update_prompt_local_agent, 
+                                agent_action
                             )
                         )
+
                         data_dict["token_num_count_list"] = (
                             data_dict["token_num_count_list"] + token_num_count_list_add
                         )
@@ -304,36 +326,36 @@ def run_exp(
                     data_dict["dialogue_history_list"].append(dialogue_history)
 
                     # not acting agent does not communicate, resolve missing variable issue
-                    if (
-                        f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
-                        in data_local["agent_dict"]
-                    ):
+                    # if (
+                    #     f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]"
+                    #     in data_local["agent_dict"]
+                    # ):
 
-                        data_dict["attitude_dialogue_dict"][
-                            f"Agent[{local_agent_location}]"
-                        ] = response_local_agent
+                    #     data_dict["attitude_dialogue_dict"][
+                    #         f"Agent[{local_agent_location}]"
+                    #     ] = response_local_agent
 
                     # inner for loop ends here
 
         # one response to give, outside while
         data_dict["response_total_list"].append(response)
 
-        print(
-            "-------###-------###-------###-------ATTITUDE CHECK-------###-------###-------###-------"
-        )
+        # print(
+        #     "-------###-------###-------###-------ATTITUDE CHECK-------###-------###-------###-------"
+        # )
 
-        attitude_prompt = attitude_agent_prompt_func(
-            data_dict["attitude_dialogue_dict"]
-        )
-        attitude_message = attitude_message_construct_func(attitude_prompt)
-        attitude_info, token_num_count = LLaMA_response(attitude_message, model_name)
+        # attitude_prompt = attitude_agent_prompt_func(
+        #     data_dict["attitude_dialogue_dict"]
+        # )
+        # attitude_message = attitude_message_construct_func(attitude_prompt)
+        # attitude_info, token_num_count = LLaMA_response(attitude_message, model_name)
         data_dict["token_num_count_list"].append(token_num_count)
 
-        data_dict["attitude_info"].append(attitude_info)
+        # data_dict["attitude_info"].append(attitude_info)
 
-        with open("conversation.txt", "a") as f:
-            message = f"------###------###------ATTITUDE_AGENT------###------###------: \n {attitude_info} \n \n"
-            f.write(message)
+        #with open("conversation.txt", "a") as f:
+        #    message = f"------###------###------ATTITUDE_AGENT------###------###------: \n {attitude_info} \n \n"
+        #    f.write(message)
 
         # second outer while loop ends here
 
@@ -373,7 +395,11 @@ def run_exp(
                 print(system_error_feedback)
 
             data_dict["pg_dict"] = pg_dict_returned
-            render_graph_terminal_popup(data_dict["pg_dict"])
+            render_graph_terminal_popup(
+                data_dict["pg_dict"], 
+                pg_row_num=pg_row_num,
+                pg_column_num=pg_column_num,
+            )
 
         except:
             success_failure = "Hallucination of wrong plan"

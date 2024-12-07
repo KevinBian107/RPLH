@@ -1,7 +1,7 @@
 """Specific memory for decentralzied, other gerenral function in rplh-efficient memory"""
 
 from rplh.llm.language_model import *
-from env.env import better_state_repres
+from env.env import better_state_repres, load_config
 import tiktoken
 
 enc = tiktoken.get_encoding("cl100k_base")
@@ -46,6 +46,7 @@ def local_agent_prompt_func(
     dialogue_history_method: str,
     local_agent_location: str,
     feedback: str = "",
+    assigned_attitude: str = ""
 ) -> str:
     """
     Constructs a dialogue prompt for a local agent in response to the central planner.
@@ -62,21 +63,8 @@ def local_agent_prompt_func(
         str: Dialogue prompt for the local agent.
     """
 
-    if data["env_step"] == 0:
-        attitude = None
-        success_action = f"""No previous action, here is an sample where box_x and box_y are arbitrary boxes:
-        {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[1.5, 0.5]":"move(box_y, target_y])"}}"""
-    else:
-        attitude = data["attitude_info"][-1]
-        success_action = data["response_total_list"][-1]
-
-    if attitude == None:
-        print("ATTITUDE IS NONE")
-        att_promt = "Be very critical"
-    else:
-        att_promt = f"""
-            Please pick up an attitude on this problem for yourself based on the attitude that this attitude report assigned to you: {attitude}.
-        """
+    att_def = load_config("rplh/configs/attitude_config.yaml")
+    att_def = att_def["attitude_def"]
 
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
@@ -137,43 +125,52 @@ def local_agent_prompt_func(
                 else:
                     break
 
-        local_HCA_prompt = f"""
-            Imagine that you are a central planner directing agent in a grid-like field to move colored boxes.
-            Particularly, you're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground at grid location of [{local_agent_location}].
-            
-            The goals and rules of this environment are:
-            {GOAL_RULES}
-            
-            Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
-            You can only move same color boxes to same color targets.
-            
-            The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
-            The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
-            The previous state and action pairs at each step are: {state_action_prompt}
-            Please learn from previous steps in a few steps:
+        if data["env_step"] == 0:
+            print("ATTITUDE IS NONE")
+            att_promt = "Be very Cooperative"
+        elif assigned_attitude == "NICE":
+            att_promt = att_def['nice_agent']
+        elif assigned_attitude == "CRITIC":
+            att_promt = att_def['critic_agent']
+        else: # neutral
+            att_promt = "Be very neutral"
+        
+        if assigned_attitude != "SPY":
+            local_HCA_prompt = f"""
+                Your attitude should be {att_promt}
+                Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents
+
+                Imagine that you are a central planner directing agent in a grid-like field to move colored boxes.
+                Particularly, you're a box-moving agent in a multi-agent system, stationed on a 1x1 square in a grid playground at grid location of [{local_agent_location}].
                 
-                1. {att_promt}
-                2. Based on other agent's response, try to argue and come up with an optimal plan
+                The goals and rules of this environment are:
+                {GOAL_RULES}
+                
+                Other central planner is also coordinating all other agents to achieve the goal: match each box with its color-coded target.
+                You can only move same color boxes to same color targets.
+                
+                The current state and possible actions of yourself are: {{{state_update_prompt_local_agent}}}.
+                The current states and possible actions of all other agents are: {{{state_update_prompt_other_agent}}}.
 
+                Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
 
-            You can imagine first about how you would plan these actions and specify your action plan.
-            This is the success response of previous state: {success_action}
-            Remanber to assign action to your self as well.
+                The previous state and action pairs at each step are: {state_action_prompt}
+                Please learn from previous steps: based on other agent's response, try to think and come up with an optimal plan
 
-            The other agent's current action plan is giving as: {central_response}.
-            Try to find agreement with the central ageent if you can, the goal is to resolve conversation, not adding more.
-            
-            Prioritize adding more actions or keeping at least the same number of action if possible, but the number of action should not be more than the number of agents.
+                You can imagine first about how you would plan these actions and specify your action plan.
+                Remanber to assign action to your self as well.
 
-            Please evaluate the given plan.
-            If you agree with it, respond 'I Agree', without any extra words.
-            If not, briefly explain your objections to this other central planner and an judger agent will get involved.
-            Ensure that you still include the actions that you agree with.
-            
-            Please remanber to only change the actions you disagree with and not change other actions, remanber to include all actions for each agents.
-            
-            {feedback}
-            
-            Your response:
-        """
+                The other agent's current action plan is giving as: {central_response}.
+                Try to find agreement with the central ageent if you can, the goal is to resolve conversation, not adding more.
+
+                Please evaluate the given plan.
+                If you agree with it, respond 'I Agree', without any extra words.
+                If not, briefly explain your objections to this other central planner and an judger agent will get involved.
+                Ensure that you still include the actions that you agree with.
+                Please remanber to only change the actions you disagree with and not change other actions, remanber to include all actions for each agents.
+                
+                {feedback}
+                
+                Your response:
+            """
     return local_HCA_prompt
