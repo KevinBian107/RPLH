@@ -829,6 +829,7 @@
   <h1>Numerical Evaluation</h1>
 
 <p>Comparing performances of different communication system through a numerical comparison (given the same <code>seed</code>, running on smaller scaled environment, 2x2 grid with max 5 boxes/targets in total (optimality depends on seed)):</p>
+<p><strong>All evaluations in this system are down using <code>gpt-40-mini</code> for speed purpose and with <code>agent</code> argument for testing reasoning abilities.</strong></p>
 <h2 id="human-annotation">Human Annotation<a class="headerlink" href="#human-annotation" title="Permanent link">&para;</a></h2>
 <p>Evaluate whether the system outputs reasonable/optimal response at each steps.</p>
 <ol>
@@ -848,8 +849,8 @@
 <ol>
 <li>Social understanding (similarity score in agent_model + success rate of finding spys)</li>
 <li>Convergence rate (Iiteration numbers)</li>
+<li>Correlation between social understanding and convergence rate (t-distribution + bootstrap)</li>
 </ol>
-<p>Correlation between social understanding and convergence rate (t-distribution + bootstrap)</p>
 
 
 
