@@ -91,7 +91,7 @@ def is_valid_action(
                 doable_action_lst = agent_action[agent_name]
                 doable_action = f'The list of doable action for {agent_name} is {doable_action_lst}'
             else:
-                print('ERROR: NOT DOABLE ACTION FOR AGENT')
+                print(f'ERROR: NOT DOABLE ACTION FOR {agent_name}')
                 doable_action = 'No doable action for this agent'
 
             if is_judge:
