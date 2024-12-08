@@ -1,6 +1,7 @@
 *__pycache__
 inference-env/
 testing-env/
+gpt-agent-testing-env-0/
 gpt-agent-testing-env-1/
 gpt-standard-testing-env-1/
 gpt-agent-testing-env-2/
