@@ -828,28 +828,37 @@
 
   <h1>Numerical Evaluation</h1>
 
-<p>Comparing performances of different communication system through a numerical comparison (given the same <code>seed</code>, running on smaller scaled environment, 2x2 grid with max 5 boxes/targets in total (optimality depends on seed)):</p>
+<p>Comparing performances of different communication system through a numerical comparison:</p>
 <p><strong>All evaluations in this system are down using <code>gpt-40-mini</code> for speed purpose and with <code>agent</code> argument for testing reasoning abilities.</strong></p>
 <h2 id="human-annotation">Human Annotation<a class="headerlink" href="#human-annotation" title="Permanent link">&para;</a></h2>
 <p>Evaluate whether the system outputs reasonable/optimal response at each steps.</p>
 <ol>
-<li>Manually reason what is the optimal number of steps given the environment.</li>
+<li>Manually reason what is the optimal number of steps given the environment.<ul>
 <li>Given the same <code>seed</code> (same environment setup), how many boxes are removed at each step and whether this step is efficient (human-annotate).</li>
-<li>Does output reasoning (tokens) makes sense.</li>
-<li>Does action decision make snese.</li>
+<li>Does output reasoning (tokens) makes sense &amp; does action decision make snese.</li>
+</ul>
+</li>
 <li>Look at one iteration lag, the <code>agent_model</code> that HCA proposed and the actual <code>actual_model</code> that local agent responses to.</li>
 </ol>
 <h2 id="computation-system-metrics">Computation System Metrics<a class="headerlink" href="#computation-system-metrics" title="Permanent link">&para;</a></h2>
+<p>Evaluating convergence rate given the same <code>seed</code>, running on smaller scaled environment, 3x3 grid with max double same color boxes/targets in total (same env for all testing systems)
+- <code>seed</code> = <code>iteration_num</code> (i.e. 1, 2, 3, ...)
+- Running 10 times for each systems.
+- Neglecting empty rounds.</p>
 <ol>
-<li>Test Success Rate (does the system converge before max number of stesp reached).</li>
-<li>Differences with optimla human plans</li>
+<li>Test Success Rate (does the system converge before max number of stesp (50 environmental steps in our evals) reached).</li>
+<li>Differences with optimla human plans (refer to human annotation steps).</li>
 <li>Convergence speed (number of environmental execution steps needed for convergence (solve the given problem)).</li>
 </ol>
 <h2 id="agent-social-reasoning-metrics">Agent Social Reasoning Metrics<a class="headerlink" href="#agent-social-reasoning-metrics" title="Permanent link">&para;</a></h2>
+<p>Evaluating agent based reasoning's power.</p>
 <ol>
-<li>Social understanding (similarity score in agent_model + success rate of finding spys)</li>
-<li>Convergence rate (Iiteration numbers)</li>
-<li>Correlation between social understanding and convergence rate (t-distribution + bootstrap)</li>
+<li>Social understanding (similarity score in final agent_model + success rate of finding spys).</li>
+<li>Convergence rate (Iiteration numbers).</li>
+</ol>
+<p>Afterward analysis:</p>
+<ol>
+<li>Correlation between social understanding and convergence rate (t-distribution + bootstrap).</li>
 </ol>
 
 
