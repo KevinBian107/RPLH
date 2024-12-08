@@ -944,18 +944,15 @@
 <h2 id="customize-by-runing-seperately">Customize By Runing Seperately<a class="headerlink" href="#customize-by-runing-seperately" title="Permanent link">&para;</a></h2>
 <h3 id="create-individual-environment">Create Individual Environment<a class="headerlink" href="#create-individual-environment" title="Permanent link">&para;</a></h3>
 <p>Create local MoveBox environment for running (depending on the version using) by:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_vanilla</span><span class="o">/</span><span class="n">env</span><span class="o">.</span><span class="n">py</span>
-</code></pre></div>
-<p>Or setting up RPLH-efficient system by:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_efficient</span><span class="o">/</span><span class="n">env</span><span class="o">.</span><span class="n">py</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">env</span><span class="o">/</span><span class="n">env</span><span class="o">.</span><span class="n">py</span>
 </code></pre></div>
 <p>Our environment is adapted from <a href="https://yongchao98.github.io/MIT-REALM-Multi-Robot/">here</a></p>
 <h3 id="individual-inference-loops">Individual Inference Loops<a class="headerlink" href="#individual-inference-loops" title="Permanent link">&para;</a></h3>
 <p>We also descigned scripts to deirectly run each seperate system. We can run original vanilla RPLH inferene loop by:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_vanilla</span><span class="o">/</span><span class="n">rplh_inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">systems</span><span class="o">/</span><span class="n">h_vanilla</span><span class="o">/</span><span class="n">rplh_inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
 </code></pre></div>
 <p>or running the efficient RPLH inferene loop by:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">h_efficient</span><span class="o">/</span><span class="n">rplh_inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">systems</span><span class="o">/</span><span class="n">h_efficient</span><span class="o">/</span><span class="n">rplh_inference</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span>
 </code></pre></div>
 
 
