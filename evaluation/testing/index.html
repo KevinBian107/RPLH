@@ -852,16 +852,29 @@
 </li>
 <li>Differences with optimla human plans (refer to human annotation steps).</li>
 <li>Convergence speed (number of environmental execution steps needed for convergence (solve the given problem)).</li>
+<li>Average boxs moved to other grid and average boxs matched taregets</li>
 </ul>
 <h2 id="agent-social-reasoning-metrics">Agent Social Reasoning Metrics<a class="headerlink" href="#agent-social-reasoning-metrics" title="Permanent link">&para;</a></h2>
-<p>Evaluating agent based reasoning's power. For each round of testing, the spy agent is the same (diagonal line) however, since the environment's box and target distribution is random, this allows the spy agent's lcoation to remain constant.</p>
+<p>Evaluating agent based reasoning's power. For each round of testing, the spy agent is the same (diagonal line) however, since the environment's box and target distribution is random, this allows the spy agent's lcoation to remain constant (some  position may be more prone to vote out? Central area?).</p>
 <ol>
 <li>Social understanding (similarity score in final agent_model + success rate of finding spys).</li>
+<li>Number of spys mentioned<ul>
+<li>cannot use average or false positive (FP) because once spy is out, HCA suspect others.</li>
+</ul>
+</li>
+<li>(Later) Spy mentioned ratio (Before the spys get kicks out, how amhy times it gets mentioned in the spy_model / all agents_mentioned).<ul>
+<li>Error may exist as non-negative thing mentioned.</li>
+<li>Further do similarity analysis.</li>
+</ul>
+</li>
 <li>Convergence rate (Iiteration numbers).</li>
+<li>Look at the number of spys' effect to performance.</li>
 </ol>
-<p>Afterward analysis:</p>
+<p>Afterward analysis: put agent and standard RPLH's data together and get features (i.e. Spy mentioned ratio, convergence rate, ...)</p>
 <ol>
 <li>Correlation between social understanding and convergence rate (t-distribution + bootstrap).</li>
+<li>AB Testing to look at distribution differences (per column).</li>
+<li>Run no spys example.</li>
 </ol>
 
 
