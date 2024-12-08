@@ -53,7 +53,7 @@ def get_response_data(response_dir, trial_data, trial, num_boxes, num_targets):
         
         return trial_data
 
-def get_spy_model_data(spy_model_dir, trial_agent_counts, trial):
+def get_spy_model_data(spy_model_dir, trial_spy_counts, trial):
     '''Use counter to store spy model data'''
     trial_counts = Counter()  # Create a separate Counter for this trial
     if os.path.exists(spy_model_dir):
@@ -72,9 +72,9 @@ def get_spy_model_data(spy_model_dir, trial_agent_counts, trial):
             agents = list(spy_model.keys())
             trial_counts.update(agents)
     
-    trial_agent_counts[trial] = trial_counts  # Save the trial-specific Counter
+    trial_spy_counts[trial] = trial_counts  # Save the trial-specific Counter
     
-    return trial_agent_counts
+    return trial_spy_counts
 
 def get_convergence_data(state_dir, trial, success_or_not):
     "Check converge or not"
@@ -129,9 +129,10 @@ def get_data(base_dir, trial_num):
     
     trial_dirs = [f"trial_{i}" for i in range(1, trial_num+1)]
     trial_data = []
-    trial_agent_counts = {}
+    trial_spy_counts = {}
     success_or_not = {}
     trial_agent_model = {}
+    trial_spy_model = {}
     for trial in trial_dirs:
         trial_path = os.path.join(base_dir, trial, "env_pg_state_3_3/pg_state0", "_w_no_history_gpt-4o-mini")
         pg_state_file = os.path.join(trial_path, "pg_state/pg_state0.json")
@@ -157,14 +158,15 @@ def get_data(base_dir, trial_num):
         
         trial_success = get_convergence_data(state_dir, trial, success_or_not)
         trial_data = get_response_data(response_dir, trial_data, trial, num_boxes, num_targets)
-        trial_agent_counts = get_spy_model_data(spy_model_dir, trial_agent_counts, trial)
+        trial_spy_counts = get_spy_model_data(spy_model_dir, trial_spy_counts, trial)
         trial_agent_model = get_agent_model(agent_dir, trial_agent_model, trial)
+        trial_spy_model = get_agent_model(spy_model_dir, trial_spy_model, trial)
     
     success_df = pd.DataFrame(trial_success.items(), columns=["Trial", "Convergence"])
     
-    agent_names = set(agent for counts in trial_agent_counts.values() for agent in counts)
+    agent_names = set(agent for counts in trial_spy_counts.values() for agent in counts)
     agent_df = pd.DataFrame.from_dict(
-        {trial: {agent: trial_agent_counts.get(trial, {}).get(agent, 0) for agent in agent_names} for trial in trial_dirs},
+        {trial: {agent: trial_spy_counts.get(trial, {}).get(agent, 0) for agent in agent_names} for trial in trial_dirs},
         orient="index"
     ).fillna(0).astype(int)
     agent_df.index.name = "Trial"
@@ -175,9 +177,16 @@ def get_data(base_dir, trial_num):
         orient="index"
     )
     agent_df.index.name = "Trial"
+    
+    agent_names = set(agent for counts in trial_spy_model.values() for agent in counts)
+    spy_df = pd.DataFrame.from_dict(
+        {trial: {agent: trial_spy_model.get(trial, {}).get(agent, 0) for agent in agent_names} for trial in trial_dirs},
+        orient="index"
+    )
+    agent_df.index.name = "Trial"
 
     df = pd.DataFrame(trial_data)
     df["Avg_Boxes_To_Targets_Per_Response"] = df["Boxes_To_Targets"] / df["Num_Responses"]
     df["Avg_Boxes_To_Other_Per_Response"] = df["Boxes_To_Other"] / df["Num_Responses"]
     
-    return df, agent_df, success_df, att_df
+    return df, agent_df, success_df, att_df, spy_df
