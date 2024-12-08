@@ -64,9 +64,9 @@ def main():
     # Dynamically import the specified module
     try:
         if args.reasoning_model == "agent":
-            inference_loop = args.module_name + ".rplh_agent_inference"
+            inference_loop = "systems." + args.module_name + ".rplh_agent_inference"
         else:
-            inference_loop = args.module_name + ".rplh_inference"
+            inference_loop = "systems." + args.module_name + ".rplh_inference"
 
         inference_module = importlib.import_module(inference_loop)
     except ModuleNotFoundError:

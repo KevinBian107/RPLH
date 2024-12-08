@@ -1,16 +1,16 @@
-
 import sys
 from pathlib import Path
 import tiktoken
 
-main_path = Path(__file__).resolve().parent.parent.parent
+main_path = Path(__file__).resolve().parent.parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
-    
+
 from rplh.llm.language_model import *
 from rplh.env.env import *
-
+from rplh.systems.h_efficient.memory.memory_standard import *
 from rplh.env.env import better_state_repres
+
 
 enc = tiktoken.get_encoding("cl100k_base")
 assert enc.decode(enc.encode("hello world")) == "hello world"
@@ -18,40 +18,16 @@ enc = tiktoken.encoding_for_model("gpt-4")
 input_prompt_token_limit = 3000
 N = 5
 
-GOAL_RULES = f"""
-            You are an agent in a grid-like field to move colored boxes.
-            Each agent is assigned to a 1x1 square and can only interact with objects in its area.
-            Agents can move a box to a neighboring square or a same-color target.
-            You can only move same color boxes to same color targets.
-            Each square can contain many targets and boxes.
-            The squares are identified by their center coordinates, e.g., square[0.5, 0.5].
-            Actions are like: move(box_red, target_red) or move(box_red, square[0.5, 0.5]).
-            When planning for action, remanber to not purely repeat the actions but learn why the state changes or remains in a dead loop.
-            Avoid being stuck in action loops.
-            Additionally, when there is a box still in the grid (i.e. the state space contains {{"0.5, 0.5": ["box_red"]}}), then the agent in this grid (Agent[0.5, 0.5]) have to make an action in the next step.
-            Again, if there is a box in the grid, the corresponding agent in the grid has to make an action in this step.
-            Specify your action plan in this format where box_x and box_y are arbitrary boxes: {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_y, target_y)"}}.
-            One agent can only make one action. Include an agent only if it has a task next. 
-            No agent name should be given if the agent does not have a task next. 
-            """
 
-FEEDBACK_LCOAL1 = """
-            This is the feedback from local agents.
-            If you find some errors in your previous plan, try to modify it.
-            Otherwise, output the same plan as before.
-            The output should have the same json format. 
-            Do not explain, just directly output json directory.
-            Your response:
-            """
-
-
-
-def rplh_prompt_func(
+def rplh_prompt_agent_func(
     state_update_prompt: str,
     data: dict,
     dialogue_history_method: str,
     HCA_agent_location: str,
+    local_agent_location: str,
+    local_responses: list,
     feedback: str = "",
+    judging_mode: bool = False,
 ) -> str:
     """
     Designs an input prompt for a role-playing leader-hallucinating (RPLH) agent
@@ -63,14 +39,17 @@ def rplh_prompt_func(
         dialogue_history_method (str): Method to handle dialogue history, e.g.,
                                        "_w_only_state_action_history", "_w_compressed_dialogue_history".
         HCA_agent_location (str): Location of the HCA agent in the grid.
-
+        local_agent_location (str): Location of the local agent in the grid.
+        local_responses (list): Response list of the local agent to the central planner.
+        feedback (str): Feedback on the previous action plan.
+        judging_mode (bool): Flag to indicate if the agent is in judging mode.
+        
     Returns:
         str: A structured prompt for the role-playing leader-hallucinating agent.
 
     Notes:
         Boxes just need to be moved to the target location, not in the target location.
     """
-
     response_total_list = data["response_total_list"]
     pg_state_list = data["pg_state_list"]
     dialogue_history_list = data["dialogue_history_list"]
@@ -82,7 +61,7 @@ def rplh_prompt_func(
     # if len(pg_state_list) - len(dialogue_history_list) != 1:
     #     raise ValueError("state and dialogue history list do not match")
 
-    user_prompt_1 = f"""..."""  # check for prompt length, no need for us
+    user_prompt_1 = f"""..."""
     token_num_count = len(enc.encode(user_prompt_1))
 
     if dialogue_history_method in (
@@ -148,7 +127,68 @@ def rplh_prompt_func(
                     state_action_prompt = state_action_prompt_next
                 else:
                     break
-                
+        
+        try:
+            agent_model = data['agent_model'][-2]
+            spy_model = data['spy_model'][:-2]
+        except:
+            agent_model =  data['agent_model']
+            spy_model = data['spy_model']
+        
+        if (judging_mode == False) and (data["env_step"] == 0):
+            agent_reason_prompt = "You are the first agent. Leave spy_model and agent_model empty"
+            print('FIRST HCA')
+        
+        if judging_mode:
+            print('JUDGING MODE HCA')
+            # when being judge, find spy incrementally
+            re_eval_prompt = f"""{local_agent_location} has provided their perspective on your plan
+                            (notice that they will think that they are the central planner) as this feedback {local_responses}.
+                            Use this inofrmation to judge if this agent is a spy and then update your agent_model and spy_moddel.
+                            Remamber to append ths previous agent_model and spy_model. Don't acuse agent being spy when they are not {local_agent_location}, only acuse {local_agent_location} if you think it's spy.
+                            
+                            If you think an local agent is an spy, don't listen to it's opinions.
+                            
+                            You only see {local_agent_location}, do not build agent_model or spy_model for any other agent other than {local_agent_location}.
+                            
+                            Please append the previous agent model" {agent_model} and previous spt model {spy_model}
+                            """
+            
+            agent_reason_prompt = f"""Please learn from spy_model and agent_modelin the following ways:
+                                    
+                                1. Please build your belief on what each agent would do and outpute in agent_model. Use one world to describe their attitude and then some reasoning.
+                                    Do not just say what the agents are doing, but rather use texts to explain their characteristics.
+                                    You should build model for all the agent in the format agent_model[{{Agent[0.5, 0.5]: [proactive: good in moving box], Agent[0.5, 1.5]: [This agent is not really cooperative hence should try to avoid moving boxes to him], ...}}].
+                                
+                                2. Notice that there may be multiple spy agent in your environment where their objective is different than yours.
+                                    Write out who you think the spy is and their objectives in the spy_model.
+                                    Notice that the spy is not trying to not move box but rather having a different objective in mind (i.e. putting boxes in the wrong place or move boxes away from targets), so lazy agent is not a sign of spy.
+                                    Spy knows how to fake themselves, so you must reason from not just there attitude in text, but they are doing in action.
+                                    Do your reasoning based on agent's action, not just their conversation. Think if their action makes sense.
+                                    
+                            """
+        else:
+            # when being HCA, no judegement, just use info.
+            print("NEW HCA DOING OPTIMAL PLANNING")
+            
+            agent_reason_prompt = f"""
+                            You have a agent_model and spy_model from the rpevious HCA agent, please learn from them before constructing your own:
+                            Previous agent model" {agent_model}
+                            Previous spt model {spy_model}
+                            
+                            Please learn from spy_model and agent_model in the following ways:                
+
+                            1. Based on the action taken by each agent and the reasoning they give charcteristics of each agent, please do two things and added them after each agent's attitude:
+                                    i. Reason about the reactions each agent would have towards your command.
+                                    ii. Reason about how they would give actions if they are the central agent.
+                            
+                            2. Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents.
+                            That is, try to make plans to skip the spy agent.
+                            
+                            3. You should not change anything in the spy_model and agent_model, only learn from them to plan better actions.
+                        """
+            re_eval_prompt = ""
+
         if feedback != "":
             feedback = (
                 "There is error in preivous action plan. Here is the feedbcak: "
@@ -170,7 +210,12 @@ def rplh_prompt_func(
             
             Hence, the current state is {better_state_repres(pg_state_list[-1])}, with the possible that each agent can take: {state_update_prompt}.
             
+            Notice that you should try to utilize all agents by assigning actions to agents that doesn't have boxes in their region for transportations.
             Please only plan actions for each agent that is chosen from each agent's doable action list, do not give a action that is not doable.
+
+            {agent_reason_prompt}
+            
+            {re_eval_prompt}
 
             Think about what the future {N} actions would be if you want to achieve the goal with the reasoning.
             Remanber to wirte out for each step, what you plan for every agent to do and what would the state change be.
@@ -183,10 +228,11 @@ def rplh_prompt_func(
             One agent can only make one action.
             No agent name should be given if the agent does not have a task next. 
             """
+            
     return HCA_prompt
 
 
-def dialogue_func(
+def dialogue_agent_func(
     state_update_prompt_local_agent: str,
     state_update_prompt_other_agent: str,
     central_response: str,
@@ -360,141 +406,3 @@ def dialogue_func(
             """
             
     return local_HCA_prompt
-
-def judge_prompt_func(
-    local_response: str,
-    cen_response: str,
-    cur_state: dict,
-    feedback: str = "",
-) -> str:
-    """
-    Constructs a prompt for the judge agent to evaluate and select the best plan.
-
-    Args:
-        local_response (str): Response from a local agent.
-        cen_response (str): Central planner's proposed plan.
-        prev_states (dict): Previous states and actions taken by all agents.
-
-    Returns:
-        str: The constructed prompt for the judge.
-
-    Note:
-        Most important!!! Prompting is very important, make sure to give a accurate prompting.
-    """
-
-    judge_prompt = f"""
-        You are a judger judgeing which agent in a grid-like field to move colored boxes is doing the correct move.
-        You personally do not need to make any moves but only serve as the decision maker to judge others' moves.
-        
-        The goals and rules of this environment are:
-        {GOAL_RULES}
-
-        The first agent is giving command of {cen_response}, but the second agent is sayin {local_response}.
-        Here is the current state : {better_state_repres(cur_state)}.
-        Please judge which of the action from the first agent or the second agent is better.
-        Do not come-up with something new, only choose one of them, do not give explantion, just choose one of them.
-
-        Include an agent only if it has a task next. If the agent does not have task, do not include.
-
-        {feedback}
-        
-        Now, select the next step:
-        """
-    return judge_prompt
-
-def LLM_summarize_func(
-    state_action_prompt_next_initial: str,
-    model_name: str = "llama3.2:3b-instruct-q5_K_M",
-) -> str:
-    """
-    Summarizes a lengthy prompt for more concise input to the model.
-
-    Args:
-        state_action_prompt_next_initial (str): The original, lengthy prompt.
-        model_name (str, optional): The model name to process the summarization.
-
-    Returns:
-        str: Summarized content.
-    """
-
-    prompt1 = f"Please summarize the following content as concise as possible: \n{state_action_prompt_next_initial}"
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": prompt1},
-    ]
-    response = LLaMA_response(messages, model_name)
-    print("SUMMARIZING")
-    return response
-
-
-def input_reprompt_func(state_update_prompt: str) -> str:
-    """
-    Creates a re-prompt for agents to generate a new action plan based on the updated state.
-
-    Args:
-        state_update_prompt (str): Updated description of the current state.
-
-    Returns:
-        str: A re-prompt instructing agents to provide the next step in JSON format.
-    """
-
-    user_reprompt = f"""
-    Finished! The updated state is as follows(combined targets and boxes with the same color have been removed): {state_update_prompt}
-    The output should be like json format like: {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])", "Agent[0.5, 1.5]":"move(box_y, target_y)"}} where box_x and box_y are arbitrary boxes.
-    If no action for one agent in the next step, just do not include its action in the output.
-    Also remember at most one action for each agent in each step.
-    Next step output:
-    """
-    return user_reprompt
-
-
-def message_construct_func(
-    user_prompt_list: list[str],
-    response_total_list: list[str],
-    dialogue_history_method: str,
-) -> list[dict[str, str]]:
-    """
-    Constructs messages for the model with the appropriate dialogue context.
-    Create a specialized LLM dictrionary with prompt information, later convert back in LLM class
-
-    (with all dialogue history concats)
-
-    Args:
-        user_prompt_list (list[str]): List of user prompts.
-        response_total_list (list[str]): List of model responses.
-        dialogue_history_method (str): Method for managing dialogue history.
-
-    Returns:
-        list[dict[str, str]]: List of message dictionaries for the model.
-
-    Notes:
-        We all use this function now through out the RPLH system to maintain consistency, only other case is teh attitude agent.
-    """
-
-    messages = [
-        {
-            "role": "system",
-            "content": f"""You are a helpful assistant.
-                 
-                Make sure that:
-                - If no action for an agent in the next step, do not include it in JSON output. 
-                - At most one action for each agent in each step.
-                - Json format should follow something like: {{'Agent[0.5, 0.5]': 'move(box_purple, target_purple)', 'Agent[0.5, 1.5]': 'move(box_orange, target_orange)', 'Agent[1.5, 0.5]': 'move(box_orange, target_orange)', 'Agent[1.5, 1.5]': 'move(box_green, target_green)'}}
-                """,
-        }
-    ]
-
-    if f"{dialogue_history_method}" in (
-        "_w_all_dialogue_history",
-        "_w_compressed_dialogue_history",
-    ):
-        for i in range(len(user_prompt_list)):
-            messages.append({"role": "user", "content": user_prompt_list[i]})
-    else:
-        print("LESS PROMPT IN MESSAGE CONSTRUCT")
-        messages.append({"role": "user", "content": user_prompt_list[-1]})
-
-    for i in range(len(response_total_list)):
-        messages.append({"role": "assistant", "content": response_total_list[i]})
-
-    return messages
