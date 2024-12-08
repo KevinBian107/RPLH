@@ -14,7 +14,7 @@
         <link rel="prev" href="../structure/">
       
       
-        <link rel="next" href="../../system/h_vanilla/">
+        <link rel="next" href="../prompt/">
       
       
       <link rel="icon" href="../../assets/logo.png">
@@ -549,6 +549,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../prompt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Prompt Structure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -650,27 +671,6 @@
   
   <span class="md-ellipsis">
     Decentralize
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../system/prompt/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Prompt Structure
   </span>
   
 
@@ -932,6 +932,7 @@
 </tr>
 </tbody>
 </table>
+<p>For agent based modeling, we ahve also made a <a href="https://github.com/KevinBian107/RPLH/tree/master/rplh/configs"><code>config.yaml</code></a> file that users can customize to defien the attitude of each agent in the environment.</p>
 <h2 id="testing-systems">Testing Systems<a class="headerlink" href="#testing-systems" title="Permanent link">&para;</a></h2>
 <p>Conduct evaluation using our system by:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">python</span> <span class="n">rplh</span><span class="o">/</span><span class="n">test</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">module_name</span> <span class="s2">&quot;h_efficient&quot;</span> <span class="o">--</span><span class="n">model_name</span> <span class="s2">&quot;qwen2.5:14b-instruct-q3_K_L&quot;</span> <span class="o">--</span><span class="n">num_trials</span> <span class="mi">5</span> <span class="o">--</span><span class="n">box_num_upper_bound</span> <span class="mi">1</span> <span class="o">--</span><span class="n">start_iter</span> <span class="mi">1</span> <span class="o">--</span><span class="n">row_num</span> <span class="mi">3</span> <span class="o">--</span><span class="n">column_num</span> <span class="mi">3</span> <span class="o">--</span><span class="n">reasoning_model</span> <span class="s2">&quot;agent&quot;</span>
