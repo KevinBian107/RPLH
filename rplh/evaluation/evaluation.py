@@ -35,6 +35,8 @@ def get_state_spy_for_analysis(base_dir: str):
         with open(state_path, "r") as f:
             try:
                 response = json.load(f)
+                
+                # catch case for two API responses
                 if not all([len(value) == 0 or len(value) == 2 for value in response.values()]):
                     print(f"{trial}: Not Converged")
                     print(response)
