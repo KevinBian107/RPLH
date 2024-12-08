@@ -1,8 +1,8 @@
 *__pycache__
 inference-env/
 testing-env/
-gpt-agent-testing-env/
-ollama-standard-tests/
+gpt-agent-testing-env-1/
+ollama-standard-testing-env/
 *.ipynb_checkpoints
 *.DS_Store
 conversation.txt

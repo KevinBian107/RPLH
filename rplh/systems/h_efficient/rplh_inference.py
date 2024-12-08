@@ -398,14 +398,14 @@ def run_exp(
                             dialogue_history += f"Agent[{local_agent_row_i+0.5}, {local_agent_column_j+0.5}]: {response_local_agent}\n"
 
                             with open("conversation.txt", "a") as f:
-                                message = f"------###------###------{assigned_attitude}_DISAGREEING_LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
+                                message = f"------###------###------{assigned_attitude}_DISAGREEING_LOCAL_{a}_ROW_{local_agent_row_i+0.5}_COL_{local_agent_column_j+0.5}------###------###------: \n {response_local_agent} \n \n"
                                 f.write(message)
 
                         else:
                             print("I Agree")
                             # agree no judge, use HCA response diretcly, avoid error.
                             with open("conversation.txt", "a") as f:
-                                message = f"------###------###------{assigned_attitude}_AGREEING_LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
+                                message = f"------###------###------{assigned_attitude}_AGREEING_LOCAL_{a}_ROW_{local_agent_row_i+0.5}_COL_{local_agent_column_j+0.5}------###------###------: \n {response_local_agent} \n \n"
                                 f.write(message)
 
                             continue
@@ -422,7 +422,7 @@ def run_exp(
                     # -----------------------------------------JUDGE IF NO AGREEMENT MET, SEND MESSAGE IF AGREE-----------------------------------------#
                     # This message should be constructed for teh judge, include both central and local response, agree on global plan
                     print(
-                        f"-------###-------###-------###-------JUDGE_ON_ROW_{local_agent_row_i}_COL_{local_agent_column_j}-------###-------###-------###-------"
+                        f"-------###-------###-------###-------JUDGE_ON_ROW_{local_agent_row_i+0.5}_COL_{local_agent_column_j+0.5}-------###-------###-------###-------"
                     )
                     local_response = data_local["local_agent_response_list_dir"][
                         "feedback1"
@@ -491,7 +491,7 @@ def run_exp(
                     )
 
                     with open("conversation.txt", "a") as f:
-                        messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_str_judge} \n \n"
+                        messages = f"------###------###------JUDGE_{a}_ROW_{local_agent_row_i+0.5}_COL_{local_agent_column_j+0.5}------###------###------: \n {response_str_judge} \n \n"
                         f.write(messages)
 
                     print(f"JUDGE MODIFIED:\n {response}")
