@@ -353,7 +353,7 @@ def run_exp(
                         (
                             state_update_prompt_local_agent,
                             state_update_prompt_other_agent,
-                            _
+                            agent_action # this need update as well
                         ) = state_update_func_local_agent(
                             pg_row_num,
                             pg_column_num,

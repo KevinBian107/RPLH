@@ -262,6 +262,30 @@ def run_exp(
 
             data_dict["hca_agent_response_list"].append(response)
             data_dict["hca_conversation_list"].append(response_str)
+            
+            with open(
+                Saving_path_result
+                + "/agent_model"
+                + "/agent_model"
+                + str(data_dict["env_step"])
+                + str(HCA_agent_location)
+                + ".json",
+                "w",
+            ) as f:
+                print("SAVE AGENT MODEL \n")
+                json.dump(data_dict['agent_model'][-1], f)
+            
+            with open(
+                Saving_path_result
+                + "/spy_model"
+                + "/spy_model"
+                + str(data_dict["env_step"])
+                + str(HCA_agent_location)
+                + ".json",
+                "w",
+            ) as f:
+                print("SAVE SPY MODEL \n")
+                json.dump(data_dict['spy_model'][-1], f)
 
             with open(
                 Saving_path_result
@@ -379,7 +403,7 @@ def run_exp(
                         (
                             state_update_prompt_local_agent,
                             state_update_prompt_other_agent,
-                            _
+                            agent_action # this need update as well
                         ) = state_update_func_local_agent(
                             pg_row_num,
                             pg_column_num,
@@ -504,6 +528,30 @@ def run_exp(
 
                     data_dict['agent_model'].append(raw_response["agent_model"])
                     data_dict['spy_model'].append(raw_response["spy_model"])
+                    
+                    with open(
+                        Saving_path_result
+                        + "/agent_model"
+                        + "/agent_model"
+                        + str(data_dict["env_step"])
+                        + str(local_agent_location)
+                        + ".json",
+                        "w",
+                    ) as f:
+                        print("SAVE AGENT MODEL \n")
+                        json.dump(data_dict['agent_model'][-1], f)
+                    
+                    with open(
+                        Saving_path_result
+                        + "/spy_model"
+                        + "/spy_model"
+                        + str(data_dict["env_step"])
+                        + str(local_agent_location)
+                        + ".json",
+                        "w",
+                    ) as f:
+                        print("SAVE SPY MODEL \n")
+                        json.dump(data_dict['spy_model'][-1], f)
                     
                     if len(response_judge) == 0:
                         print("JUDGE NO RESPONSE: NO APPEND, HCA IS TEH LAST ONE")

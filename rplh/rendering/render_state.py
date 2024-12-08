@@ -1,30 +1,21 @@
 import plotly.express as px
-import pandas as pd
 import re
 import copy
 import plotly.graph_objects as go
 import plotly.io as pio
 import plotly.express as px
 import plotly.express as px
+import pandas as pd
+import numpy as np
+import sys
+from pathlib import Path
 
 pio.renderers.default = "plotly_mimetype"
 from PIL import Image
 
-import sys
-from pathlib import Path
-
 main_path = Path(__file__).resolve().parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
-
-# from rplh.h_vanilla.memory import *
-import os
-import json
-import numpy as np
-
-
-import shutil
-import random
 
 
 def render_animate_terminal_popup(box_map, action_list):
@@ -293,7 +284,7 @@ def render_graph(box_map):
 
 def render_graph(box_map, pg_row_num, pg_column_num):
     fig = go.Figure()
-    robot = Image.open("demos/robot.png")
+    robot = Image.open("rplh/rendering/assets/robot.png")
 
     # Add rectangles and robot images for the "boxes"
     for center in box_map.keys():
@@ -482,7 +473,7 @@ def render_animate(box_map, actions, num_frames=2):
         range_y=[0, 2],
     )
 
-    robot = Image.open("robot.png")
+    robot = Image.open("rplh/rendering/assets/robot.png")
 
     for center in box_map.keys():
         cx, cy = center
