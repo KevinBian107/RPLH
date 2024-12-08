@@ -845,16 +845,15 @@
 <li><code>seed</code> = <code>iteration_num</code> (i.e. 1, 2, 3, ...)</li>
 <li>Running 10 times for each systems.</li>
 <li>Neglecting empty rounds.</li>
-<li>
-<p>Due to small LM's reason, some rounds does not converge with <code>syntactic error</code> response, maybe due to spy?</p>
-</li>
-<li>
-<p>Test Success Rate (does the system converge before max number of stesp (50 environmental steps in our evals) reached).</p>
-</li>
+<li>Due to small LM's reason, some rounds does not converge with <code>syntactic error</code> response, maybe due to spy?</li>
+</ul>
+<p>Measures:</p>
+<ol>
+<li>Test Success Rate (does the system converge before max number of stesp (50 environmental steps in our evals) reached).</li>
 <li>Differences with optimla human plans (refer to human annotation steps).</li>
 <li>Convergence speed (number of environmental execution steps needed for convergence (solve the given problem)).</li>
 <li>Average boxs moved to other grid and average boxs matched taregets</li>
-</ul>
+</ol>
 <h2 id="agent-social-reasoning-metrics">Agent Social Reasoning Metrics<a class="headerlink" href="#agent-social-reasoning-metrics" title="Permanent link">&para;</a></h2>
 <p>Evaluating agent based reasoning's power. For each round of testing, the spy agent is the same (diagonal line) however, since the environment's box and target distribution is random, this allows the spy agent's lcoation to remain constant (some  position may be more prone to vote out? Central area?).</p>
 <ol>
