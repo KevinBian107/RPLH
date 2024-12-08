@@ -84,7 +84,7 @@ def main():
     Code_dir_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     # Set up the base saving path
-    base_path = os.path.join(Code_dir_path, "testing-env")
+    base_path = os.path.join(Code_dir_path, f"testing-env-agent")
     os.makedirs(base_path, exist_ok=True)
 
     print(
@@ -105,8 +105,8 @@ def main():
             repeat_num=1,
             box_num_upper_bound=args.box_num_upper_bound,
             box_num_low_bound=1,
-            pg_row_num=pg_row_num,
-            pg_column_num=pg_column_num,
+            pg_row_num=args.row_num,
+            pg_column_num=args.column_num,
             seed=seed,
         )
 
@@ -122,16 +122,14 @@ def main():
             dialogue_history_method = "_w_only_state_action_history"
 
         # Experiment parameters
-        pg_row_num = 2
-        pg_column_num = 2
         iteration_num = 0
-        query_time_limit = 20
+        query_time_limit = 50
 
         # Call the run_exp function from the specified module
         result = inference_module.run_exp(
             trial_path,
-            pg_row_num,
-            pg_column_num,
+            args.row_num,
+            args.column_num,
             iteration_num,
             query_time_limit,
             dialogue_history_method=dialogue_history_method,

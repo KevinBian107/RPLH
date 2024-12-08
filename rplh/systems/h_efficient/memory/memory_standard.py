@@ -154,7 +154,7 @@ def rplh_prompt_func(
                 "There is error in preivous action plan. Here is the feedbcak: "
                 + feedback
             )
-
+            
         HCA_prompt = f"""
             You are a central planner directing agent in a grid-like field to move colored boxes.
             You are agent at grid [{HCA_agent_location}]. You need to make moves and other agents need to make moves as well.
@@ -175,7 +175,7 @@ def rplh_prompt_func(
             Think about what the future {N} actions would be if you want to achieve the goal with the reasoning.
             Remanber to wirte out for each step, what you plan for every agent to do and what would the state change be.
             
-            {feedback}
+            THIS IS THE FEEDBACK: {feedback}
 
             Action Plan:
             Specify your action plan in this format: {{"Agent[0.5, 0.5]":"move(box_x, square[0.5, 1.5])","Agent[0.5, 1.5]": "move(box_y, target_y)"}} where box_x and box_y are arbitrary boxes.
@@ -480,6 +480,7 @@ def message_construct_func(
                 - If no action for an agent in the next step, do not include it in JSON output. 
                 - At most one action for each agent in each step.
                 - Json format should follow something like: {{'Agent[0.5, 0.5]': 'move(box_purple, target_purple)', 'Agent[0.5, 1.5]': 'move(box_orange, target_orange)', 'Agent[1.5, 0.5]': 'move(box_orange, target_orange)', 'Agent[1.5, 1.5]': 'move(box_green, target_green)'}}
+                - If you have a feedback, you must learn from the feedback
                 """,
         }
     ]

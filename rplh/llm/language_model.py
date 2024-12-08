@@ -43,6 +43,7 @@ def LLaMA_response_json(
         client = instructor.from_openai(
             client, 
             mode=instructor.Mode.JSON,
+            # temperature=0.3,
         )
         while True:
             if count >= MAX_RETRY:

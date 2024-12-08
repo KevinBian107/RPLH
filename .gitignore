@@ -1,6 +1,7 @@
 *__pycache__
 inference-env/
-testsing-env/
+testing-env/
+gpt-agent-testing-env/
 ollama-standard-tests/
 *.ipynb_checkpoints
 *.DS_Store
@@ -8,3 +9,5 @@ conversation.txt
 site/
 docs/
 multi-agent-env/
+testing-env-agent/
+testing-env-standard/

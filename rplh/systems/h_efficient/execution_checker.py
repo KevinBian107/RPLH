@@ -86,7 +86,7 @@ def is_valid_action(
             pass
         else:
 
-            agent_name = f'Agent[{key[0]}, {key[0]}]'
+            agent_name = f'Agent[{key[0]}, {key[1]}]'
             if agent_name in agent_action:
                 doable_action_lst = agent_action[agent_name]
                 doable_action = f'The list of doable action for {agent_name} is {doable_action_lst}'
@@ -97,8 +97,7 @@ def is_valid_action(
             if is_judge:
                 feedback = f"""
         You are the judge and your assigned task for {key[0]}, {key[1]} is not in the doable action list,
-        {doable_action}
-        So choose the alternative action from the central central planner {central_response}.
+        {doable_action}, please don't make the same action plan for Agent {key[0]}, {key[1]}. So choose the alternative action from the central central planner {central_response}.
                 """
             else:
                 feedback = f"""

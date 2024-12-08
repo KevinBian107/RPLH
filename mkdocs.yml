@@ -139,6 +139,10 @@ extra:
     - icon: fontawesome/brands/github 
       link: https://github.com/KevinBian107
 
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js
+
+
 # extra_css:
 #   - css/mkdocstrings.css
 
