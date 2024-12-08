@@ -75,6 +75,8 @@ def run_exp(
     os.makedirs(Saving_path_result + f"/pg_state", exist_ok=True)
     os.makedirs(Saving_path_result + f"/dialogue_history", exist_ok=True)
     os.makedirs(Saving_path_result + f"/hca_agent_response", exist_ok=True)
+    os.makedirs(Saving_path_result + f"/agent_model", exist_ok=True)
+    os.makedirs(Saving_path_result + f"/spy_model", exist_ok=True)
 
     """This is information constant"""
     # TODO: Put this in a data tree
@@ -111,11 +113,11 @@ def run_exp(
 
     print(f"query_time_limit: {query_time_limit}")
 
-    render_graph_terminal_popup(
-        data_dict["pg_dict"],
-        pg_row_num=pg_row_num,
-        pg_column_num=pg_column_num,
-    )
+    # render_graph_terminal_popup(
+    #     data_dict["pg_dict"],
+    #     pg_row_num=pg_row_num,
+    #     pg_column_num=pg_column_num,
+    # )
 
     for index_query_times in range(10):
         # -----------------------------------------ONE HCA AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
@@ -255,10 +257,6 @@ def run_exp(
             print(f"AGENT ACTION RESPONSE: {response}")
             # else:
             #    raise ValueError(f"No action format found in raw response: {raw_response}")
-            if response == "Out of tokens":
-                pass
-            elif response == "Syntactic Error":
-                pass
 
             data_dict["hca_agent_response_list"].append(response)
             data_dict["hca_conversation_list"].append(response_str)
@@ -268,6 +266,7 @@ def run_exp(
                 + "/agent_model"
                 + "/agent_model"
                 + str(data_dict["env_step"])
+                + "_"
                 + str(HCA_agent_location)
                 + ".json",
                 "w",
@@ -280,6 +279,7 @@ def run_exp(
                 + "/spy_model"
                 + "/spy_model"
                 + str(data_dict["env_step"])
+                + "_"
                 + str(HCA_agent_location)
                 + ".json",
                 "w",
@@ -534,6 +534,7 @@ def run_exp(
                         + "/agent_model"
                         + "/agent_model"
                         + str(data_dict["env_step"])
+                        + "_"
                         + str(local_agent_location)
                         + ".json",
                         "w",
@@ -546,6 +547,7 @@ def run_exp(
                         + "/spy_model"
                         + "/spy_model"
                         + str(data_dict["env_step"])
+                        + "_"
                         + str(local_agent_location)
                         + ".json",
                         "w",
@@ -643,12 +645,14 @@ def run_exp(
 
                 data_dict["pg_dict"] = pg_dict_returned
 
-                render_graph_terminal_popup(
-                    data_dict["pg_dict"],
-                    pg_row_num=pg_row_num,
-                    pg_column_num=pg_column_num,
-                )
+                # render_graph_terminal_popup(
+                #     data_dict["pg_dict"],
+                #     pg_row_num=pg_row_num,
+                #     pg_column_num=pg_column_num,
+                # )
                 # render_animate_terminal_popup(data_dict["pg_dict"], [original_response_dict])
+                
+                success_failure = "Success Update"
 
             except:
                 success_failure = "Hallucination of wrong plan"
@@ -667,6 +671,17 @@ def run_exp(
                 count += len(value)
                 print(f"STILL HAVE {count} LEFT")
             if count == 0:
+                # save final result
+                with open(
+                    Saving_path_result
+                    + "/pg_state"
+                    + "/pg_state"
+                    + str(data_dict["env_step"] + 1)
+                    + ".json",
+                    "w",
+                ) as f:
+                    print("SAVE INITIAL STATE \n")
+                    json.dump(data_dict["pg_dict"], f)
                 break
 
     # -----------------------------------------TASK SUCCESS OUT-----------------------------------------#

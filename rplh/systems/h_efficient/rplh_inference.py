@@ -85,7 +85,6 @@ def run_exp(
         "attitude_dialogue_dict": {},
         "pg_dict": None,  # For initial environment state
         "env_step": -1,
-        "agree_num": {},
         "spy_detect": 0,
     }
 
@@ -106,7 +105,7 @@ def run_exp(
 
     print(f"query_time_limit: {query_time_limit}")
 
-    render_graph_terminal_popup(data_dict["pg_dict"], pg_column_num = pg_column_num, pg_row_num = pg_row_num)
+    # render_graph_terminal_popup(data_dict["pg_dict"], pg_column_num = pg_column_num, pg_row_num = pg_row_num)
 
     for index_query_times in range(10):
         # -----------------------------------------ONE HCA AGENT THINK BY THEMSELVES ONCE-----------------------------------------#
@@ -234,10 +233,6 @@ def run_exp(
             print(f"AGENT ACTION RESPONSE: {response}")
             # else:
             #    raise ValueError(f"No action format found in raw response: {raw_response}")
-            if response == "Out of tokens":
-                pass
-            elif response == "Syntactic Error":
-                pass
 
             data_dict["hca_agent_response_list"].append(response)
             data_dict["hca_conversation_list"].append(response_str)
@@ -408,7 +403,6 @@ def run_exp(
 
                         else:
                             print("I Agree")
-                            data_dict["agree_num"][f"HCA_{a}"] += 1
                             # agree no judge, use HCA response diretcly, avoid error.
                             with open("conversation.txt", "a") as f:
                                 message = f"------###------###------{assigned_attitude}_AGREEING_LOCAL_{a}_ROW_{local_agent_row_i}_COL_{local_agent_column_j}------###------###------: \n {response_local_agent} \n \n"
@@ -421,7 +415,6 @@ def run_exp(
                         data_local["local_agent_response_list_dir"]["feedback1"] != ""
                     ):  # if not I agree
                         # once not agree, set to zero to re-discuss lat plan
-                        # data_dict["agree_num"] = 0
                         data_local["local_agent_response_list_dir"][
                             "feedback1"
                         ] += FEEDBACK_LCOAL1
@@ -570,8 +563,10 @@ def run_exp(
 
                 data_dict["pg_dict"] = pg_dict_returned
 
-                render_graph_terminal_popup(data_dict["pg_dict"], pg_column_num = pg_column_num, pg_row_num = pg_row_num)
+                # render_graph_terminal_popup(data_dict["pg_dict"], pg_column_num = pg_column_num, pg_row_num = pg_row_num)
                 # render_animate_terminal_popup(data_dict["pg_dict"], [original_response_dict])
+                
+                success_failure = "Success Update"
 
             except:
                 success_failure = "Hallucination of wrong plan"
@@ -580,14 +575,23 @@ def run_exp(
             # need to append new states to state list
             data_dict["pg_state_list"].append(data_dict["pg_dict"])
 
-            data_dict["agree_num"][f"HCA_{a}"] = 0
-
             # -----------------------------------------TASK SUCCESS CHECK-----------------------------------------#
             count = 0
             for ky, value in data_dict["pg_dict"].items():
                 count += len(value)
                 print(f"STILL HAVE {count} LEFT")
             if count == 0:
+                # save final result
+                with open(
+                    Saving_path_result
+                    + "/pg_state"
+                    + "/pg_state"
+                    + str(data_dict["env_step"] + 1)
+                    + ".json",
+                    "w",
+                ) as f:
+                    print("SAVE INITIAL STATE \n")
+                    json.dump(data_dict["pg_dict"], f)
                 break
 
     # -----------------------------------------TASK SUCCESS OUT-----------------------------------------#
