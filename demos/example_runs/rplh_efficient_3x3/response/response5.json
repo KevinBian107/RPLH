@@ -1,0 +1,1 @@
+{"Agent[0.5, 1.5]": "move(box_green, square[1.5, 1.5])", "Agent[1.5, 1.5]": "move(box_orange, square[1.5, 0.5])"}
