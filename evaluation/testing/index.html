@@ -841,15 +841,19 @@
 <li>Look at one iteration lag, the <code>agent_model</code> that HCA proposed and the actual <code>actual_model</code> that local agent responses to.</li>
 </ol>
 <h2 id="computation-system-metrics">Computation System Metrics<a class="headerlink" href="#computation-system-metrics" title="Permanent link">&para;</a></h2>
-<p>Evaluating convergence rate given the same <code>seed</code>, running on smaller scaled environment, 3x3 grid with max double same color boxes/targets in total (same env for all testing systems)
-- <code>seed</code> = <code>iteration_num</code> (i.e. 1, 2, 3, ...)
-- Running 10 times for each systems.
-- Neglecting empty rounds.</p>
-<ol>
-<li>Test Success Rate (does the system converge before max number of stesp (50 environmental steps in our evals) reached).</li>
+<p>Evaluating convergence rate given the same <code>seed</code>, running on smaller scaled environment, 3x3 grid with max double same color boxes/targets in total (same env for all testing systems).</p>
+<ul>
+<li><code>seed</code> = <code>iteration_num</code> (i.e. 1, 2, 3, ...)</li>
+<li>Running 10 times for each systems.</li>
+<li>
+<p>Neglecting empty rounds.</p>
+</li>
+<li>
+<p>Test Success Rate (does the system converge before max number of stesp (50 environmental steps in our evals) reached).</p>
+</li>
 <li>Differences with optimla human plans (refer to human annotation steps).</li>
 <li>Convergence speed (number of environmental execution steps needed for convergence (solve the given problem)).</li>
-</ol>
+</ul>
 <h2 id="agent-social-reasoning-metrics">Agent Social Reasoning Metrics<a class="headerlink" href="#agent-social-reasoning-metrics" title="Permanent link">&para;</a></h2>
 <p>Evaluating agent based reasoning's power.</p>
 <ol>
