@@ -2,6 +2,8 @@
 inference-env/
 testing-env/
 gpt-agent-testing-env-1/
+gpt-standard-testing-env-1/
+gpt-agent-testing-env-2/
 ollama-standard-testing-env/
 *.ipynb_checkpoints
 *.DS_Store
