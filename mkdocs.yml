@@ -151,11 +151,11 @@ nav:
   - API:
     - System Structure: api/structure.md
     - API Calls: api/api.md
+    - Prompt Structure: api/prompt.md
   - System:
     - Vanilla: system/h_vanilla.md
     - Efficient: system/h_efficient.md
     - Decentralize: system/d_efficient.md
-    - Prompt Structure: system/prompt.md
   - Evaluation:
     - Numerical Evaluation: evaluation/testing.md
   - About Us: team.md

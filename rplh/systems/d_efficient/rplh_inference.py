@@ -4,17 +4,17 @@ import sys
 from pathlib import Path
 import argparse
 
-main_path = Path(__file__).resolve().parent.parent.parent
+main_path = Path(__file__).resolve().parent.parent.parent.parent
 if str(main_path) not in sys.path:
     sys.path.append(str(main_path))
 
 from rplh.llm.language_model import *
 from rplh.env.env import *
-from rplh.h_efficient.execution_checker import *
+from rplh.systems.h_efficient.execution_checker import *
 from rplh.llm.response_model import *
 
-from rplh.h_efficient.memory.memory_standard import *
-from rplh.d_efficient.memory import *
+from rplh.systems.h_efficient.memory.memory_standard import *
+from rplh.systems.d_efficient.memory import *
 
 from rplh.rendering.render_state import *
 
