@@ -412,9 +412,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#intelligence-in-information-data-flow" class="md-nav__link">
+  <a href="#intelligence-in-data-flow-structured-environment" class="md-nav__link">
     <span class="md-ellipsis">
-      Intelligence In Information &amp; Data Flow
+      Intelligence In Data Flow &amp; Structured Environment
     </span>
   </a>
   
@@ -790,9 +790,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#intelligence-in-information-data-flow" class="md-nav__link">
+  <a href="#intelligence-in-data-flow-structured-environment" class="md-nav__link">
     <span class="md-ellipsis">
-      Intelligence In Information &amp; Data Flow
+      Intelligence In Data Flow &amp; Structured Environment
     </span>
   </a>
   
@@ -846,8 +846,9 @@
 <h1 id="a-light-weight-agetnt-based-multi-collaboration-system">A Light-Weight Agetnt-Based Multi-Collaboration System<a class="headerlink" href="#a-light-weight-agetnt-based-multi-collaboration-system" title="Permanent link">&para;</a></h1>
 <p>We hope to build agent that is caplable of <strong>social-reasoning</strong> and expecting what the other agent should be doing. We are building a generalize agent model for every single agent in this environment and hopefully moving a step closer to <strong>level-one agent</strong>.</p>
 <p>Using Language Models' <strong>In-context Learning</strong> abilities, we are developing frameworks for multi-agent collaborations system using Role-Playing Leader-Hallucinations system, or in short, RPLH. We know that as parameter increases, performance automatically increases. However, only limited works have being down on generalizing this sort of in-context learning ability into samll parameter models. In our work, we try to address this issue. We try to design an efficient <code>light-weight</code> system that is runable directly on a laptop Macbook or using API calls with smaller/cheaper GPT models such as GPT-4o-mini. More importantly, this system can <strong>scale up</strong> in terms of the complexity of the environment and the number of agents.</p>
-<h2 id="intelligence-in-information-data-flow">Intelligence In Information &amp; Data Flow<a class="headerlink" href="#intelligence-in-information-data-flow" title="Permanent link">&para;</a></h2>
+<h2 id="intelligence-in-data-flow-structured-environment">Intelligence In Data Flow &amp; Structured Environment<a class="headerlink" href="#intelligence-in-data-flow-structured-environment" title="Permanent link">&para;</a></h2>
 <p>We believe that the key of collaboration, or of solving issues in such partial observable and actuabtable environment layes in communication and the data/inofrmation we can extract from such communication to gradually build up a world model.</p>
+<p>Our study studies a particularly a hard task (for smaller/less parametrized models) but an interesting one because the LM is embodied in a <code>structured</code> environment where not all actions are unstructured string based (i.e. mafia easoning environment), so the HCA agent must reason from each local agent's action to deduct about what they may be thinking and whether or not they are the spy agent. Furthermore, other than the scalability of our environment soloy (2x2, 3x3, 4x4, 5x5, ...) for even smaller language models, due to the <code>strctured</code> environment and that most social reasoning or agent simulations require the agent to operate in an structured environment, it can be deemed as a base-case of able to scale/transport and <strong>operate</strong> in some other structured virtual enviornment that is more complicated for social reasoning (i.e. VirtualHome).</p>
 <h2 id="social-reasoning-agent">Social Reasoning Agent<a class="headerlink" href="#social-reasoning-agent" title="Permanent link">&para;</a></h2>
 <p>In decentralzie environment, usually each agent must communicate about <strong>what they can see</strong> and <strong>what they can do</strong> to better collaborate with each other and do the actions because of the partial observability situation. Here is an example of such partial information of describing what an specific local agent can see and do.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Agent[0.5, 0.5]:
@@ -859,7 +860,6 @@
 <p>Our system propose a novel approach to solve this problem where each HCA agent try to conduct social reasoning of what the other agent would think, do, and react to it's plan and recieve actual sensory feedbacks from local agents to understand what is the problem with teh previous reasoning. Idealy, through longer iyerations, the HCA would gradually build an more correct model of other agents. This situation improves complexity even more when we have different local agent playing this role of the HCA agent, meaning that they can incorporate their attitudes into giving actions.</p>
 <h2 id="advesarial-reasoning-agent">Advesarial Reasoning Agent<a class="headerlink" href="#advesarial-reasoning-agent" title="Permanent link">&para;</a></h2>
 <p>Beyond standard reasonings that LM perform in multi-agent collaboration, our system (specifically <code>h_efficient</code> and <code>d_efficient</code>) supports agent based reasoning with advesarial players in teh environment that has a different objective than all other agents in the environment. Hypothetically, under a advesarial situation (spy exist in environment), a hallucination efficient system would improve the social understanding ability, hence, convergence rate (since advesarial players would try their best to disrupt the system).</p>
-<p>This is particularly a hard task but an interesting one because the LM is embodied in a <code>structured</code> environment where not all observations are string based, so the HCA agent must reason from each local agent's action to deduct about what they may be thinking and whether or not they are the spy agent. Furthermore, because our system has a <code>strctured</code> environment, it can be deemed as a basecase of able to scale to some other virtual enviornment that is more complicated for social reasoning (i.e. VirtualHome).</p>
 <p>With more interaction, the HCA may get a better idea of who the spy is and taken action to prohibit the spys.</p>
 <h2 id="rplh-demos">RPLH Demos:<a class="headerlink" href="#rplh-demos" title="Permanent link">&para;</a></h2>
 <p>Here is a demo of our RPLH performing multi-agent resasoning with the first HCA (central) agent hallucinations about future steps:</p>
