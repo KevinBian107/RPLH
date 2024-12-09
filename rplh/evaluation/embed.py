@@ -75,3 +75,22 @@ def pearson_correlation(vec1, vec2):
         return 0
     
     return numerator / denominator
+
+def get_spy_detect_embedding(main_df,
+                             spy_df,
+                             justification_df, 
+                             spy_sentence="you are the spy agent, your goal is to prevent match targets",
+                             spy_agents=["Agent[0.5, 0.5]", "Agent[1.5, 1.5]", "Agent[2.5, 2.5]"]):
+    '''Get embeddings for spy data'''
+    
+    out_df = main_df[['Trial', 'Num_Boxes', 'Boxes_To_Other']].copy()
+    
+    spy_df = spy_df.reset_index().drop(columns=['dummy', 'Trial'])
+    for col in spy_df.columns:
+        if col in spy_agents:
+            spy_embed = spy_df[col].apply(lambda x: cosine_sim(get_embedding(spy_sentence), get_embedding(str(x))))
+            out_df[f"Spy_Embed_{col}"] = spy_embed
+    
+    out_df['Justification_Embed'] = justification_df['Justifications'].apply(lambda x: cosine_sim(get_embedding(spy_sentence), get_embedding(str(x))))
+    
+    return out_df
