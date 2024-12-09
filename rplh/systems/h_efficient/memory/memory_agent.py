@@ -135,10 +135,6 @@ def rplh_prompt_agent_func(
             agent_model =  data['agent_model']
             spy_model = data['spy_model']
         
-        if (judging_mode == False) and (data["env_step"] == 0):
-            agent_reason_prompt = "You are the first agent. Leave spy_model and agent_model empty"
-            print('FIRST HCA')
-        
         if judging_mode:
             print('JUDGING MODE HCA')
             # when being judge, find spy incrementally
@@ -149,9 +145,9 @@ def rplh_prompt_agent_func(
                             
                             If you think an local agent is an spy, don't listen to it's opinions.
                             
-                            You only see {local_agent_location}, do not build agent_model or spy_model for any other agent other than {local_agent_location}.
+                            You only see {local_agent_location}, only say {local_agent_location} in both spy_model and agent_moddel.
                             
-                            Please append the previous agent model" {agent_model} and previous spt model {spy_model}
+                            Please append the previous agent model {agent_model} and previous spt model {spy_model}
                             """
             
             agent_reason_prompt = f"""Please learn from spy_model and agent_modelin the following ways:
@@ -188,6 +184,11 @@ def rplh_prompt_agent_func(
                             3. You should not change anything in the spy_model and agent_model, only learn from them to plan better actions.
                         """
             re_eval_prompt = ""
+        
+        # Thiis need to be after, ensure fresh env start
+        if (judging_mode == False) and (data["env_step"] == 0):
+            agent_reason_prompt = "You are the first agent. Leave spy_model and agent_model empty"
+            print('FIRST HCA')
 
         if feedback != "":
             feedback = (

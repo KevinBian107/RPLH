@@ -41,17 +41,17 @@ def get_response_data(response_dir, trial_data, trial, num_boxes, num_targets):
                 else:
                     boxes_to_other += 1
         
-        # Store trial data
-        trial_data.append({
-        "Trial": trial,
-        "Num_Boxes": num_boxes,
-        "Num_Targets": num_targets,
-        "Num_Responses": valid_responses,
-        "Boxes_To_Targets": boxes_to_targets,
-        "Boxes_To_Other": boxes_to_other,
+    # Store trial data
+    trial_data.append({
+    "Trial": trial,
+    "Num_Boxes": num_boxes,
+    "Num_Targets": num_targets,
+    "Num_Responses": valid_responses,
+    "Boxes_To_Targets": boxes_to_targets,
+    "Boxes_To_Other": boxes_to_other,
     })
         
-        return trial_data
+    return trial_data
 
 def get_spy_model_data(spy_model_dir, trial_spy_counts, trial):
     '''Use counter to store spy model data'''
@@ -104,7 +104,7 @@ def get_agent_model(agent_dir, trial_agent_model, trial):
     '''Get all agent model data'''
     trial_agent_descriptions = {}
     if os.path.exists(agent_dir):
-        agent_files = [f for f in os.listdir(agent_dir) if f.endswith(".json")]
+        agent_files = os.listdir(agent_dir)
         
         for agent_file in agent_files:
             agent_path = os.path.join(agent_dir, agent_file)
