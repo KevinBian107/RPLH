@@ -77,6 +77,7 @@ def run_exp(
     os.makedirs(Saving_path_result + f"/hca_agent_response", exist_ok=True)
     os.makedirs(Saving_path_result + f"/agent_model", exist_ok=True)
     os.makedirs(Saving_path_result + f"/spy_model", exist_ok=True)
+    os.makedirs(Saving_path_result + f"/justification", exist_ok=True)
 
     """This is information constant"""
     # TODO: Put this in a data tree
@@ -92,6 +93,7 @@ def run_exp(
         "env_step": -1,
         "agree_num": {},
         "agent_model": [],
+        "justification": [],
         "spy_model": [],
         "spy_detect": 0,
     }
@@ -530,9 +532,11 @@ def run_exp(
                         [f"{k}: {v}" for k, v, in raw_response_judge.items()]
                     )
                     response_judge = raw_response_judge["actions_plan"]
-
-                    data_dict['agent_model'].append(raw_response["agent_model"])
-                    data_dict['spy_model'].append(raw_response["spy_model"])
+                    
+                    # bug, did not update here with judge earlier
+                    data_dict['agent_model'].append(raw_response_judge["agent_model"])
+                    data_dict['spy_model'].append(raw_response_judge["spy_model"])
+                    data_dict['justification'].append(raw_response_judge["justification"])
                     
                     with open(
                         Saving_path_result
@@ -559,6 +563,19 @@ def run_exp(
                     ) as f:
                         print("SAVE SPY MODEL \n")
                         json.dump(data_dict['spy_model'][-1], f)
+                    
+                    with open(
+                        Saving_path_result
+                        + "/justification"
+                        + "/justification"
+                        + str(data_dict["env_step"])
+                        + "_"
+                        + str(HCA_agent_location)
+                        + ".json",
+                        "w",
+                    ) as f:
+                        print("SAVE JUSTIFICATION\n")
+                        json.dump(data_dict['justification'][-1], f)
                     
                     if len(response_judge) == 0:
                         print("JUDGE NO RESPONSE: NO APPEND, HCA IS TEH LAST ONE")
