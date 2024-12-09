@@ -12,6 +12,6 @@ conversation.txt
 site/
 docs/
 multi-agent-env/
-testing-env-agnt/
+testing-env-agent/
 testing-env-standard/
 gpt-standard-testing-nospy-env-1/

@@ -155,12 +155,16 @@ def rplh_prompt_agent_func(
                                 1. Please build your belief on what each agent would do and outpute in agent_model. Use one world to describe their attitude and then some reasoning.
                                     Do not just say what the agents are doing, but rather use texts to explain their characteristics.
                                     You should build model for all the agent in the format agent_model[{{Agent[0.5, 0.5]: [proactive: good in moving box], Agent[0.5, 1.5]: [This agent is not really cooperative hence should try to avoid moving boxes to him], ...}}].
+                                    If you don't think {local_agent_location} is a spy, don't put {local_agent_location} in the spy_model at all.
                                 
                                 2. Notice that there may be multiple spy agent in your environment where their objective is different than yours.
                                     Write out who you think the spy is and their objectives in the spy_model.
                                     Notice that the spy is not trying to not move box but rather having a different objective in mind (i.e. putting boxes in the wrong place or move boxes away from targets), so lazy agent is not a sign of spy.
                                     Spy knows how to fake themselves, so you must reason from not just there attitude in text, but they are doing in action.
                                     Do your reasoning based on agent's action, not just their conversation. Think if their action makes sense.
+                                    
+                                3. If you think {local_agent_location} is the spy, you should avoid listen to it's opinions and follow your own plans.
+                                Please state in your justification if you choose to not take {local_agent_location}'s input because {local_agent_location} is spy
                                     
                             """
         else:
@@ -175,8 +179,8 @@ def rplh_prompt_agent_func(
                             Please learn from spy_model and agent_model in the following ways:                
 
                             1. Based on the action taken by each agent and the reasoning they give charcteristics of each agent, please do two things and added them after each agent's attitude:
-                                    i. Reason about the reactions each agent would have towards your command.
-                                    ii. Reason about how they would give actions if they are the central agent.
+                                i. Reason about the reactions each agent would have towards your command.
+                                ii. Reason about how they would give actions if they are the central agent.
                             
                             2. Notice that when one agent is not in your action plan, they will not be participated in conversation, so it may be smart to not give actions to uncooperative agents.
                             That is, try to make plans to skip the spy agent.
@@ -402,7 +406,7 @@ def dialogue_agent_func(
                 
                 {feedback}
                 
-                Remaanber to state who you are first before giving responses.
+                Remaanber to not say your true intention but still say something to be less suspicious.
                 Your response:
             """
             
