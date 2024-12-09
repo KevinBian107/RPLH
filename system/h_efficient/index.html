@@ -863,6 +863,9 @@
 <ol>
 <li>
 <p>Each <code>agent_model</code> and <code>spy_model</code> are two degree Markovian (though this can be a hyperparameter) where each judege HCA when updating the models can see the previous two versions of the models.</p>
+<ul>
+<li><strong>The model may get overlapped by later interactions</strong>.</li>
+</ul>
 </li>
 <li>
 <p>For the speedyness of our system, once a spy does not have boxes to move or tragets to match in its grid, then the system will remaind the HCA that one spy agent has been identifided. If all the spy agent has been identified, the system would remaind the HCA agent to not look for spy anymore.</p>
