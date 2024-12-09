@@ -374,10 +374,15 @@ def run_exp(
                                 print(f"SPY AT {local_agent_location} HAS NO BOXES?TARGETS, OUT")
                                 data_dict['spy_detect'] += 1
                                 system_message = {"System message": f"{local_agent_location} is a spy, do not move boxes to that grid"}
+                                
+                                # reset if one spy found
+                                data_dict['spy_model'] = []
                                 data_dict['spy_model'].append(system_message)
                                 
                                 if data_dict['spy_detect'] == len(att_config["spy_agent"]):
                                     print("ALL SPY OUT, END")
+                                    # reset if one spy found
+                                    data_dict['spy_model'] = []
                                     system_message = {"System message": "All spys does not have boxes and targets in their region, focus on moving boxes to their location, leave spy_model empty."}
                                     data_dict['spy_model'].append(system_message)
                                     
