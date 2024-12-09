@@ -83,7 +83,7 @@ def get_spy_detect_embedding(main_df,
                              spy_agents=["Agent[0.5, 0.5]", "Agent[1.5, 1.5]", "Agent[2.5, 2.5]"]):
     '''Get embeddings for spy data'''
     
-    out_df = main_df[['Trial', 'Num_Boxes', 'Boxes_To_Other']].copy()
+    out_df = main_df[['Trial', 'Num_Boxes', 'Boxes_To_Other', 'Convergence']].copy()
     
     spy_df = spy_df.reset_index().drop(columns=['dummy', 'Trial'])
     for col in spy_df.columns:
