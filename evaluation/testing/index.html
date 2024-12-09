@@ -704,9 +704,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#computation-system-metrics" class="md-nav__link">
+  <a href="#standard-reasoning-metrics" class="md-nav__link">
     <span class="md-ellipsis">
-      Computation System Metrics
+      Standard Reasoning Metrics
     </span>
   </a>
   
@@ -716,6 +716,15 @@
   <a href="#agent-social-reasoning-metrics" class="md-nav__link">
     <span class="md-ellipsis">
       Agent Social Reasoning Metrics
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statistical-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Statistical Analysis
     </span>
   </a>
   
@@ -791,9 +800,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#computation-system-metrics" class="md-nav__link">
+  <a href="#standard-reasoning-metrics" class="md-nav__link">
     <span class="md-ellipsis">
-      Computation System Metrics
+      Standard Reasoning Metrics
     </span>
   </a>
   
@@ -803,6 +812,15 @@
   <a href="#agent-social-reasoning-metrics" class="md-nav__link">
     <span class="md-ellipsis">
       Agent Social Reasoning Metrics
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statistical-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Statistical Analysis
     </span>
   </a>
   
@@ -828,8 +846,13 @@
 
   <h1>Numerical Evaluation</h1>
 
-<p>Comparing performances of different communication system through a numerical comparison. <strong>All evaluations in this system are down using <code>gpt-40-mini</code> for speed purpose and with <code>agent</code> argument for testing reasoning abilities.</strong></p>
-<p>We have an <a href="https://github.com/KevinBian107/RPLH/blob/master/demos/notebooks/evaluation.ipynb">notebook for demonstrating</a> our evaluation process.</p>
+<p>Comparing performances of different communication system through a numerical comparison. <strong>All evaluations in this system are down using <code>gpt-40-mini</code> for speed purpose and with <code>agent</code> argument for testing reasoning abilities.</strong> We have an <a href="https://github.com/KevinBian107/RPLH/blob/master/demos/notebooks/evaluation.ipynb">notebook for demonstrating</a> our evaluation process.</p>
+<ul>
+<li><code>seed</code> = <code>iteration_num</code> (i.e. 1, 2, 3, ...)</li>
+<li>Running 10 times for each systems.</li>
+<li>Neglecting empty rounds.</li>
+<li>Due to small LM's reason, some rounds does not converge with <code>syntactic error</code> response, maybe due to spy?</li>
+</ul>
 <h2 id="human-annotation">Human Annotation<a class="headerlink" href="#human-annotation" title="Permanent link">&para;</a></h2>
 <p>Evaluate whether the system outputs reasonable/optimal response at each steps.</p>
 <ol>
@@ -840,20 +863,13 @@
 </li>
 <li>Look at one iteration lag, the <code>agent_model</code> that HCA proposed and the actual <code>actual_model</code> that local agent responses to.</li>
 </ol>
-<h2 id="computation-system-metrics">Computation System Metrics<a class="headerlink" href="#computation-system-metrics" title="Permanent link">&para;</a></h2>
+<p>This is used for testing differences with optimla human plans (refer to human annotation steps).</p>
+<h2 id="standard-reasoning-metrics">Standard Reasoning Metrics<a class="headerlink" href="#standard-reasoning-metrics" title="Permanent link">&para;</a></h2>
 <p>Evaluating convergence rate given the same <code>seed</code>, running on smaller scaled environment, 3x3 grid with max double same color boxes/targets in total (same env for all testing systems).</p>
-<ul>
-<li><code>seed</code> = <code>iteration_num</code> (i.e. 1, 2, 3, ...)</li>
-<li>Running 10 times for each systems.</li>
-<li>Neglecting empty rounds.</li>
-<li>Due to small LM's reason, some rounds does not converge with <code>syntactic error</code> response, maybe due to spy?</li>
-</ul>
-<p>Measures:</p>
 <ol>
 <li>Test Success Rate (does the system converge before max number of stesp (50 environmental steps in our evals) reached).</li>
-<li>Differences with optimla human plans (refer to human annotation steps).</li>
 <li>Convergence speed (number of environmental execution steps needed for convergence (solve the given problem)).</li>
-<li>Average boxs moved to other grid and average boxs matched taregets</li>
+<li>Average boxs moved to other grid and average boxs matched taregets.</li>
 </ol>
 <h2 id="agent-social-reasoning-metrics">Agent Social Reasoning Metrics<a class="headerlink" href="#agent-social-reasoning-metrics" title="Permanent link">&para;</a></h2>
 <p>Evaluating agent based reasoning's power. For each round of testing, the spy agent is the same (diagonal line) however, since the environment's box and target distribution is random, this allows the spy agent's lcoation to remain constant.  Comparing between <code>RPLH-agent-spy</code> with <code>RPLH-standard-spy</code> with <code>RPLH-standard-no-spy</code>.</p>
@@ -864,7 +880,8 @@
 <li>different agents comparison in <code>agent_model</code>.</li>
 </ul>
 </li>
-<li>(Later) Spy mentioned ratio (Before the spys get kicks out, how amhy times it gets mentioned in the spy_model / all agents_mentioned).<ul>
+<li>(Later) Spy mentioned ratio.<ul>
+<li>Before the spys get kicks out, how amhy times it gets mentioned in the (spy_model / all agents_mentioned).</li>
 <li>Error may exist as non-negative thing mentioned.</li>
 <li>Further do similarity analysis.</li>
 <li>cannot use average or false positive (FP) because once spy is out, HCA suspect others.</li>
@@ -873,7 +890,8 @@
 </ul>
 </li>
 </ol>
-<p>Statistical analysis: put agent and standard RPLH's data together and get features (i.e. Spy mentioned ratio, convergence rate, ...)</p>
+<h2 id="statistical-analysis">Statistical Analysis<a class="headerlink" href="#statistical-analysis" title="Permanent link">&para;</a></h2>
+<p>Put agent and standard RPLH's data together and get features (social reasoning similarity, convergence rate)</p>
 <ol>
 <li>Correlation between social understanding and convergence rate (t-distribution + bootstrap).</li>
 <li>AB Testing to look at distribution differences (per column).</li>
