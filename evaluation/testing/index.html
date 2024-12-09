@@ -856,26 +856,27 @@
 <li>Average boxs moved to other grid and average boxs matched taregets</li>
 </ol>
 <h2 id="agent-social-reasoning-metrics">Agent Social Reasoning Metrics<a class="headerlink" href="#agent-social-reasoning-metrics" title="Permanent link">&para;</a></h2>
-<p>Evaluating agent based reasoning's power. For each round of testing, the spy agent is the same (diagonal line) however, since the environment's box and target distribution is random, this allows the spy agent's lcoation to remain constant (some  position may be more prone to vote out? Central area?).</p>
+<p>Evaluating agent based reasoning's power. For each round of testing, the spy agent is the same (diagonal line) however, since the environment's box and target distribution is random, this allows the spy agent's lcoation to remain constant.  Comparing between <code>RPLH-agent-spy</code> with <code>RPLH-standard-spy</code> with <code>RPLH-standard-no-spy</code>.</p>
 <ol>
-<li>Social understanding (similarity score in final agent_model + success rate of finding spys).</li>
-<li>Number of spys mentioned<ul>
-<li>cannot use average or false positive (FP) because once spy is out, HCA suspect others.</li>
+<li>Convergence rate (Iiteration numbers).</li>
+<li>Sentence embedding cosine similarity (social understanding).<ul>
+<li><code>non-spy</code>vs <code>spy</code> in <code>spy_model</code>.</li>
+<li>different agents comparison in <code>agent_model</code>.</li>
 </ul>
 </li>
 <li>(Later) Spy mentioned ratio (Before the spys get kicks out, how amhy times it gets mentioned in the spy_model / all agents_mentioned).<ul>
 <li>Error may exist as non-negative thing mentioned.</li>
 <li>Further do similarity analysis.</li>
+<li>cannot use average or false positive (FP) because once spy is out, HCA suspect others.</li>
+<li>Look at the number of spys' effect to performance.</li>
+<li>Look at spy location's effect on performance (some position may be more prone to vote out? Central area?).</li>
 </ul>
 </li>
-<li>Convergence rate (Iiteration numbers).</li>
-<li>Look at the number of spys' effect to performance.</li>
 </ol>
-<p>Afterward analysis: put agent and standard RPLH's data together and get features (i.e. Spy mentioned ratio, convergence rate, ...)</p>
+<p>Statistical analysis: put agent and standard RPLH's data together and get features (i.e. Spy mentioned ratio, convergence rate, ...)</p>
 <ol>
 <li>Correlation between social understanding and convergence rate (t-distribution + bootstrap).</li>
 <li>AB Testing to look at distribution differences (per column).</li>
-<li>Run no spys example.</li>
 </ol>
 
 
