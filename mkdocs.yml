@@ -162,6 +162,8 @@ nav:
   - Evaluation:
     - Numerical Evaluation: evaluation/testing.md
     - Results: evaluation/results.md
+    - Limitations: evaluation/limitations.md
+    - Agent Modeling: evaluation/agent.md
   - About Us: team.md
   # - Examples: examples.md
   # - Changelog: changelog.md
