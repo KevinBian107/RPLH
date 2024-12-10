@@ -34,5 +34,6 @@ dependencies:
       - mkdocs
       - seaborn
       - tabulate
+      - umap-learn
 
 

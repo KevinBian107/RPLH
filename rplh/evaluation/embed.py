@@ -85,8 +85,7 @@ def get_spy_detect_embedding(main_df,
                              only_spy=False):
     '''Get embeddings for spy data'''
     
-    out_df = main_df[['Trial', 'Num_Boxes', 'Avg_Boxes_To_Targets_Per_Response', 'Avg_Boxes_To_Other_Per_Response', 'Convergence']].copy()
-    
+    out_df = main_df[['Trial', 'Num_Boxes', 'Avg_Boxes_To_Targets_Per_Response', 'Avg_Boxes_To_Other_Per_Response', 'Convergence', 'Num_Responses']].copy()
     
     spy_df = spy_df.reset_index()
     for col in spy_df.columns:

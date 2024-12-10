@@ -262,7 +262,8 @@ def dialogue_agent_func(
         str: Dialogue prompt for the local agent.
     """
     
-    att_def = load_config("rplh/configs/attitude_config.yaml")
+    # demo seems to be hard to converge?
+    att_def = load_config("rplh/configs/attitude_config_for_demo.yaml")
     att_def = att_def["attitude_def"]
     
     response_total_list = data["response_total_list"]
