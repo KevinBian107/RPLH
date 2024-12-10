@@ -330,6 +330,8 @@ def run_exp(
                             assigned_attitude = "NICE"
                         elif local_agent_location in att_config["critic_agent"]:
                             assigned_attitude = "CRITIC"
+                        elif local_agent_location in att_config["agreeing_agent"]:
+                            assigned_attitude = "AGREEING"
                         else:
                             assigned_attitude = "NEUTRAL"
                             
