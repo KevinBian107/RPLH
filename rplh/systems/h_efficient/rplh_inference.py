@@ -71,6 +71,7 @@ def run_exp(
     os.makedirs(Saving_path_result + f"/pg_state", exist_ok=True)
     os.makedirs(Saving_path_result + f"/dialogue_history", exist_ok=True)
     os.makedirs(Saving_path_result + f"/hca_agent_response", exist_ok=True)
+    os.makedirs(Saving_path_result + f"/justification", exist_ok=True)
 
     """This is information constant"""
     # TODO: Put this in a data tree
@@ -86,6 +87,7 @@ def run_exp(
         "pg_dict": None,  # For initial environment state
         "env_step": -1,
         "spy_detect": 0,
+        "justification": []
     }
 
     # Load initial environment state
@@ -457,6 +459,21 @@ def run_exp(
                         [f"{k}: {v}" for k, v, in raw_response_judge.items()]
                     )
                     response_judge = raw_response_judge["actions_plan"]
+                    
+                    data_dict['justification'].append(raw_response_judge["justification"])
+                    
+                    with open(
+                        Saving_path_result
+                        + "/justification"
+                        + "/justification"
+                        + str(data_dict["env_step"])
+                        + "_"
+                        + str(HCA_agent_location)
+                        + ".json",
+                        "w",
+                    ) as f:
+                        print("SAVE JUSTIFICATION\n")
+                        json.dump(data_dict['justification'][-1], f)
 
                     if len(response_judge) == 0:
                         print("JUDGE NO RESPONSE: NO APPEND, HCA IS TEH LAST ONE")
