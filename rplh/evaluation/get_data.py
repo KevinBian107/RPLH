@@ -45,7 +45,6 @@ def get_response_data(response_dir, trial_data, trial, num_boxes, num_targets):
     trial_data.append({
     "Trial": trial,
     "Num_Boxes": num_boxes,
-    "Num_Targets": num_targets,
     "Num_Responses": valid_responses,
     "Boxes_To_Targets": boxes_to_targets,
     "Boxes_To_Other": boxes_to_other,
@@ -67,7 +66,7 @@ def get_convergence_data(state_dir, trial, success_or_not):
             # catch case for two API responses
             if not all([len(value) == 0 or len(value) == 2 for value in response.values()]):
                 print(f"{trial}: Not Converged")
-                print(response)
+                # print(response)
                 success_or_not[trial] = "Not Converged"
             else:
                 success_or_not[trial] = "Converged"
@@ -140,7 +139,7 @@ def get_justification(justification_dir, trial_justification, trial):
     trial_justification[trial] = trial_agent_descriptions
     return trial_justification
 
-def get_data(base_dir, trial_num):
+def get_data(base_dir, trial_num, demo=False):
     '''Main retrieval fiunction for evaluations'''
     
     trial_dirs = [f"trial_{i}" for i in range(1, trial_num+1)]
@@ -152,6 +151,11 @@ def get_data(base_dir, trial_num):
     trial_justification = {}
     for trial in trial_dirs:
         trial_path = os.path.join(base_dir, trial, "env_pg_state_3_3/pg_state0", "_w_no_history_gpt-4o-mini")
+        
+        if demo:
+            trial_path = base_dir
+            print(base_dir)
+            
         pg_state_file = os.path.join(trial_path, "pg_state/pg_state0.json")
         response_dir = os.path.join(trial_path, "response")
         spy_model_dir = os.path.join(trial_path, "spy_model")
