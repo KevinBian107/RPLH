@@ -12,13 +12,14 @@ def count_boxes_and_targets(pg_state):
     num_targets = sum(1 for items in pg_state.values() for item in items if item.startswith("target_"))
     return num_boxes, num_targets
 
-def get_response_data(response_dir, trial_data, trial, num_boxes, num_targets):
+def get_response_data(response_dir, trial_data, trial, num_boxes, num_targets, consectutive_syntactic_error_limit=3):
     '''Get all resposne data'''
     response_files = os.listdir(response_dir)
     valid_responses = 0
     boxes_to_targets = 0
     boxes_to_other = 0
-
+    
+    sythetic_count = 0
     for response_file in response_files:
         response_path = os.path.join(response_dir, response_file)
         with open(response_path, "r") as f:
@@ -29,9 +30,15 @@ def get_response_data(response_dir, trial_data, trial, num_boxes, num_targets):
                 continue 
             
         if response == "Syntactic Error":
+            sythetic_count+=1
             # can't read() first
-            continue
+            response = {}
+            
+            if sythetic_count > consectutive_syntactic_error_limit:
+                print(f"{trial}: Not converge")
+                break
         
+        sythetic_count = 0
         valid_responses += 1
         for action in response.values():
             if "move(" in action:
