@@ -81,16 +81,26 @@ def get_spy_detect_embedding(main_df,
                              justification_df, 
                              spy_sentence="you are the spy agent, your goal is to prevent match targets",
                              just_sentence="I suspect that this agent is the spy agent, thus, I would not listen to this agent.",
-                             spy_agents=["Agent[0.5, 0.5]", "Agent[1.5, 1.5]", "Agent[2.5, 2.5]"]):
+                             spy_agents=["Agent[0.5, 0.5]", "Agent[1.5, 1.5]", "Agent[2.5, 2.5]"],
+                             only_spy=False):
     '''Get embeddings for spy data'''
     
-    out_df = main_df[['Trial', 'Num_Boxes', 'Boxes_To_Other', 'Convergence']].copy()
+    out_df = main_df[['Trial', 'Num_Boxes', 'Avg_Boxes_To_Targets_Per_Response', 'Avg_Boxes_To_Other_Per_Response', 'Convergence']].copy()
     
-    spy_df = spy_df.reset_index().drop(columns=['dummy', 'Trial'])
+    
+    spy_df = spy_df.reset_index()
     for col in spy_df.columns:
-        if col in spy_agents:
+        if "Agent" not in col:
+            spy_df = spy_df.drop(columns=[col])
+    
+    for col in spy_df.columns:
+        if not only_spy:
             spy_embed = spy_df[col].apply(lambda x: cosine_sim(get_embedding(spy_sentence), get_embedding(str(x))))
             out_df[f"Spy_Embed_{col}"] = spy_embed
+        else:
+            if col in spy_agents:
+                spy_embed = spy_df[col].apply(lambda x: cosine_sim(get_embedding(spy_sentence), get_embedding(str(x))))
+                out_df[f"Spy_Embed_{col}"] = spy_embed
     
     out_df['Justification_Embed'] = justification_df['Justifications'].apply(lambda x: cosine_sim(get_embedding(just_sentence), get_embedding(str(x))))
     

@@ -32,5 +32,6 @@ dependencies:
       - plotly
       - instructor
       - mkdocs
+      - seaborn
 
 

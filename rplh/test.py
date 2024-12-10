@@ -84,7 +84,7 @@ def main():
     Code_dir_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     # Set up the base saving path
-    base_path = os.path.join(Code_dir_path, f"testing-env-agent")
+    base_path = os.path.join(Code_dir_path, f"testing-env-standard")
     os.makedirs(base_path, exist_ok=True)
 
     print(

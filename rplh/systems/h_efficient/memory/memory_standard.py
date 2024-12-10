@@ -211,7 +211,7 @@ def dialogue_func(
         str: Dialogue prompt for the local agent.
     """
     
-    att_def = load_config("rplh/configs/attitude_config.yaml")
+    att_def = load_config("rplh/configs/attitude_config_for_demo.yaml")
     att_def = att_def["attitude_def"]
     
     response_total_list = data["response_total_list"]
@@ -294,6 +294,8 @@ def dialogue_func(
             att_promt = att_def['nice_agent']
         elif assigned_attitude == "CRITIC":
             att_promt = att_def['critic_agent']
+        elif assigned_attitude == "AGREEING":
+            att_promt = att_def['agreeing_agent']
         else: # neutral
             att_promt = "Be very neutral"
         

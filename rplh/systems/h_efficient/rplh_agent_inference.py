@@ -62,7 +62,7 @@ def run_exp(
     print("RUNNIN EFFICIENT RPLH")
     
     # load attitudes
-    att_config = load_config("rplh/configs/attitude_config.yaml")
+    att_config = load_config("rplh/configs/attitude_config_for_demo.yaml")
     att_config = att_config["h_efficient_agent"]
 
     Saving_path_result = (
@@ -392,6 +392,8 @@ def run_exp(
                             assigned_attitude = "NICE"
                         elif local_agent_location in att_config["critic_agent"]:
                             assigned_attitude = "CRITIC"
+                        elif local_agent_location in att_config["agreeing_agent"]:
+                            assigned_attitude = "AGREEING"
                         else:
                             assigned_attitude = "NEUTRAL"
                             
