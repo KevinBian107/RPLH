@@ -345,6 +345,8 @@ def dialogue_agent_func(
             att_promt = att_def['nice_agent']
         elif assigned_attitude == "CRITIC":
             att_promt = att_def['critic_agent']
+        elif assigned_attitude == "AGREEING":
+            att_promt = att_def['agreeing_agent']
         else: # neutral
             att_promt = "Be very neutral"
         

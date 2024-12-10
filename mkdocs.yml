@@ -161,6 +161,7 @@ nav:
     - Decentralize: system/d_efficient.md
   - Evaluation:
     - Numerical Evaluation: evaluation/testing.md
+    - Results: evaluation/results.md
   - About Us: team.md
   # - Examples: examples.md
   # - Changelog: changelog.md
