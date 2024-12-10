@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#human-annotation" class="md-skip">
+        <a href="#experiment-configurations" class="md-skip">
           Skip to content
         </a>
       
@@ -674,9 +674,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#human-annotation" class="md-nav__link">
+  <a href="#experiment-configurations" class="md-nav__link">
     <span class="md-ellipsis">
-      Human Annotation
+      Experiment Configurations
     </span>
   </a>
   
@@ -695,15 +695,6 @@
   <a href="#agent-social-reasoning-metrics" class="md-nav__link">
     <span class="md-ellipsis">
       Agent Social Reasoning Metrics
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#statistical-analysis" class="md-nav__link">
-    <span class="md-ellipsis">
-      Statistical Analysis
     </span>
   </a>
   
@@ -791,9 +782,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#human-annotation" class="md-nav__link">
+  <a href="#experiment-configurations" class="md-nav__link">
     <span class="md-ellipsis">
-      Human Annotation
+      Experiment Configurations
     </span>
   </a>
   
@@ -812,15 +803,6 @@
   <a href="#agent-social-reasoning-metrics" class="md-nav__link">
     <span class="md-ellipsis">
       Agent Social Reasoning Metrics
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#statistical-analysis" class="md-nav__link">
-    <span class="md-ellipsis">
-      Statistical Analysis
     </span>
   </a>
   
@@ -848,13 +830,23 @@
 
 <p>Comparing performances of different communication system through a numerical comparison. <strong>All evaluations in this system are down using <code>gpt-40-mini</code> for speed purpose and with <code>agent</code> argument for testing reasoning abilities.</strong></p>
 <p>We have an <a href="https://github.com/KevinBian107/RPLH/blob/master/demos/notebooks/evaluation.ipynb">notebook for demonstrating</a> our evaluation process.</p>
+<h2 id="experiment-configurations">Experiment Configurations<a class="headerlink" href="#experiment-configurations" title="Permanent link">&para;</a></h2>
+<p>The following is how we configured our experiment:</p>
 <ul>
-<li><code>seed</code> = <code>iteration_num</code> (i.e. 1, 2, 3, ...)</li>
-<li>Running 10 times for each systems.</li>
-<li>Neglecting empty rounds.</li>
-<li>Due to small LM's reason, some rounds does not converge with <code>syntactic error</code> response, maybe due to spy?</li>
+<li>Setting <code>seed</code> = <code>iteration_num</code> (i.e. 1, 2, 3, ...)</li>
+<li>Running 20 times for each systems.</li>
+<li>Neglecting empty actions rounds.</li>
+<li>Trial automatically ends after 50 round of environmental steps.</li>
 </ul>
-<h2 id="human-annotation">Human Annotation<a class="headerlink" href="#human-annotation" title="Permanent link">&para;</a></h2>
+<p>Note that in some final rounds of moving boxes, some rounds does not converge with <code>syntactic error</code> response, which is likely due to spy's misleading information giving to the central agent, resulting in non-convergence round (within 50 env-step).</p>
+<h2 id="standard-reasoning-metrics">Standard Reasoning Metrics<a class="headerlink" href="#standard-reasoning-metrics" title="Permanent link">&para;</a></h2>
+<p>Evaluating convergence rate given the same <code>seed</code>, running on smaller scaled environment, 3x3 grid with max double same color boxes/targets in total (same env for all testing systems).</p>
+<ol>
+<li>Test Success Rate (does the system converge before max number of stesp (50 environmental steps in our evals) reached).</li>
+<li>Convergence speed (number of environmental execution steps needed for convergence (solve the given problem)).</li>
+<li>Average boxs moved to other grid and average boxs matched taregets.</li>
+</ol>
+<h3 id="human-annotations">Human Annotations<a class="headerlink" href="#human-annotations" title="Permanent link">&para;</a></h3>
 <p>Evaluate whether the system outputs reasonable/optimal response at each steps.</p>
 <ol>
 <li>Manually reason what is the optimal number of steps given the environment.<ul>
@@ -865,13 +857,6 @@
 <li>Look at one iteration lag, the <code>agent_model</code> that HCA proposed and the actual <code>actual_model</code> that local agent responses to.</li>
 </ol>
 <p>This is used for testing differences with optimla human plans (refer to human annotation steps).</p>
-<h2 id="standard-reasoning-metrics">Standard Reasoning Metrics<a class="headerlink" href="#standard-reasoning-metrics" title="Permanent link">&para;</a></h2>
-<p>Evaluating convergence rate given the same <code>seed</code>, running on smaller scaled environment, 3x3 grid with max double same color boxes/targets in total (same env for all testing systems).</p>
-<ol>
-<li>Test Success Rate (does the system converge before max number of stesp (50 environmental steps in our evals) reached).</li>
-<li>Convergence speed (number of environmental execution steps needed for convergence (solve the given problem)).</li>
-<li>Average boxs moved to other grid and average boxs matched taregets.</li>
-</ol>
 <h2 id="agent-social-reasoning-metrics">Agent Social Reasoning Metrics<a class="headerlink" href="#agent-social-reasoning-metrics" title="Permanent link">&para;</a></h2>
 <p>Evaluating agent based reasoning's power. For each round of testing, the spy agent is the same (diagonal line) however, since the environment's box and target distribution is random, this allows the spy agent's lcoation to remain constant.  Comparing between <code>RPLH-agent-spy</code> with <code>RPLH-standard-spy</code> with <code>RPLH-standard-no-spy</code>.</p>
 <ol>
@@ -881,23 +866,32 @@
 <li>different agents comparison in <code>agent_model</code>.</li>
 </ul>
 </li>
-<li>(Later) Spy mentioned ratio.<ul>
-<li>Before the spys get kicks out, how amhy times it gets mentioned in the (spy_model / all agents_mentioned).</li>
-<li>Error may exist as non-negative thing mentioned.</li>
-<li>Further do similarity analysis.</li>
-<li>cannot use average or false positive (FP) because once spy is out, HCA suspect others.</li>
-<li>Look at the number of spys' effect to performance.</li>
-<li>Look at spy location's effect on performance (some position may be more prone to vote out? Central area?).</li>
-</ul>
-</li>
 </ol>
 <p>Our agent-based system seems to be better at detecting True Positive (spy says spy) than True Negative (not spy say not spy).</p>
-<h2 id="statistical-analysis">Statistical Analysis<a class="headerlink" href="#statistical-analysis" title="Permanent link">&para;</a></h2>
+<h3 id="embedding-details">Embedding Details<a class="headerlink" href="#embedding-details" title="Permanent link">&para;</a></h3>
+<p>Our conversation sentence embedding similarity comparison uses a set of pre-defined sentence for comparing to how LM thinks about each agent's attitude. Specifically, we have sentences starts with <code>seems like</code> for describing LM's model of other agent in teh agent/spy model and <code>I suspect</code> for the justification model.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Nice_agent:<span class="w"> </span><span class="s2">&quot;Seems to be be very easy going, trying to find agreement with the central ageent and the goal is to resolve conversation.&quot;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Critica_agent:<span class="w"> </span><span class="s2">&quot;Seems to be very critical and proposing many changes.&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>Agreeing_agent:<span class="w"> </span><span class="s2">&quot;Seems to be super coopertaive, agreeing to central command.&quot;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>Spy_agent:<span class="w"> </span><span class="s2">&quot;Seems to be the spy agent, its goal is to prevent match targets.&quot;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>Justification:<span class="w"> </span><span class="s2">&quot;I suspect that this agent is the spy agent, thus, I would not listen to this agent.&quot;</span>
+</code></pre></div>
+<h3 id="statistical-details">Statistical Details<a class="headerlink" href="#statistical-details" title="Permanent link">&para;</a></h3>
 <p>Put agent and standard RPLH's data together and get features (social reasoning similarity, convergence rate)</p>
 <ol>
 <li>Correlation between social understanding and convergence rate (t-distribution + bootstrap).</li>
 <li>AB Testing to look at distribution differences (per column).</li>
 </ol>
+<h3 id="future-spy-manipulation">Future Spy Manipulation:<a class="headerlink" href="#future-spy-manipulation" title="Permanent link">&para;</a></h3>
+<p>We can model how amhy times it gets mentioned in the (spy_model / all agents_mentioned) before the spys get kicks out.
+- Error may exist as non-negative thing mentioned.
+- cannot use average or false positive (FP) because once spy is out, HCA suspect others.
+- Look at the number of spys' effect to performance.
+- Look at spy location's effect on performance (some position may be more prone to vote out? Central area?).</p>
 
 
 
