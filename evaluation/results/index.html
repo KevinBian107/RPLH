@@ -14,7 +14,7 @@
         <link rel="prev" href="../testing/">
       
       
-        <link rel="next" href="../../team/">
+        <link rel="next" href="../limitations/">
       
       
       <link rel="icon" href="../../assets/logo.png">
@@ -721,6 +721,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limitations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Limitations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -811,7 +832,8 @@
   <h1>Results</h1>
 
 <h2 id="embedding-comparisons">Embedding Comparisons<a class="headerlink" href="#embedding-comparisons" title="Permanent link">&para;</a></h2>
-<p>For RPLH system with agent based reasoning (having <code>agent_model</code>, <code>spy_model</code>, and <code>justification</code>), we uses embedding methods to compare what our LM have said with the spy detect sentence <code>Seems to be the spy agent, its goal is to prevent match targets</code>. The following result is RPLH-agent system running for 20 trials with box-num-upperbound set to 3 in a 3x3 grid environment (shown agents are spy agents).</p>
+<p>For RPLH system with agent based reasoning (having <code>agent_model</code>, <code>spy_model</code>, and <code>justification</code>), we uses embedding methods to compare what our LM have said with the spy detect sentence <code>Seems to be the spy agent, its goal is to prevent match targets</code>. The following result is RPLH-agent system running for 20 trials with box-num-upperbound set to 3 in a 3x3 grid environment (shown agents are spy agents).
+- Note that we used a higher num-box-upperbound here to allow the central agent to learn more about the spy agent.</p>
 <table>
 <thead>
 <tr>
@@ -910,7 +932,28 @@
 </table>
 <h2 id="feature-importance">Feature Importance<a class="headerlink" href="#feature-importance" title="Permanent link">&para;</a></h2>
 <p>We made agent's performance metrics (df above) into features and used a RandomForest Regressor to see which of the features matter more to the prediction of <code>Avg_Boxes_To_Targets_Per_Response</code>:</p>
-<p><img alt="feature" src="../../assets/feature_ranks.png" /></p>
+<div style="display: flex; justify-content: space-around;">
+    <!-- First Graph -->
+    <div style="flex: 1; margin-right: 10px;">
+        <img src="../../assets/f_rank_1.png" alt="Graph 1" style="width: 100%; height: auto;">
+    </div>
+    <!-- Second Graph -->
+    <div style="flex: 1; margin-left: 10px;">
+        <img src="../../assets/f_rank_3.png" alt="Graph 2" style="width: 100%; height: auto;">
+    </div>
+</div>
+
+<p>When using <code>number of response</code> and <code>average targets matched per response</code> as a vector:</p>
+<div style="display: flex; justify-content: space-around;">
+    <!-- First Graph -->
+    <div style="flex: 1; margin-right: 10px;">
+        <img src="../../assets/f_rank_2.png" alt="Graph 1" style="width: 100%; height: auto;">
+    </div>
+    <!-- Second Graph -->
+    <div style="flex: 1; margin-left: 10px;">
+        <img src="../../assets/f_rank_4.png" alt="Graph 2" style="width: 100%; height: auto;">
+    </div>
+</div>
 
 
 
