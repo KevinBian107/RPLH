@@ -838,7 +838,7 @@
 <li>Neglecting empty actions rounds.</li>
 <li>Trial automatically ends after 50 round of environmental steps.</li>
 </ul>
-<p>Note that in some final rounds of moving boxes, some rounds does not converge with <code>syntactic error</code> response, which is likely due to spy's misleading information giving to the central agent, resulting in non-convergence round (within 50 env-step).</p>
+<p>*Note that in some final rounds of moving boxes, some rounds does not converge with <code>syntactic error</code> response, which is likely due to spy's misleading information giving to the central agent, resulting in non-convergence round (within 50 env-step) as later rounds with less boxes run really fast (due to the configuration of the system, refer <a href="https://kbian.org/RPLH/system/h_efficient/">here</a>).</p>
 <h2 id="standard-reasoning-metrics">Standard Reasoning Metrics<a class="headerlink" href="#standard-reasoning-metrics" title="Permanent link">&para;</a></h2>
 <p>Evaluating convergence rate given the same <code>seed</code>, running on smaller scaled environment, 3x3 grid with max double same color boxes/targets in total (same env for all testing systems).</p>
 <ol>
@@ -869,7 +869,7 @@
 </ol>
 <p>Our agent-based system seems to be better at detecting True Positive (spy says spy) than True Negative (not spy say not spy).</p>
 <h3 id="embedding-details">Embedding Details<a class="headerlink" href="#embedding-details" title="Permanent link">&para;</a></h3>
-<p>Our conversation sentence embedding similarity comparison uses a set of pre-defined sentence for comparing to how LM thinks about each agent's attitude. Specifically, we have sentences starts with <code>seems like</code> for describing LM's model of other agent in teh agent/spy model and <code>I suspect</code> for the justification model.</p>
+<p>Our conversation sentence embedding similarity comparison uses a set of pre-defined sentence for comparing to how LM thinks about each agent's attitude. Specifically, we have sentences starts with <code>seems like</code> for describing LM's model of other agent in teh agent/spy model and <code>I suspect</code> for the justification model (*this comparison matters a lot, we try our best to set a neutral standard).</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Nice_agent:<span class="w"> </span><span class="s2">&quot;Seems to be be very easy going, trying to find agreement with the central ageent and the goal is to resolve conversation.&quot;</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Critica_agent:<span class="w"> </span><span class="s2">&quot;Seems to be very critical and proposing many changes.&quot;</span>
