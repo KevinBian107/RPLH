@@ -704,18 +704,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#feature-importance" class="md-nav__link">
+  <a href="#intuition-feature-importance" class="md-nav__link">
     <span class="md-ellipsis">
-      Feature Importance
+      Intuition: Feature Importance
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#clusters" class="md-nav__link">
+  <a href="#cluster-through-dimensionality-reduction" class="md-nav__link">
     <span class="md-ellipsis">
-      Clusters
+      Cluster Through Dimensionality Reduction
     </span>
   </a>
   
@@ -833,18 +833,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#feature-importance" class="md-nav__link">
+  <a href="#intuition-feature-importance" class="md-nav__link">
     <span class="md-ellipsis">
-      Feature Importance
+      Intuition: Feature Importance
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#clusters" class="md-nav__link">
+  <a href="#cluster-through-dimensionality-reduction" class="md-nav__link">
     <span class="md-ellipsis">
-      Clusters
+      Cluster Through Dimensionality Reduction
     </span>
   </a>
   
@@ -969,7 +969,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="feature-importance">Feature Importance<a class="headerlink" href="#feature-importance" title="Permanent link">&para;</a></h2>
+<h2 id="intuition-feature-importance">Intuition: Feature Importance<a class="headerlink" href="#intuition-feature-importance" title="Permanent link">&para;</a></h2>
 <p>We made agent's performance metrics (df above) into features and used a RandomForest Regressor to see which of the features matter more to the prediction of <code>Avg_Boxes_To_Targets_Per_Response</code>:</p>
 <div style="display: flex; justify-content: space-around;">
     <!-- First Graph -->
@@ -995,17 +995,24 @@
 </div>
 
 <p>When having all the data, we can clearly see how the presence of spy may effect performance, especially for <code>Number of response</code>. We performed follow-up bootstrapped hypothesis testing with <code>alpha-value=0.1</code> and test-statistics as differences in mean.
-- <span class="arithmatex">\( H_0 \)</span>: There is no difference in the mean convergence times between the two groups.
-- <span class="arithmatex">\( H_1 \)</span>: There is difference in the mean convergence times between the two groups.</p>
+- H0: There is no difference in the mean convergence times between the two groups.
+- H1: There is difference in the mean convergence times between the two groups.</p>
 <div style="display: flex; justify-content: space-around;">
     <div style="flex: 1; margin-right: 10px;">
         <img src="../../assets/h_test.png" alt="Graph 1" style="width: 100%; height: auto;">
     </div>
 </div>
 
-<p>The p-value represents the probability of obtaining a test statistic as extreme as, or more extreme than, the one observed, assuming that the null hypothesis (<span class="arithmatex">\(H_0\)</span>) is true. We randomly bootstrapped from the full data distribution uniformally and calculated (mean_spy - mean_no_spy) as our test statistics (bootstrapped differences in mean, normally distributed). Our observed statistics falls on the tail of such distribution with <code>P=0.088</code>, which is below our <code>alpha</code> value. Hence, we reject <span class="arithmatex">\( H_0 \)</span>.</p>
-<h2 id="clusters">Clusters<a class="headerlink" href="#clusters" title="Permanent link">&para;</a></h2>
-<p>We also try to identify different clusters in our data with <code>tsne</code>:</p>
+<p>The p-value represents the probability of obtaining a test statistic as extreme as, or more extreme than, the one observed, assuming that the null hypothesis (H0) is true. We randomly bootstrapped from the full data distribution uniformally and calculated (mean_spy - mean_no_spy) as our test statistics (bootstrapped differences in mean, normally distributed). Our observed statistics falls on the tail of such distribution with <code>P=0.088</code>, which is below our <code>alpha</code> value. Hence, we reject H0.</p>
+<p>Similarly, we can also see the similarity being an important featuer when visualizing a <code>depth=2</code> decision tree.</p>
+<div style="display: flex; justify-content: space-around;">
+    <div style="flex: 1; margin-right: 10px;">
+        <img src="../../assets/decision_tree.png" alt="Graph 1" style="width: 100%; height: auto;">
+    </div>
+</div>
+
+<h2 id="cluster-through-dimensionality-reduction">Cluster Through Dimensionality Reduction<a class="headerlink" href="#cluster-through-dimensionality-reduction" title="Permanent link">&para;</a></h2>
+<p>We also try to identify different clusters in our data with <code>tsne</code> using bootstrapped dataset:</p>
 <div style="display: flex; justify-content: space-around;">
     <div style="flex: 1; margin-right: 10px;">
         <img src="../../assets/tsne.png" alt="Graph 1" style="width: 100%; height: auto;">
