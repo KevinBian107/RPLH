@@ -1013,7 +1013,22 @@
 </tr>
 </tbody>
 </table>
-<p>As we can see, our system with agent reasoning <code>rplh-agent-spy</code> outperforms any of the other two systems no matter in upperbound as 2 or 3.</p>
+<p>As we can see, our system with agent reasoning <code>rplh-agent-spy</code> outperforms any of the other two systems no matter in upperbound as 2 or 3. We can make a few observations:</p>
+<ol>
+<li>In all cases, having less boxes in the environment make the environment easier to be completed (in terms of convergence rate, convergence speed, number of responses needed)<ul>
+<li>Interestingly, <code>Average-Box-To-Targets-Per-Response</code> did not change for both rplh-standard system neglecting the presence of spy, pointing to potential conclusion that there underlaying mechanism may be the same, independent of number of boxes. But with rplh-agent, more boxes would result in a more efficient understanding of the spy agent, resulting in higher target match rate.</li>
+</ul>
+</li>
+<li>As expected, with more boxes, the agent has more experience with spys, improving the justification embedding similarity. However, teh same conclusion is not transferable to spy model embeddings.</li>
+<li>On average, rplh-agent would take:<ul>
+<li>Least energy to complete the task (AUC)</li>
+<li>Fastest speed of convergence (Slope)</li>
+<li>Highest rate of convergence (Rate)</li>
+<li>Highest average box to targets per response ratio</li>
+<li>Least number of responses needed</li>
+</ul>
+</li>
+</ol>
 <h2 id="energy-metrics">Energy Metrics<a class="headerlink" href="#energy-metrics" title="Permanent link">&para;</a></h2>
 <p>The energy metric is our unique measure of telling how our system performs with different settings. It is a <code>distance</code> based metrics where we calculate, for each trial, and for each environmental step, what is teh current distance between each boxes and each target, the distance is measures in two forms:</p>
 <ul>
