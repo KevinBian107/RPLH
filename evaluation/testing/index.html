@@ -694,7 +694,7 @@
         <li class="md-nav__item">
   <a href="#agent-social-reasoning-metrics" class="md-nav__link">
     <span class="md-ellipsis">
-      Agent Social Reasoning Metrics
+      Agent-Social Reasoning Metrics
     </span>
   </a>
   
@@ -844,7 +844,7 @@
         <li class="md-nav__item">
   <a href="#agent-social-reasoning-metrics" class="md-nav__link">
     <span class="md-ellipsis">
-      Agent Social Reasoning Metrics
+      Agent-Social Reasoning Metrics
     </span>
   </a>
   
@@ -870,65 +870,67 @@
 
   <h1>Numerical Evaluation</h1>
 
-<p>Comparing performances of different communication system through a numerical comparison. <strong>All evaluations in this system are down using <code>gpt-40-mini</code> for speed purpose and with <code>agent</code> argument for testing reasoning abilities.</strong></p>
+<p>This page is for describing our metrics, <strong>all evaluations in this system are down using <code>gpt-40-mini</code> for speed purpose and with <code>agent</code> argument for testing reasoning abilities.</strong> The results can be find <a href="https://kbian.org/RPLH/evaluation/results/">here</a></p>
 <p>We have an <a href="https://github.com/KevinBian107/RPLH/blob/master/demos/notebooks/evaluation.ipynb">notebook for demonstrating</a> our evaluation process.</p>
 <h2 id="experiment-configurations">Experiment Configurations<a class="headerlink" href="#experiment-configurations" title="Permanent link">&para;</a></h2>
 <p>The following is how we configured our experiment:</p>
 <ul>
 <li>Setting <code>seed</code> = <code>iteration_num</code> (i.e. 1, 2, 3, ...)</li>
-<li>Running 20 times for each systems.</li>
+<li>Running 20 times for each systems. with <code>num_box_upperbound</code> as 3.</li>
 <li>Neglecting empty actions rounds.</li>
 <li>Trial automatically ends after 50 round of environmental steps.</li>
 </ul>
 <p>*Note that in some final rounds of moving boxes, some rounds does not converge with <code>syntactic error</code> response, which is likely due to spy's misleading information giving to the central agent, resulting in non-convergence round (within 50 env-step) as later rounds with less boxes run really fast (due to the configuration of the system, refer <a href="https://kbian.org/RPLH/system/h_efficient/">here</a>).</p>
 <h2 id="standard-reasoning-metrics">Standard Reasoning Metrics<a class="headerlink" href="#standard-reasoning-metrics" title="Permanent link">&para;</a></h2>
-<p>Evaluating convergence rate given the same <code>seed</code>, running on smaller scaled environment, 3x3 grid with max double same color boxes/targets in total (same env for all testing systems).</p>
+<p>Evaluating standard computtaion metrics:</p>
 <ol>
 <li>Test Success Rate (does the system converge before max number of stesp (50 environmental steps in our evals) reached).</li>
 <li>Convergence speed (number of environmental execution steps needed for convergence (solve the given problem)).</li>
 <li>Average boxs moved to other grid and average boxs matched taregets.</li>
-</ol>
-<h3 id="human-annotations">Human Annotations<a class="headerlink" href="#human-annotations" title="Permanent link">&para;</a></h3>
-<p>Evaluate whether the system outputs reasonable/optimal response at each steps.</p>
-<ol>
-<li>Manually reason what is the optimal number of steps given the environment.<ul>
+<li>Human annotation (evaluate whether the system outputs reasonable/optimal response at each steps. Manually reason what is the optimal number of steps given the environment.)s<ul>
 <li>Given the same <code>seed</code> (same environment setup), how many boxes are removed at each step and whether this step is efficient (human-annotate).</li>
 <li>Does output reasoning (tokens) makes sense &amp; does action decision make snese.</li>
 </ul>
 </li>
-<li>Look at one iteration lag, the <code>agent_model</code> that HCA proposed and the actual <code>actual_model</code> that local agent responses to.</li>
 </ol>
-<p>This is used for testing differences with optimla human plans (refer to human annotation steps).</p>
-<h2 id="agent-social-reasoning-metrics">Agent Social Reasoning Metrics<a class="headerlink" href="#agent-social-reasoning-metrics" title="Permanent link">&para;</a></h2>
+<h2 id="agent-social-reasoning-metrics">Agent-Social Reasoning Metrics<a class="headerlink" href="#agent-social-reasoning-metrics" title="Permanent link">&para;</a></h2>
 <p>Evaluating agent based reasoning's power. For each round of testing, the spy agent is the same (diagonal line) however, since the environment's box and target distribution is random, this allows the spy agent's lcoation to remain constant.  Comparing between <code>RPLH-agent-spy</code> with <code>RPLH-standard-spy</code> with <code>RPLH-standard-no-spy</code>.</p>
 <ol>
-<li>Convergence rate (Iiteration numbers).</li>
-<li>Sentence embedding cosine similarity (social understanding).<ul>
+<li>
+<p>Sentence embedding cosine similarity (social understanding), described in more details <a href="https://kbian.org/RPLH/evaluation/results/#embedding-comparisons">here</a>:</p>
+<ul>
 <li><code>non-spy</code>vs <code>spy</code> in <code>spy_model</code>.</li>
 <li>different agents comparison in <code>agent_model</code>.</li>
 </ul>
 </li>
+<li>
+<p>Feature importance:</p>
+<ul>
+<li>We put agent/standard RPLH's data together and get features (social reasoning similarity, convergence rate), described in more details <a href="https://kbian.org/RPLH/evaluation/results/#intuition-feature-importance">here</a>.</li>
+</ul>
+</li>
+<li>
+<p>Energy metrics (our unique measures):</p>
+<ul>
+<li>Using distance metrics to describe the <code>energy</code> that our system would use to complete the task, described in more details <a href="">here</a>.</li>
+</ul>
+</li>
+<li>
+<p>Statistical test:</p>
+<ul>
+<li>We performed both <em>hypothesis testing</em> and <em>AB testing</em> to evaluate whether there is a significant result between our testing environment (spy vs no-spy).</li>
+</ul>
+</li>
 </ol>
-<p>Our agent-based system seems to be better at detecting True Positive (spy says spy) than True Negative (not spy say not spy).</p>
-<h3 id="embedding-details">Embedding Details<a class="headerlink" href="#embedding-details" title="Permanent link">&para;</a></h3>
+<h3 id="embeddings">Embeddings<a class="headerlink" href="#embeddings" title="Permanent link">&para;</a></h3>
 <p>Our conversation sentence embedding similarity comparison uses a set of pre-defined sentence for comparing to how LM thinks about each agent's attitude. Specifically, we have sentences starts with <code>seems like</code> for describing LM's model of other agent in teh agent/spy model and <code>I suspect</code> for the justification model (*this comparison matters a lot, we try our best to set a neutral standard).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Nice_agent:<span class="w"> </span><span class="s2">&quot;Seems to be be very easy going, trying to find agreement with the central ageent and the goal is to resolve conversation.&quot;</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Critica_agent:<span class="w"> </span><span class="s2">&quot;Seems to be very critical and proposing many changes.&quot;</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>Agreeing_agent:<span class="w"> </span><span class="s2">&quot;Seems to be super coopertaive, agreeing to central command.&quot;</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>Spy_agent:<span class="w"> </span><span class="s2">&quot;Seems to be the spy agent, its goal is to prevent match targets.&quot;</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>Justification:<span class="w"> </span><span class="s2">&quot;I suspect that this agent is the spy agent, thus, I would not listen to this agent.&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>-<span class="w"> </span>Nice_agent:<span class="w"> </span><span class="s2">&quot;Seems to be be very easy going, trying to find agreement with the central ageent and the goal is to resolve conversation.&quot;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>-<span class="w"> </span>Critica_agent:<span class="w"> </span><span class="s2">&quot;Seems to be very critical and proposing many changes.&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>-<span class="w"> </span>Agreeing_agent:<span class="w"> </span><span class="s2">&quot;Seems to be super coopertaive, agreeing to central command.&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>-<span class="w"> </span>Spy_agent:<span class="w"> </span><span class="s2">&quot;Seems to be the spy agent, its goal is to prevent match targets.&quot;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>-<span class="w"> </span>Justification:<span class="w"> </span><span class="s2">&quot;I suspect that this agent is the spy agent, thus, I would not listen to this agent.&quot;</span>
 </code></pre></div>
-<h3 id="statistical-details">Statistical Details<a class="headerlink" href="#statistical-details" title="Permanent link">&para;</a></h3>
-<p>Put agent and standard RPLH's data together and get features (social reasoning similarity, convergence rate)</p>
-<ol>
-<li>Correlation between social understanding and convergence rate (t-distribution + bootstrap).</li>
-<li>AB Testing to look at distribution differences (per column).</li>
-</ol>
-<h3 id="future-spy-manipulation">Future Spy Manipulation:<a class="headerlink" href="#future-spy-manipulation" title="Permanent link">&para;</a></h3>
+<h3 id="future-manipulation">Future Manipulation:<a class="headerlink" href="#future-manipulation" title="Permanent link">&para;</a></h3>
 <p>We can model how amhy times it gets mentioned in the (spy_model / all agents_mentioned) before the spys get kicks out.
 - Error may exist as non-negative thing mentioned.
 - cannot use average or false positive (FP) because once spy is out, HCA suspect others.
