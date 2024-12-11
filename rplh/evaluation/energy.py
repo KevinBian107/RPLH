@@ -110,6 +110,8 @@ def calculate_auc(df):
 
     print(f"Overall AUC for Norm1: {auc_norm1}")
     print(f"Overall AUC for Norm2: {auc_norm2}")
+    
+    return auc_norm1, auc_norm2
 
 def calculate_slope(df):
     '''Calculate average slope with linear regression'''
@@ -135,3 +137,6 @@ def calculate_slope(df):
 
     print(f"Average slope for Norm1: {avg_slope_norm1}")
     print(f"Average slope for Norm2: {avg_slope_norm2}")
+    
+    return avg_slope_norm1, avg_slope_norm2
+    

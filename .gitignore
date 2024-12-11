@@ -1,17 +1,20 @@
+# python
 *__pycache__
-inference-env/
-testing-env/
-gpt-agent-testing-env-0/
-gpt-agent-testing-env-1/
-gpt-standard-testing-env-1/
-gpt-agent-testing-env-2/
-ollama-standard-testing-env/
 *.ipynb_checkpoints
 *.DS_Store
-conversation.txt
-site/
-docs/
-multi-agent-env/
+
+# data
+gpt-agent-testing-env-3up/
+gpt-standard-testing-env-2up/
+gpt-standard-testing-env-3up/
+gpt-standard-testing-nospy-env-2up/
+
+# testing and inference
+inference-env/
 testing-env-agent/
 testing-env-standard/
-gpt-standard-testing-nospy-env-1/
+conversation.txt
+
+# docs
+site/
+docs/
