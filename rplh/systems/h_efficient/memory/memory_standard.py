@@ -400,6 +400,8 @@ def judge_prompt_func(
 
         {feedback}
         
+        In justification, please discuss attitude of each agent and who is suspicious.
+        
         Now, select the next step:
         """
     return judge_prompt
