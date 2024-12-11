@@ -777,7 +777,17 @@
 
 <p>Our system faces several limitations, namely:</p>
 <ol>
-<li>Since our language model used is less parametrized, we observed that it tends to believe in the most recent event much more than relying on past experiences, leads to the bias of easier detecting a spy agent just right after seeing a spy agent doing action. Though the reasoning ability and agent modeling ability is there. When this step walks more into the history, the effects on LM decreases.</li>
+<li>
+<p>Since our language model used is less parametrized, we observed that it tends to believe in the most recent event much more than relying on past experiences, leads to the bias of easier detecting a spy agent just right after seeing a spy agent doing action. Though the reasoning ability and agent modeling ability is there. When this step walks more into the history, the effects on LM decreases.</p>
+</li>
+<li>
+<p>Regarding the <code>spy_model</code>:</p>
+<ul>
+<li>In any of the <code>spy_model</code> modeling, there may be room for error as non-spy-related things may be mentioned.</li>
+<li>Even with all spys kicked out, HCA agent may still keep on suspecting, which causes errors.</li>
+<li>Some agent in certain position may be more prone to be seen as spy.</li>
+</ul>
+</li>
 </ol>
 
 
