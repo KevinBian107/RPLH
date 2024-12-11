@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#embedding-comparisons" class="md-skip">
+        <a href="#sentence-embedding-simlarity" class="md-skip">
           Skip to content
         </a>
       
@@ -695,9 +695,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#embedding-comparisons" class="md-nav__link">
+  <a href="#sentence-embedding-simlarity" class="md-nav__link">
     <span class="md-ellipsis">
-      Embedding Comparisons
+      Sentence Embedding Simlarity
     </span>
   </a>
   
@@ -824,9 +824,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#embedding-comparisons" class="md-nav__link">
+  <a href="#sentence-embedding-simlarity" class="md-nav__link">
     <span class="md-ellipsis">
-      Embedding Comparisons
+      Sentence Embedding Simlarity
     </span>
   </a>
   
@@ -870,7 +870,7 @@
 
   <h1>Results</h1>
 
-<h2 id="embedding-comparisons">Embedding Comparisons<a class="headerlink" href="#embedding-comparisons" title="Permanent link">&para;</a></h2>
+<h2 id="sentence-embedding-simlarity">Sentence Embedding Simlarity<a class="headerlink" href="#sentence-embedding-simlarity" title="Permanent link">&para;</a></h2>
 <p>For RPLH system with agent based reasoning (having <code>agent_model</code>, <code>spy_model</code>, and <code>justification</code>), we uses embedding methods to compare what our LM have said with the spy detect sentence <code>Seems to be the spy agent, its goal is to prevent match targets</code>. The following result is RPLH-agent system running for 20 trials with box-num-upperbound set to 3 in a 3x3 grid environment (shown agents are spy agents).
 - Note that we used a higher num-box-upperbound here to allow the central agent to learn more about the spy agent.</p>
 <table>
@@ -1011,13 +1011,13 @@
     </div>
 </div>
 
-<h2 id="energy-metrics"><code>Energy</code> Metrics<a class="headerlink" href="#energy-metrics" title="Permanent link">&para;</a></h2>
+<h2 id="energy-metrics">Energy Metrics<a class="headerlink" href="#energy-metrics" title="Permanent link">&para;</a></h2>
 <p>The energy metric is our unique measure of telling how our system performs with different settings. It is a <code>distance</code> based metrics where we calculate, for each trial, and for each environmental step, what is teh current distance between each boxes and each target, the distance is measures in two forms:</p>
 <ul>
 <li><code>Norm1</code>: How many actual step is needed to move the box to the targets (Manhatten distance), for each color type we pick the smalles norm1 distance as the easiest target for the box to reach.</li>
 <li><code>Norm2</code>:  How many "distance" (abstract idea) the boxes  are to each targets, the value is an arbitrary value for comparison purpose, which is why we averages against each color.</li>
 </ul>
-<p>Then for each trail, we can see that these two notion of distance changes over different environmental steps, all teh way until convergence (we only take convergence trails). When <code>slope</code> tells us about the convergence speed, we use area under the curve (<code>AUC</code>) as the <code>Energy</code> or all the steps needed for a system to converge.</p>
+<p>Then for each trail, we can see that these two notion of distance changes over different environmental steps, all teh way until convergence (we only take convergence trails). When <code>slope</code> tells us about the convergence speed, we use area under the curve (<code>AUC</code>) as the <code>Energy</code> or all the steps needed for a system to converge. Here is a demo of how such graph would look like for our three system with <code>seed=0</code> trial.</p>
 <div style="display: flex; justify-content: space-around;">
     <!-- First Graph -->
     <div style="flex: 1; margin-right: 10px;">
