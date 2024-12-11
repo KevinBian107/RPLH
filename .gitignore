@@ -4,10 +4,7 @@
 *.DS_Store
 
 # data
-gpt-agent-testing-env-3up/
-gpt-standard-testing-env-2up/
-gpt-standard-testing-env-3up/
-gpt-standard-testing-nospy-env-2up/
+data/
 
 # testing and inference
 inference-env/

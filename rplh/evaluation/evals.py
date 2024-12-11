@@ -1,5 +1,11 @@
-import pandas as pd 
-from rplh.evaluation.embed import get_spy_detect_embedding_only
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestRegressor
+from pathlib import Path
+from sklearn.model_selection import train_test_split
+
+from rplh.evaluation.get_data import get_data
+from rplh.evaluation.embed import get_spy_detect_embedding_only, get_spy_detect_embedding_for_feature
 from rplh.evaluation.energy import dist_df_process, calculate_auc, calculate_slope
 
 def get_all_evals(df_main, df_success, df_spy, df_justification, df_dist, system="rplh-agent-spy"):
@@ -60,3 +66,77 @@ def get_all_evals(df_main, df_success, df_spy, df_justification, df_dist, system
 
     result_df = pd.DataFrame([metrics], index=[system]).T
     return result_df
+
+def eval_all_feature_importance():
+    '''get all feature importance for all data'''
+    
+    data_list = [ "3up/gpt-agent-testing-env-3up",
+                 "3up/gpt-standard-testing-env-3up",
+                 "3up/gpt-standard-testing-nospy-env-3up",
+                 "2up/gpt-agent-testing-env-2up",
+                 "2up/gpt-standard-testing-env-2up",
+                 "2up/gpt-standard-testing-nospy-env-2up"]
+    
+    full_embed_df = pd.DataFrame()
+    
+    current_folder = Path.cwd()
+    parent_folder = current_folder.parent.parent
+    print(parent_folder)
+    
+    for d in data_list:
+        print(f"LOADING {d} \n")
+        base_dir = parent_folder / "data" / d
+        df, success_df, spy_count_df, spy_df, att_df, justification_df, dist_df = get_data(base_dir, 20)
+        merged = df.merge(success_df, on="Trial")
+    
+        embedding = get_spy_detect_embedding_for_feature(merged, spy_df, justification_df,
+                                                spy_sentence="Seems to be the spy agent, its goal is to prevent match targets.",
+                                                just_sentence="I suspect that this agent is the spy agent, thus, I would not listen to this agent.",
+                                                spy_agents=["Agent[0.5, 0.5]", "Agent[1.5, 1.5]", "Agent[2.5, 2.5]"],
+                                                only_spy=False).drop(columns=["Justification_Embed"])
+
+        embedding["Have_spy"] = 0 if "nospy" in d else 1
+        full_embed_df = pd.concat([full_embed_df, embedding], axis=0, ignore_index=True).fillna(0)
+    
+    # train on three different types
+    X = full_embed_df.drop(columns=["Avg_Boxes_To_Targets_Per_Response", "Num_Responses", "Num_Boxes"])
+    y1 = full_embed_df["Avg_Boxes_To_Targets_Per_Response"]
+    X_train1, X_test1, y_train1, y_test1 = train_test_split(X, y1, test_size=0.2, random_state=42)
+    model1 = RandomForestRegressor(random_state=42)
+    model1.fit(X_train1, y_train1)
+
+    y2 = full_embed_df["Num_Responses"]
+    X_train2, X_test2, y_train2, y_test2 = train_test_split(X, y2, test_size=0.2, random_state=42)
+    model2 = RandomForestRegressor(random_state=42)
+    model2.fit(X_train2, y_train2)
+    
+    y3 = full_embed_df[["Num_Responses", "Avg_Boxes_To_Targets_Per_Response"]]
+    X_train3, X_test3, y_train3, y_test3 = train_test_split(X, y3, test_size=0.2, random_state=42)
+    model3 = RandomForestRegressor(random_state=42)
+    model3.fit(X_train3, y_train3)
+
+    importances1 = pd.Series(model1.feature_importances_, index=X.columns).sort_values()
+    importances2 = pd.Series(model2.feature_importances_, index=X.columns).sort_values()
+    importances3 = pd.Series(model3.feature_importances_, index=X.columns).sort_values()
+    
+    importances3.plot(kind="barh", title="Feature Importance for Vectorized Targets (All Data)")
+
+    plt.figure(figsize=(10, 8))
+    y = range(len(importances1))
+
+    plt.barh(y, importances1.sort_index(), height=0.4, label="Avg_Boxes_To_Targets_Per_Response", alpha=0.7)
+    plt.barh([i + 0.4 for i in y], importances2.sort_index(), height=0.4, label="Num_Responses", alpha=0.7)
+    plt.yticks([i + 0.2 for i in y], importances1.sort_index().index)
+    plt.title("Comparison of Feature Importance Based on Different Target Variables (All Data)")
+    plt.xlabel("Importance")
+    plt.ylabel("Features")
+    plt.legend()
+    plt.grid(axis='x', linestyle='--', alpha=0.6)
+    plt.tight_layout()
+
+    # explained_variance_model1 = model1.score(X_test1, y_test1)
+    # explained_variance_model2 = model2.score(X_test2, y_test2)
+    # print(f"Explained Variance (R^2) for Avg_Boxes_To_Targets_Per_Response: {explained_variance_model1:.3f}")
+    # print(f"Explained Variance (R^2) for Num_Responses: {explained_variance_model2:.3f}")
+    
+    plt.show()
