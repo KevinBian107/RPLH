@@ -1105,27 +1105,15 @@
 </tbody>
 </table>
 <h2 id="feature-importance">Feature Importance<a class="headerlink" href="#feature-importance" title="Permanent link">&para;</a></h2>
-<p>We made agent's performance metrics (df above) into features and used a RandomForest Regressor to see which of the features matter more to the prediction of <code>Avg_Boxes_To_Targets_Per_Response</code>:</p>
+<p>We made agent's performance metrics (df above) into features and used a RandomForest Regressor to see which of the features matter more to the prediction of <code>number of response</code> or <code>average targets matched per response</code>. We also used both as an vector to do comparison.</p>
 <div style="display: flex; justify-content: space-around;">
     <!-- First Graph -->
     <div style="flex: 1; margin-right: 10px;">
-        <img src="../../assets/f_rank_1.png" alt="Graph 1" style="width: 100%; height: auto;">
+        <img src="../../assets/feature_rank2.png" alt="Graph 1" style="width: 100%; height: auto;">
     </div>
     <!-- Second Graph -->
     <div style="flex: 1; margin-left: 10px;">
-        <img src="../../assets/f_rank_3.png" alt="Graph 2" style="width: 100%; height: auto;">
-    </div>
-</div>
-
-<p>When using <code>number of response</code> and <code>average targets matched per response</code> as a vector:</p>
-<div style="display: flex; justify-content: space-around;">
-    <!-- First Graph -->
-    <div style="flex: 1; margin-right: 10px;">
-        <img src="../../assets/f_rank_2.png" alt="Graph 1" style="width: 100%; height: auto;">
-    </div>
-    <!-- Second Graph -->
-    <div style="flex: 1; margin-left: 10px;">
-        <img src="../../assets/f_rank_4.png" alt="Graph 2" style="width: 100%; height: auto;">
+        <img src="../../assets/feature_rank1.png" alt="Graph 2" style="width: 100%; height: auto;">
     </div>
 </div>
 
