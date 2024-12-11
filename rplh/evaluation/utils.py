@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import auc
+from sklearn.linear_model import LinearRegression
+import numpy as np
 
 def plot_env_progression(dist_a_spy, dist_s_spy, dist_s_nospy, get_trial=0):
     '''Plot teh environment progression per trial based on distance'''
@@ -108,3 +110,28 @@ def calculate_auc(df):
 
     print(f"Overall AUC for Norm1: {auc_norm1}")
     print(f"Overall AUC for Norm2: {auc_norm2}")
+
+def calculate_slope(df):
+    '''Calculate average slope with linear regression'''
+    
+    slopes_norm1 = []
+    slopes_norm2 = []
+
+    for trial, group in df.groupby('trial'):
+        X = group['env_step'].values.reshape(-1, 1)  # Predictor (env_step)
+        y_norm1 = group['Norm1'].values  # Response (Norm1)
+        y_norm2 = group['Norm2'].values  # Response (Norm2)
+
+        # Fit linear regression for Norm1
+        model_norm1 = LinearRegression().fit(X, y_norm1)
+        slopes_norm1.append(model_norm1.coef_[0])
+
+        # Fit linear regression for Norm2
+        model_norm2 = LinearRegression().fit(X, y_norm2)
+        slopes_norm2.append(model_norm2.coef_[0])
+
+    avg_slope_norm1 = np.mean(slopes_norm1)
+    avg_slope_norm2 = np.mean(slopes_norm2)
+
+    print(f"Average slope for Norm1: {avg_slope_norm1}")
+    print(f"Average slope for Norm2: {avg_slope_norm2}")
