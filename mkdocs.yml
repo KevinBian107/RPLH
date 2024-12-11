@@ -139,8 +139,13 @@ extra:
     - icon: fontawesome/brands/github 
       link: https://github.com/KevinBian107
 
+extra_css:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css
 extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
   - https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js
 
 
 # extra_css:
@@ -156,6 +161,7 @@ nav:
     - System Structure: api/structure.md
     - API Calls: api/api.md
   - System:
+    - Algorithm: system/algorithm.md
     - Vanilla: system/h_vanilla.md
     - Efficient: system/h_efficient.md
     - Decentralize: system/d_efficient.md
