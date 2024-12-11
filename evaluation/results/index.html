@@ -898,14 +898,17 @@
 <li>Average convergence speed.</li>
 <li>Average similarity metric in embeddings for s<code>spy_model</code> and <code>justification_model</code> against spy sentence.</li>
 </ol>
-<p>Details are visited in the table.</p>
+<p>We have conducted experiment with manipulation of number of boxes (same color) in the environment, we have <code>box_upperbound</code> as 2 and 3. Details are visited in the table.</p>
 <table>
 <thead>
 <tr>
 <th align="left"></th>
-<th align="right">rplh-agent-spy</th>
-<th align="right">rplh-standard-spy</th>
-<th align="right">rplh-standard-nospy</th>
+<th align="right">rplh-agent-spy-3up</th>
+<th align="right">rplh-standard-spy-3up</th>
+<th align="right">rplh-standard-nospy-3up</th>
+<th align="right">rplh-agent-spy-2up</th>
+<th align="right">rplh-standard-spy-2up</th>
+<th align="right">rplh-standard-nospy-2up</th>
 </tr>
 </thead>
 <tbody>
@@ -913,47 +916,71 @@
 <td align="left">Average-AUC-Norm1</td>
 <td align="right">187.714</td>
 <td align="right">228.818</td>
+<td align="right">241.808</td>
+<td align="right">143.333</td>
+<td align="right">163.571</td>
 <td align="right">160.292</td>
 </tr>
 <tr>
 <td align="left">Average-AUC-Norm2</td>
 <td align="right">108.593</td>
 <td align="right">133.279</td>
+<td align="right">138.934</td>
+<td align="right">77.282</td>
+<td align="right">90.352</td>
 <td align="right">87.453</td>
 </tr>
 <tr>
 <td align="left">Average-Slope1</td>
 <td align="right">-0.388</td>
 <td align="right">-0.333</td>
+<td align="right">-0.279</td>
+<td align="right">-0.74</td>
+<td align="right">-0.622</td>
 <td align="right">-0.567</td>
 </tr>
 <tr>
 <td align="left">Average-Slope2</td>
 <td align="right">-0.27</td>
 <td align="right">-0.24</td>
+<td align="right">-0.191</td>
+<td align="right">-0.465</td>
+<td align="right">-0.371</td>
 <td align="right">-0.334</td>
 </tr>
 <tr>
 <td align="left">Average-Box-To-Targets-Per-Response</td>
 <td align="right">0.406</td>
 <td align="right">0.271</td>
-<td align="right">0.29</td>
+<td align="right">0.278</td>
+<td align="right">0.391</td>
+<td align="right">0.271</td>
+<td align="right">0.278</td>
 </tr>
 <tr>
 <td align="left">Average-Responses</td>
 <td align="right">28.4</td>
 <td align="right">35.8</td>
-<td align="right">28.9</td>
+<td align="right">36.95</td>
+<td align="right">22.417</td>
+<td align="right">35.8</td>
+<td align="right">36.95</td>
 </tr>
 <tr>
 <td align="left">Average-Convergence-Rate</td>
 <td align="right">0.7</td>
 <td align="right">0.55</td>
+<td align="right">0.65</td>
+<td align="right">0.75</td>
+<td align="right">0.7</td>
 <td align="right">0.6</td>
 </tr>
 <tr>
 <td align="left">Average-Embedding-Similarity-Spy_Embed_Agent[0.5, 0.5]</td>
 <td align="right">0.563</td>
+<td align="right">nan</td>
+<td align="right">nan</td>
+<td align="right">0.632</td>
 <td align="right">nan</td>
 <td align="right">nan</td>
 </tr>
@@ -962,10 +989,16 @@
 <td align="right">0.647</td>
 <td align="right">nan</td>
 <td align="right">nan</td>
+<td align="right">0.676</td>
+<td align="right">nan</td>
+<td align="right">nan</td>
 </tr>
 <tr>
 <td align="left">Average-Embedding-Similarity-Spy_Embed_Agent[1.5, 1.5]</td>
 <td align="right">0.622</td>
+<td align="right">nan</td>
+<td align="right">nan</td>
+<td align="right">0.631</td>
 <td align="right">nan</td>
 <td align="right">nan</td>
 </tr>
@@ -973,10 +1006,14 @@
 <td align="left">Average-Embedding-Similarity-Justification_Embed</td>
 <td align="right">0.627</td>
 <td align="right">0.553</td>
+<td align="right">0.554</td>
+<td align="right">0.612</td>
+<td align="right">nan</td>
 <td align="right">nan</td>
 </tr>
 </tbody>
 </table>
+<p>As we can see, our system with agent reasoning <code>rplh-agent-spy</code> outperforms any of the other two systems no matter in upperbound as 2 or 3.</p>
 <h2 id="energy-metrics">Energy Metrics<a class="headerlink" href="#energy-metrics" title="Permanent link">&para;</a></h2>
 <p>The energy metric is our unique measure of telling how our system performs with different settings. It is a <code>distance</code> based metrics where we calculate, for each trial, and for each environmental step, what is teh current distance between each boxes and each target, the distance is measures in two forms:</p>
 <ul>
