@@ -130,4 +130,8 @@ def get_spy_detect_embedding_only(spy_df,
     
     out_df['Justification_Embed'] = justification_df['Justifications'].apply(lambda x: cosine_sim(get_embedding(just_sentence), get_embedding(str(x))))
     
+    if justification_df.isnull().values.any():
+        print("Justification df is empty, no embedding similarity calculated.")
+        out_df['Justification_Embed'] = np.nan
+    
     return out_df
