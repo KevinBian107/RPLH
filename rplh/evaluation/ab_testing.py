@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import t, norm
 
-
 def bootstrap_proportions_t_technique(group1, group2, alternative='greater', num_samples=10000, population_mean=0):
     """
     Perform a bootstrap test using the bootstrap-t technique for the mean difference in proportions. The difference is group2 - group1
