@@ -160,10 +160,10 @@ nav:
     - Efficient: system/h_efficient.md
     - Decentralize: system/d_efficient.md
   - Evaluation:
-    - Numerical Evaluation: evaluation/testing.md
-    - Results: evaluation/results.md
+    - Evaluation Metrics: evaluation/testing.md
+    - Evaluation Results: evaluation/results.md
     - Limitations: evaluation/limitations.md
-    - Agent Modeling: evaluation/agent.md
+    - Agent Modeling Sample: evaluation/agent.md
   - About Us: team.md
   # - Examples: examples.md
   # - Changelog: changelog.md
