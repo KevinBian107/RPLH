@@ -1,5 +1,3 @@
-import requests
-import numpy as np
 import numpy as np
 import pandas as pd 
 import json
@@ -11,6 +9,42 @@ def count_boxes_and_targets(pg_state):
     num_boxes = sum(1 for items in pg_state.values() for item in items if item.startswith("box_"))
     num_targets = sum(1 for items in pg_state.values() for item in items if item.startswith("target_"))
     return num_boxes, num_targets
+
+def calculate_distance(grid_data):
+    '''Parsing grid data to extract coordinates and objects'''
+    positions = {}
+    for coord, items in grid_data.items():
+        x, y = map(float, coord.split("_"))
+        for item in items:
+            kind, color = item.split("_")
+            if color not in positions:
+                positions[color] = {"box": [], "target": []}
+            positions[color][kind].append((x, y))
+
+    all_distances = {}
+    for color, pos in positions.items():
+        boxes = np.array(pos["box"])
+        targets = np.array(pos["target"])
+        
+        if boxes.size > 0 and targets.size > 0:
+            distances = np.linalg.norm(boxes[:, None] - targets, axis=2, ord=1)  # 1-norm
+            min_1_norm = distances.min()
+            
+            distances_2 = np.linalg.norm(boxes[:, None] - targets, axis=2, ord=2)  # 2-norm
+            average_2_norm = distances_2.mean()
+            
+            all_distances[color] = {"1-norm": min_1_norm, "2-norm": average_2_norm}
+        else:
+            all_distances[color] = {"1-norm": None, "2-norm": None}
+    
+    df = pd.DataFrame(all_distances).T
+    if df.empty:
+        return (0, 0)
+    
+    df.columns = ["1-Norm Smallest Distance", "2-Norm Average Distance"]
+    df['1-Norm Smallest Distance'] = df['1-Norm Smallest Distance'] + 1 # same grid need one more stepfor 1 norm
+    
+    return tuple(df.sum(axis=0))
 
 def get_response_data(response_dir, trial_data, trial, num_boxes, num_targets, consectutive_syntactic_error_limit=3):
     '''Get all resposne data'''
@@ -35,6 +69,7 @@ def get_response_data(response_dir, trial_data, trial, num_boxes, num_targets, c
             response = {}
             
             if sythetic_count > consectutive_syntactic_error_limit:
+                # over consectutive_syntactic_error_limit, break directly
                 print(f"{trial}: Not converge")
                 break
         
@@ -146,8 +181,30 @@ def get_justification(justification_dir, trial_justification, trial):
     trial_justification[trial] = trial_agent_descriptions
     return trial_justification
 
+def get_current_distance(state_dir, trial, cur_distance):
+    "Check current 1 norm and 2 norm distance"
+    
+    state_path = os.listdir(state_dir)
+    state_path.sort(key=lambda x: int(x.split(".")[0][8:]))
+    
+    all_distance = []
+    for state_file in state_path:
+        file = os.path.join(state_dir, state_file)
+        with open(file, "r") as f:
+            try:
+                response = json.load(f)
+                distance = calculate_distance(response)
+                all_distance.append(distance)
+                
+            except json.JSONDecodeError:
+                print(f"Invalid JSON in {file} of {trial}")
+    
+    cur_distance[trial] = all_distance 
+    return cur_distance
+
+
 def get_data(base_dir, trial_num, demo=False):
-    '''Main retrieval fiunction for evaluations'''
+    '''Main retrieval fiunction for evaluations, all tensor operations'''
     
     trial_dirs = [f"trial_{i}" for i in range(1, trial_num+1)]
     trial_data = []
@@ -156,6 +213,7 @@ def get_data(base_dir, trial_num, demo=False):
     trial_agent_model = {}
     trial_spy_model = {}
     trial_justification = {}
+    cur_distance = {}
     for trial in trial_dirs:
         trial_path = os.path.join(base_dir, trial, "env_pg_state_3_3/pg_state0", "_w_no_history_gpt-4o-mini")
         
@@ -186,6 +244,7 @@ def get_data(base_dir, trial_num, demo=False):
             continue
         
         trial_success = get_convergence_data(state_dir, trial, success_or_not)
+        cur_distance = get_current_distance(state_dir, trial, cur_distance)
         trial_data = get_response_data(response_dir, trial_data, trial, num_boxes, num_targets)
         trial_spy_counts = get_spy_count_data(spy_model_dir, trial_spy_counts, trial)
         trial_agent_model = get_agent_model(agent_dir, trial_agent_model, trial)
@@ -197,6 +256,8 @@ def get_data(base_dir, trial_num, demo=False):
     df["Avg_Boxes_To_Other_Per_Response"] = df["Boxes_To_Other"] / df["Num_Responses"]
     
     success_df = pd.DataFrame(trial_success.items(), columns=["Trial", "Convergence"])
+    
+    dist_df = pd.DataFrame(cur_distance.items(), columns=["Trial", "Distance"])
     
     agent_names = set(agent for counts in trial_spy_counts.values() for agent in counts)
     spy_count_df = pd.DataFrame.from_dict(
@@ -221,4 +282,4 @@ def get_data(base_dir, trial_num, demo=False):
     
     justification_df = pd.DataFrame(trial_justifications.items(), columns=["Trial", "Justifications"])
     
-    return df, success_df, spy_count_df, spy_df, att_df, justification_df
+    return df, success_df, spy_count_df, spy_df, att_df, justification_df, dist_df
