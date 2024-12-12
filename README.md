@@ -1,4 +1,4 @@
-# RPLH: A Light-Weight Multi-Collaboration System
-Using Language Models' **In-context Learning** abilities, we are developing frameworks for multi-agent collaborations system using Role-Playing Leader-Hellucinating system, or in short, RPLH. We know that as parameter increases, performance automatically increases. However, only limited works have being down on generalizing this sort of in-context learning ability into samll parameter models. In our work, we try to address this issue. We try to design an efficient `light-weight` system that is runable directly on a laptop computer 💻.
+# RPLH: A Light-Weight Agent-Based Multi-Collaboration System
+We hope to build an system that is lightweight, customizable, and that is caplable of social-reasoning and expecting what the other agent should be doing through the lens of advesarial collaboration. We are building a generalize agent model for every single agent in this environment and hopefully moving a step closer to level-one agent.
 
 Check documentation here: https://kbian.org/RPLH/

@@ -6,7 +6,68 @@ from sklearn.model_selection import train_test_split
 
 from rplh.evaluation.get_data import get_data
 from rplh.evaluation.embed import get_spy_detect_embedding_only, get_spy_detect_embedding_for_feature
-from rplh.evaluation.energy import dist_df_process, calculate_auc, calculate_slope
+from rplh.evaluation.energy import dist_df_process, calculate_auc, calculate_slope, calculate_auc_boot
+from rplh.evaluation.ab_testing import *
+
+
+def get_all_boots_evals(df_main, df_success, df_dist, num_samples = 10000,system="rplh-agent-spy"):
+    '''Take in 4 df for the same system:
+    
+    1. Distance df, including all information of convergence trials norm1 and norm2 data.
+    2. Main df, include all standard data.
+    3. Success df, including whether converge or not
+    4. Spy df, including all spy model info, only agent reasoning has.
+    5. Justification df, include all justifications.
+    
+    3,4,5 should give -> Embedding df, including all standard data + embedding similarity for each agent compared to spy sentence (N.A. for standard).
+    
+    Out:
+    - One column with name of system
+    - Rows include
+        - Average-AUC,
+        - Average-Slope,
+        - Average-Embedding-Similarity for each spy agent,
+        - Average-Justifcation-Similarity
+        - Average-Box-To-Targets,
+        - Average-Responses,
+        - Average-Convergence-Rate (If converge)
+    '''
+    # merge main
+    main_merged = df_main.merge(df_success, on="Trial")
+    bootstrap_mean = []
+    standard_data = main_merged.drop(columns=["Trial"])
+    # avg_standard_data = pd.DataFrame(standard_data.mean()).T
+    
+    for _ in range(num_samples):
+
+        bootstrap_sample = standard_data.sample(replace = True, n = main_merged.shape[0])
+        bootstrap_mean.append(dict(bootstrap_sample.drop(columns = ['Convergence']).mean()) |
+                              {'Convergence' : 
+                               bootstrap_sample.query("Convergence == 'Converged'").shape[0] / 
+                               bootstrap_sample.shape[0]})
+
+    mean_boot_standard_mean = pd.DataFrame(bootstrap_mean).mean()
+    
+    
+    # auc & slope
+    dist_merged = df_dist.merge(df_success, on="Trial")
+    dist_converged = dist_merged[dist_merged["Convergence"] == "Converged"].drop(columns=["Trial"]).reset_index(drop=True)
+    dist_processed = dist_df_process(dist_converged)
+    auc_boot = calculate_auc_boot(dist_processed, num_samples=num_samples)
+    auc_norm1 = auc_boot['norm1']
+    auc_norm2 = auc_boot['norm2']
+    
+    
+    metrics = {
+        "Average-AUC-Norm1": auc_norm1,
+        "Average-AUC-Norm2": auc_norm2,
+        "Average-avg-Box-To-Targets-Per-Response": mean_boot_standard_mean["Avg_Boxes_To_Targets_Per_Response"],
+        "Average-Responses": mean_boot_standard_mean["Num_Responses"],
+        "Average-Convergence-Rate": mean_boot_standard_mean['Convergence'],
+    }
+
+    result_df = pd.DataFrame([metrics], index=[system]).T
+    return result_df
 
 def get_all_evals(df_main, df_success, df_spy, df_justification, df_dist, system="rplh-agent-spy"):
     '''Take in 4 df for the same system:
