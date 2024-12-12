@@ -127,6 +127,10 @@ def get_spy_detect_embedding_only(spy_df,
             if col in spy_agents:
                 spy_embed = spy_df[col].apply(lambda x: cosine_sim(get_embedding(spy_sentence), get_embedding(str(x))))
                 out_df[f"Spy_Embed_{col}"] = spy_embed
+        
+        if spy_df[col].isnull().values.any():
+            print("Spy model df is empty, no embedding similarity calculated.")
+            out_df[f"Spy_Embed_{col}"] = np.nan
     
     out_df['Justification_Embed'] = justification_df['Justifications'].apply(lambda x: cosine_sim(get_embedding(just_sentence), get_embedding(str(x))))
     
