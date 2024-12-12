@@ -919,7 +919,7 @@
 <li>Average convergence speed.</li>
 <li>Average similarity metric in embeddings for s<code>spy_model</code> and <code>justification_model</code> against spy sentence.</li>
 </ol>
-<p>We have conducted experiment with manipulation of number of boxes (same color) in the environment, we have <code>box_upperbound</code> as 2 and 3. Details are visited in the table.</p>
+<p>We have conducted experiment with manipulation of number of boxes (same color) in the environment, we have <code>box_upperbound</code> as 2 and 3. We have conducted the same test with b<code>ootstrapped</code> dataset, which we got similar result. Details are visited in the table.</p>
 <table>
 <thead>
 <tr>
@@ -1158,11 +1158,11 @@
 - H1: There is difference in the mean convergence times between the two groups.</p>
 <div style="display: flex; justify-content: space-around;">
     <div style="flex: 1; margin-right: 10px;">
-        <img src="../../assets/h_test.png" alt="Graph 1" style="width: 100%; height: auto;">
+        <img src="../../assets/hypothesis_testing.png" alt="Graph 1" style="width: 100%; height: auto;">
     </div>
 </div>
 
-<p>The p-value represents the probability of obtaining a test statistic as extreme as, or more extreme than, the one observed, assuming that the null hypothesis (H0) is true. We randomly bootstrapped from the full data distribution uniformally and calculated (mean_spy - mean_no_spy) as our test statistics (bootstrapped differences in mean, normally distributed). Our observed statistics falls on the tail of such distribution with <code>P=0.088</code>, which is below our <code>alpha</code> value. Hence, we reject H0.</p>
+<p>The p-value represents the probability of obtaining a test statistic as extreme as, or more extreme than, the one observed, assuming that the null hypothesis (H0) is true. We randomly bootstrapped from the full data distribution uniformally and calculated (mean_spy - mean_no_spy) as our test statistics (bootstrapped differences in mean, normally distributed). Our observed statistics falls on the tail of such distribution with <code>P=0.07</code>, which is below our <code>alpha</code> value. Hence, we reject H0. With more data collected, we will get better understanding of our performance.</p>
 
 
 
