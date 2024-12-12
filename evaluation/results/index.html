@@ -913,7 +913,10 @@
 <p>The following is our evaluation table for all three system in which we includeed metrics such as:</p>
 <ol>
 <li>Average energy metrics (<code>AUC</code>).</li>
-<li>Average convergence speed (<code>Slope</code>).</li>
+<li>Average convergence speed (<code>Slope</code>).<ul>
+<li>There may be potential loss in information in this. </li>
+</ul>
+</li>
 <li>Averaged average boxes to targets per response.</li>
 <li>Average number of response.</li>
 <li>Average convergence speed.</li>
@@ -1034,14 +1037,85 @@
 </tr>
 </tbody>
 </table>
+<p>Bootstrapped 10,000 times result:</p>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="right">rplh-agent-spy-3up</th>
+<th align="right">rplh-standard-spy-3up</th>
+<th align="right">rplh-standard-nospy-3up</th>
+<th align="right">rplh-agent-spy-2up</th>
+<th align="right">rplh-standard-spy-2up</th>
+<th align="right">rplh-standard-nospy-2up</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Average-AUC-Norm1</td>
+<td align="right">187.532</td>
+<td align="right">229.138</td>
+<td align="right">242.402</td>
+<td align="right">143.308</td>
+<td align="right">163.369</td>
+<td align="right">160.406</td>
+</tr>
+<tr>
+<td align="left">Average-AUC-Norm2</td>
+<td align="right">108.44</td>
+<td align="right">133.444</td>
+<td align="right">139.312</td>
+<td align="right">77.283</td>
+<td align="right">90.217</td>
+<td align="right">87.539</td>
+</tr>
+<tr>
+<td align="left">Average-avg-Box-To-Targets-Per-Response</td>
+<td align="right">0.406</td>
+<td align="right">0.271</td>
+<td align="right">0.278</td>
+<td align="right">0.391</td>
+<td align="right">0.333</td>
+<td align="right">0.29</td>
+</tr>
+<tr>
+<td align="left">Average-Responses</td>
+<td align="right">28.364</td>
+<td align="right">35.83</td>
+<td align="right">36.923</td>
+<td align="right">22.436</td>
+<td align="right">26.272</td>
+<td align="right">28.899</td>
+</tr>
+<tr>
+<td align="left">Average-Convergence-Rate</td>
+<td align="right">0.703</td>
+<td align="right">0.55</td>
+<td align="right">0.652</td>
+<td align="right">0.749</td>
+<td align="right">0.701</td>
+<td align="right">0.601</td>
+</tr>
+</tbody>
+</table>
 <p>As we can see, our system with agent reasoning <code>rplh-agent-spy</code> outperforms any of the other two systems no matter in upperbound as 2 or 3. We can make a few observations:</p>
 <ol>
-<li>In all cases, having less boxes in the environment make the environment easier to be completed (in terms of convergence rate, convergence speed, number of responses needed)<ul>
+<li>
+<p>In all cases, having less boxes in the environment make the environment easier to be completed (in terms of convergence rate, convergence speed, number of responses needed)</p>
+<ul>
 <li>Interestingly, <code>Average-Box-To-Targets-Per-Response</code> did not change for both rplh-standard system neglecting the presence of spy, pointing to potential conclusion that there underlaying mechanism may be the same, independent of number of boxes. But with rplh-agent, more boxes would result in a more efficient understanding of the spy agent, resulting in higher target match rate.</li>
 </ul>
 </li>
-<li>As expected, with more boxes, the agent has more experience with spys, improving the justification embedding similarity. However, teh same conclusion is not transferable to spy model embeddings.</li>
-<li>On average, rplh-agent would take:<ul>
+<li>
+<p>As expected, with more boxes, the agent has more experience with spys, improving the justification embedding similarity. However, teh same conclusion is not transferable to spy model embeddings.</p>
+<ul>
+<li>Interestingly, it takes longer for the system to solve the task when no-spy is around, which we hypothesize that it might be caused by the phenomenon where the presence of spy agent "forces" the HCA to conduct better agent modeling, hence, better convergence in solving the task.</li>
+<li>However, though doing work is more efficient, the convergence rate is actually lower, signifying that spy does have effect on disrupting central agent as well (when HCA doesn't explicitky models spy (RPLH-standard)).</li>
+</ul>
+</li>
+<li>
+<p>On average, rplh-agent would take:</p>
+<ul>
 <li>Least energy to complete the task (AUC).</li>
 <li>Fastest speed of convergence (Slope).</li>
 <li>Highest rate of convergence (Rate).</li>
