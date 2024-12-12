@@ -49,6 +49,7 @@ theme:
 
 plugins:
   - search
+  - macros
   # - privacy  # Caching dynamic badges
   - mkdocs-jupyter
   - mike
@@ -74,9 +75,9 @@ plugins:
 
 
 markdown_extensions:
-
   # Python Markdown
   - abbr
+  # - md_katex
   - admonition
   - attr_list
   - def_list
@@ -139,13 +140,13 @@ extra:
     - icon: fontawesome/brands/github 
       link: https://github.com/KevinBian107
 
-extra_css:
-  - https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css
+# extra_css:
+#   - https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css
 extra_javascript:
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
   - https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js
-  - https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js
-  - https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js
+  # - https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js
+  # - https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js
 
 
 # extra_css:

@@ -201,3 +201,39 @@ def eval_all_feature_importance():
     # print(f"Explained Variance (R^2) for Num_Responses: {explained_variance_model2:.3f}")
     
     plt.show()
+    
+    # H Test
+    n_bootstrap = 15000
+    group_with_spy = full_embed_df[full_embed_df["Have_spy"] == 1]["Num_Responses"]
+    group_without_spy = full_embed_df[full_embed_df["Have_spy"] == 0]["Num_Responses"]
+    observed_diff = group_with_spy.mean() - group_without_spy.mean()
+    combined_data = np.concatenate([group_with_spy, group_without_spy])
+
+    bootstrap_diffs = []
+    for _ in range(n_bootstrap):
+        resampled_group_with_spy = np.random.choice(combined_data, size=len(group_with_spy), replace=True)
+        resampled_group_without_spy = np.random.choice(combined_data, size=len(group_without_spy), replace=True)
+        bootstrap_diffs.append(resampled_group_with_spy.mean() - resampled_group_without_spy.mean())
+
+    bootstrap_diffs = np.array(bootstrap_diffs)
+    p_bootstrap = np.mean(np.abs(bootstrap_diffs) >= np.abs(observed_diff))
+    print(f"Observed difference in means: {observed_diff:.3f}")
+    print(f"Bootstrap p-value: {p_bootstrap:.3f}")
+
+    alpha = 0.1
+    if p_bootstrap < alpha:
+        print("Reject the null hypothesis: Having a spy significantly slows down convergence.")
+    else:
+        print("Fail to reject the null hypothesis: No evidence that having a spy affects convergence.")
+
+    plt.figure(figsize=(10, 6))
+    plt.hist(bootstrap_diffs, bins=30, alpha=0.7, color='skyblue', edgecolor='black')
+    plt.axvline(observed_diff, color='red', linestyle='--', label=f'Observed Diff: {observed_diff:.3f}')
+    plt.axvline(-observed_diff, color='red', linestyle='--')
+    plt.title('Bootstrap Sampling Distribution of Mean Difference')
+    plt.xlabel('Difference in Means')
+    plt.ylabel('Frequency')
+    plt.legend()
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.show()
