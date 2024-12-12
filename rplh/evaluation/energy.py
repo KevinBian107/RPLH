@@ -91,6 +91,34 @@ def dist_df_process(dist_df):
     df['env_step'] = df.apply(lambda x: x['env_step'] - min_value[x['trial']], axis=1)
     return df.drop(columns=['Distance'])
 
+def calculate_auc_boot(df, num_samples):
+    '''Calculate AUC'''
+    
+    auc_norm1 = []
+    auc_norm2 = []
+
+    for trial, group in df.groupby('trial'):
+        group = group.sort_values(by='env_step')
+        auc_norm1.append(auc(group['env_step'], group['Norm1']))
+        auc_norm2.append(auc(group['env_step'], group['Norm2']))
+
+    # Create a DataFrame with the calculated AUCs
+    auc_df = pd.DataFrame({'norm1': auc_norm1, 'norm2': auc_norm2})
+
+    bootstrap_mean = []
+    for _ in range(num_samples):
+        bootstrap_sample = auc_df.sample(replace=True, n=auc_df.shape[0])
+        bootstrap_mean.append(bootstrap_sample.mean().to_dict())
+
+    # Compute the mean of bootstrap samples
+    mean_boot = pd.DataFrame(bootstrap_mean).mean()
+
+    # Log or return results
+    print(f"Overall AUC for Norm1: {mean_boot['norm1']}")
+    print(f"Overall AUC for Norm2: {mean_boot['norm2']}")
+    
+    return mean_boot
+
 
 def calculate_auc(df):
     '''Calculate AUC'''
