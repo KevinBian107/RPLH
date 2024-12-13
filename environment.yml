@@ -35,5 +35,6 @@ dependencies:
       - seaborn
       - tabulate
       - umap-learn
+      - gdown
 
 

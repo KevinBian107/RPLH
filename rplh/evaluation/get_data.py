@@ -3,6 +3,39 @@ import pandas as pd
 import json
 import os
 from collections import Counter
+import zipfile
+import gdown
+
+def download_and_unzip_from_drive(drive_url, download_path='data.zip', extract_dir='data'):
+    """
+    Downloads a ZIP file from a Google Drive shareable link and unzips it.
+
+    drive_url : str
+        The publicly shareable Google Drive URL of the ZIP file.
+    download_path : str, optional
+        The local path (including filename) to store the downloaded ZIP file.
+        Default is 'data.zip'.
+    extract_dir : str, optional
+        The directory where the files will be extracted.
+        Default is 'data'.
+    """
+    if not os.path.exists(extract_dir):
+        os.makedirs(extract_dir, exist_ok=True)
+    
+    print(f"Downloading from {drive_url}...")
+    gdown.download(drive_url, download_path, quiet=False)
+
+    # Unzip the downloaded file
+    print(f"Extracting {download_path} to {extract_dir}...")
+    with zipfile.ZipFile(download_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_dir)
+
+    # Optionally remove the ZIP file after extraction
+    os.remove(download_path)
+    print(f"Extraction complete. Files are located in: {extract_dir}")
+
+    return extract_dir
+
 
 def count_boxes_and_targets(pg_state):
     '''Function to count boxes and targets in a given pg_state'''
