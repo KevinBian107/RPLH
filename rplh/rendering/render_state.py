@@ -522,7 +522,7 @@ def render_animate(box_map, actions, num_frames=2):
             title="",
         ),
         yaxis=dict(
-            range=[0, df_combined['y'].max() + 0.5],  # Add padding around the grid
+            range=[0, df_combined['y'].max() + 0.3],  # Add padding around the grid
             showgrid=True,
             gridcolor="lightgray",
             zeroline=True,
