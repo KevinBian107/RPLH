@@ -913,10 +913,7 @@
 <p>The following is our evaluation table for all three system in which we includeed metrics such as:</p>
 <ol>
 <li>Average energy metrics.</li>
-<li>Average convergence speed.<ul>
-<li>There may be potential loss in information in this. </li>
-</ul>
-</li>
+<li>Average convergence speed.</li>
 <li>Averaged average boxes to targets per response.</li>
 <li>Average number of response.</li>
 <li>Average convergence speed.</li>
@@ -1037,68 +1034,13 @@
 </tr>
 </tbody>
 </table>
-<p>Bootstrapped 10,000 times result:</p>
-<table>
-<thead>
-<tr>
-<th align="left"></th>
-<th align="right">rplh-agent-spy-3up</th>
-<th align="right">rplh-standard-spy-3up</th>
-<th align="right">rplh-standard-nospy-3up</th>
-<th align="right">rplh-agent-spy-2up</th>
-<th align="right">rplh-standard-spy-2up</th>
-<th align="right">rplh-standard-nospy-2up</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left">Average-AUC-Norm1</td>
-<td align="right">187.369</td>
-<td align="right">228.863</td>
-<td align="right">241.998</td>
-<td align="right">156.594</td>
-<td align="right">163.61</td>
-<td align="right">160.321</td>
-</tr>
-<tr>
-<td align="left">Average-AUC-Norm2</td>
-<td align="right">108.398</td>
-<td align="right">133.285</td>
-<td align="right">139.057</td>
-<td align="right">85.789</td>
-<td align="right">90.377</td>
-<td align="right">87.479</td>
-</tr>
-<tr>
-<td align="left">Average-avg-Box-To-Targets-Per-Response</td>
-<td align="right">0.406</td>
-<td align="right">0.271</td>
-<td align="right">0.277</td>
-<td align="right">0.365</td>
-<td align="right">0.333</td>
-<td align="right">0.29</td>
-</tr>
-<tr>
-<td align="left">Average-Responses</td>
-<td align="right">28.41</td>
-<td align="right">35.773</td>
-<td align="right">36.958</td>
-<td align="right">24.096</td>
-<td align="right">26.279</td>
-<td align="right">28.87</td>
-</tr>
-<tr>
-<td align="left">Average-Convergence-Rate</td>
-<td align="right">0.699</td>
-<td align="right">0.55</td>
-<td align="right">0.649</td>
-<td align="right">0.736</td>
-<td align="right">0.702</td>
-<td align="right">0.601</td>
-</tr>
-</tbody>
-</table>
-<p>As we can see, our system with agent reasoning <code>rplh-agent-spy</code> outperforms any of the other two systems no matter in upperbound as 2 or 3. We can make a few observations:</p>
+<p>As we can see, our system with agent reasoning <code>rplh-agent-spy</code> outperforms any of the other two systems no matter in upperbound as 2 or 3. On average, rplh-agent would take:
+- Least energy to complete the task.
+- Fastest speed of convergence.
+- Highest rate of convergence.
+- Highest average box to targets per response ratio.
+- Least number of responses needed.</p>
+<p>We can make a few observations:</p>
 <ol>
 <li>
 <p>In all cases, having less boxes in the environment make the environment easier to be completed (in terms of convergence rate, convergence speed, number of responses needed)</p>
@@ -1111,16 +1053,6 @@
 <ul>
 <li>Interestingly, it takes longer for the system to solve the task when no-spy is around, which we hypothesize that it might be caused by the phenomenon where the presence of spy agent "forces" the HCA to conduct better agent modeling, hence, better convergence in solving the task.</li>
 <li>However, though doing work is more efficient, the convergence rate is actually lower, signifying that spy does have effect on disrupting central agent as well (when HCA doesn't explicitky models spy (RPLH-standard)).</li>
-</ul>
-</li>
-<li>
-<p>On average, rplh-agent would take:</p>
-<ul>
-<li>Least energy to complete the task (AUC).</li>
-<li>Fastest speed of convergence (Slope).</li>
-<li>Highest rate of convergence (Rate).</li>
-<li>Highest average box to targets per response ratio.</li>
-<li>Least number of responses needed.</li>
 </ul>
 </li>
 </ol>
@@ -1214,6 +1146,7 @@
 </tr>
 </tbody>
 </table>
+<p>We can see that the HCA agent is somewhat aware of the spy.</p>
 <h2 id="feature-importance-hypothesis-testing">Feature Importance &amp; Hypothesis Testing<a class="headerlink" href="#feature-importance-hypothesis-testing" title="Permanent link">&para;</a></h2>
 <p>We made agent's performance metrics (df above) into features and used a RandomForest Regressor to see which of the features matter more to the prediction of <code>number of response</code> or <code>average targets matched per response</code>. We also used both as an vector to do comparison.</p>
 <div style="display: flex; justify-content: space-around;">
@@ -1227,9 +1160,11 @@
     </div>
 </div>
 
-<p>When having all the data, we can clearly see how the presence of spy may effect performance, especially for <code>Number of response</code>. We performed follow-up bootstrapped hypothesis testing with <code>alpha-value=0.1</code> (need to divide by 2 due to two tail test) and test-statistics as differences in mean.
-- H0: There is no difference in the mean convergence times between the two groups.
-- H1: There is difference in the mean convergence times between the two groups.</p>
+<p>When having all the data, we can clearly see how the presence of spy may effect performance, especially for <code>Number of response</code>. We performed follow-up bootstrapped hypothesis testing with <code>alpha-value=0.1</code> (need to divide by 2 due to two tail test) and test-statistics as differences in mean.</p>
+<ul>
+<li>H0: There is no difference in the mean convergence times between the two groups.</li>
+<li>H1: There is difference in the mean convergence times between the two groups.</li>
+</ul>
 <div style="display: flex; justify-content: space-around;">
     <div style="flex: 1; margin-right: 10px;">
         <img src="../../assets/hypothesis_testing.png" alt="Graph 1" style="width: 100%; height: auto;">
