@@ -722,9 +722,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#feature-importance" class="md-nav__link">
+  <a href="#feature-importance-hypothesis-testing" class="md-nav__link">
     <span class="md-ellipsis">
-      Feature Importance
+      Feature Importance &amp; Hypothesis Testing
     </span>
   </a>
   
@@ -881,9 +881,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#feature-importance" class="md-nav__link">
+  <a href="#feature-importance-hypothesis-testing" class="md-nav__link">
     <span class="md-ellipsis">
-      Feature Importance
+      Feature Importance &amp; Hypothesis Testing
     </span>
   </a>
   
@@ -912,8 +912,8 @@
 <h2 id="our-main-findings">Our Main Findings<a class="headerlink" href="#our-main-findings" title="Permanent link">&para;</a></h2>
 <p>The following is our evaluation table for all three system in which we includeed metrics such as:</p>
 <ol>
-<li>Average energy metrics (<code>AUC</code>).</li>
-<li>Average convergence speed (<code>Slope</code>).<ul>
+<li>Average energy metrics.</li>
+<li>Average convergence speed.<ul>
 <li>There may be potential loss in information in this. </li>
 </ul>
 </li>
@@ -1214,7 +1214,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="feature-importance">Feature Importance<a class="headerlink" href="#feature-importance" title="Permanent link">&para;</a></h2>
+<h2 id="feature-importance-hypothesis-testing">Feature Importance &amp; Hypothesis Testing<a class="headerlink" href="#feature-importance-hypothesis-testing" title="Permanent link">&para;</a></h2>
 <p>We made agent's performance metrics (df above) into features and used a RandomForest Regressor to see which of the features matter more to the prediction of <code>number of response</code> or <code>average targets matched per response</code>. We also used both as an vector to do comparison.</p>
 <div style="display: flex; justify-content: space-around;">
     <!-- First Graph -->
@@ -1227,7 +1227,7 @@
     </div>
 </div>
 
-<p>When having all the data, we can clearly see how the presence of spy may effect performance, especially for <code>Number of response</code>. We performed follow-up bootstrapped hypothesis testing with <code>alpha-value=0.05</code> and test-statistics as differences in mean.
+<p>When having all the data, we can clearly see how the presence of spy may effect performance, especially for <code>Number of response</code>. We performed follow-up bootstrapped hypothesis testing with <code>alpha-value=0.1</code> (need to divide by 2 due to two tail test) and test-statistics as differences in mean.
 - H0: There is no difference in the mean convergence times between the two groups.
 - H1: There is difference in the mean convergence times between the two groups.</p>
 <div style="display: flex; justify-content: space-around;">
